@@ -18,10 +18,10 @@ class VectGenIO : VectGenGenerator
 
 public:
   VectGenIO(){}
-  VectGenIO(std::string, int);
+  VectGenIO(std::string, int, int);
   ~VectGenIO(){}
 
-  void DoProcess();
+  void DoProcess(int);
 
 private:
 

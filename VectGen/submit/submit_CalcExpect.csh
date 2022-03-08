@@ -26,7 +26,7 @@ echo 'cd '$PWD >> $ofile
 echo 'cd ..' >> $ofile
 echo 'source /usr/local/sklib_gcc8/skofl-trunk/env.csh' >> $ofile
 echo 'hostname' >> $ofile
-echo "./bin/CalcExpect "$1" 1" >> $ofile
+echo "./bin/CalcExpect "$1" 1 1 0" >> $ofile
 chmod 755 $ofile
 
 #pjsub -o out/$1 -e err/$1 $ofile

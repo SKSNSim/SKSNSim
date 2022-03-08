@@ -2,8 +2,7 @@
 #include "VectGenSetBin.hh"
 #include "VectGenIO.hh"
 
-VectGenIO::VectGenIO(std::string ModelName, int nuosc)
-//  : Generator()
+VectGenIO::VectGenIO(std::string ModelName, int nuosc, int flag_event)
 {
 
 	/*-----set binning-----*/
@@ -56,8 +55,10 @@ VectGenIO::VectGenIO(std::string ModelName, int nuosc)
 
 	//Class call of neutrino flux table
 	std::stringstream ssname1;
-	ssname1 << "/home/sklowe/supernova/data/nakazato/" << ModelName;
+	//ssname1 << "/home/sklowe/supernova/data/nakazato/" << ModelName;
+	ssname1 << "/home/sklowe/supernova/data/" << ModelName;
 	std::string FileIn = ssname1.str();
+	//FileIn = "/home/kasiwagi/SNwatch/wilson/NakazatoFormat_tables/00_WilsonTable.NakazatoFormat.data"; // kasiwagi
 	nuflux = new VectGenSnNakazato(FileIn.c_str());
 	//nuflux = new SnWilson();
 
@@ -84,7 +85,7 @@ VectGenIO::VectGenIO(std::string ModelName, int nuosc)
 
 }
 
-void VectGenIO::DoProcess()
+void VectGenIO::DoProcess(int flag_event)
 {
   Process();
 
