@@ -28,7 +28,7 @@ CFLAGS += -DNO_EXTERN_COMMON_POINTERS
 
 all: bin/CalcExpect
 
-bin/CalcExpect: obj/CalcExpect.o $(OBJS) bin data
+bin/CalcExpect: obj/CalcExpect.o $(OBJS) bin data/nakazato data/wilson
 	@LD_RUN_PATH=$(LIBDIR) $(CXX) $(CXXFLAGS) -o $@ obj/CalcExpect.o $(OBJS) $(LDLIBS)
 
 obj/CalcExpect.o: CalcExpect.cc obj
@@ -41,8 +41,8 @@ obj/%.o: src/%.cc obj
 	@echo "[SKSNSim] Building $* ..."
 	@$(CXX) $(CXXFLAGS) -c $< -o $@
 
-obj bin data:
-	@mkdir $@
+obj bin data/nakazato data/wilson:
+	@mkdir -p $@
 
 clean: 
 	$(RM) -r *.o *~ src/*~ include/*~ core obj/* bin/* obj bin
