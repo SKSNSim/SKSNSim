@@ -11,6 +11,7 @@
 #include <sstream>
 #include <stdlib.h>
 
+#include "VectGenUtil.hh"
 #include "VectGenSnNakazato.hh"
 
 using namespace std;
@@ -20,8 +21,6 @@ static const double erg2mev=1.0e0/1.60217733e-6;
 
 VectGenSnNakazato::VectGenSnNakazato(string file_name)
 {
-
-  const double zero_precision = 0.000001;
 
   cout <<"SN model data in SnLoading :  "<<file_name << endl;
 
@@ -70,6 +69,8 @@ VectGenSnNakazato::VectGenSnNakazato(string file_name)
 	a5[j] = 0.;
 	a8[j] = 0.;
       }
+      //std::cout << t0 << " " << a0[j] << " " << a1[j] << " " << a2[j] << std::endl;// kasiwagi
+      //std::cout << a3[j] << " " << a4[j] << " " << a5[j] << std::endl;// kasiwagi
 
     }
     enue.push_back(a0);

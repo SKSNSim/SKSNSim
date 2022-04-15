@@ -13,19 +13,24 @@
 
 #include "VectGenSnNakazato.hh"
 
+extern "C" {
+	void sn_sundir_( int *, int *, float *, float *, float *);
+}
+
 class VectGenIO : VectGenGenerator
 {
 
 public:
   VectGenIO(){}
-  VectGenIO(std::string, int, int);
+  VectGenIO(std::string, int, double, int, std::string, uint);
+  VectGenIO(std::string, uint);
   ~VectGenIO(){}
 
+  void DoProcess();
   void DoProcess(int);
 
 private:
 
-  std::string FileRoot;
   std::string FileText;
 
 };

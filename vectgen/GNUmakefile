@@ -26,27 +26,22 @@ OBJS = $(patsubst src/%.cc, obj/%.o, $(SRCS))
 
 CFLAGS += -DNO_EXTERN_COMMON_POINTERS
 
-all: bin/CalcExpect
+TARGET = main
 
-bin/CalcExpect: obj/CalcExpect.o $(OBJS) bin data/nakazato data/wilson
-	@LD_RUN_PATH=$(LIBDIR) $(CXX) $(CXXFLAGS) -o $@ obj/CalcExpect.o $(OBJS) $(LDLIBS)
+all: $(TARGET)
 
-obj/CalcExpect.o: CalcExpect.cc obj
-	@$(CXX) $(CXXFLAGS) -c $< -o $@
+main: main.o $(OBJS)
+	@LD_RUN_PATH=$(LIBDIR) $(CXX) $(CXXFLAGS) -o $@ main.o $(OBJS) $(LDLIBS)
 
-obj/main.o: main.cc obj
+main.o: main.cc
 	@$(CXX) $(CXXFLAGS) -c $< -o $@
 
 obj/%.o: src/%.cc obj
 	@echo "[SKSNSim] Building $* ..."
 	@$(CXX) $(CXXFLAGS) -c $< -o $@
 
-obj bin data/nakazato data/wilson:
+obj:
 	@mkdir -p $@
 
 clean: 
-	$(RM) -r *.o *~ src/*~ include/*~ core obj/* bin/* obj bin
-
-GenEvent: obj/GenEvent.o $(OBJS) bin
-	LD_RUN_PATH=$(LIBDIR) $(CXX) $(CXXFLAGS) -o $@ obj/GenEvent.o $(OBJS) $(LDLIBS)
-
+	$(RM) -r *.o *~ src/*~ include/*~ core obj/* bin/* obj bin $(TARGET)

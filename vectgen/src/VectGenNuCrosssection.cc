@@ -14,8 +14,11 @@
 
 #include <math.h>
 
+#include "VectGenSetBin.hh"
 #include "VectGenSnConst.hh"
 #include "VectGenNuCrosssection.hh"
+
+#include "VectGenUtil.hh"
 
 using namespace std;
 
@@ -177,7 +180,7 @@ void VectGenNuCrosssection::DcsNuebP_SV(double enu, double costheta, double &Epo
   return;
 }
 
-double VectGenNuCrosssection::CsNuebP_VB(double enu, double eth)
+double VectGenNuCrosssection::CsNuebP_VB(double enu)
 {
   /*
     Total cross section of nu_e_bar + p --> e^+  + n  interaction
@@ -205,7 +208,7 @@ double VectGenNuCrosssection::CsNuebP_VB(double enu, double eth)
   return totcsnuebp_vb;
 }
 
-double VectGenNuCrosssection::CsNuebP_SV(double enu, double eth)
+double VectGenNuCrosssection::CsNuebP_SV(double enu)
 {
   /*
     Total cross section of nu_e_bar + p --> e^+  + n  interaction
@@ -217,7 +220,7 @@ double VectGenNuCrosssection::CsNuebP_SV(double enu, double eth)
 
   double totcsnuebp_SV = 0;
   double Ee = enu - DeltaM;
-  if((Ee > Me) && (Ee > eth)){
+  if(Ee > Me){
     for(int j=-100; j<100; j++){
       double costheta = (double(j)+0.5)/100.;
       double dcs0, Epo0;
@@ -235,8 +238,7 @@ double VectGenNuCrosssection::CsNuebP_SV(double enu, double eth)
 void VectGenNuCrosssection::ReadCsNuElastic()
 {
   //Open file of total cross-section of elastic scattering
-  std::string fnameEla = "/disk02/usr6/koshio/elastic/sl_elastic.root";
-  //std::string fnameEla = "/usr/local/sklib_gcc8/skofl-trunk/const/lowe/sn_elastic.root";
+  std::string fnameEla = "/usr/local/sklib_gcc8/skofl-trunk/const/lowe/sn_elastic.root";
   fCsElaFile = new TFile(fnameEla.c_str(), "read");
   fCsElaTree = (TTree*)fCsElaFile->Get("nuela");
 
@@ -247,7 +249,7 @@ void VectGenNuCrosssection::ReadCsNuElastic()
   fCsElaTree->SetBranchAddress("cnxb", &CsElaNxb);
 }
 
-double VectGenNuCrosssection::CsNuElastic(int ipart, double enu)
+double VectGenNuCrosssection::CsNuElastic(int ipart, double enu, int flag)
 {
   /*
     Total cross section of nu + e --> nu + e  interaction
@@ -261,32 +263,90 @@ double VectGenNuCrosssection::CsNuElastic(int ipart, double enu)
     exit(1);
   }
 
-  double x;
-  if(enu <= nuElaEneMin || enu >= nuElaEneMax) {
-    x = 0.;
-    return x;
+  double x = 0.;
+  if(enu <= nuElaEneMin || enu >= nuElaEneMax) return x;
+
+  if(flag == 0) { // should apply Eth
+    double t_min = eEneThr - Me;
+    double t_max = 2.*enu*enu/(Me+2.*enu);
+
+    if(t_min > t_max){
+      x = 0.;
+      return x;
+    }
+
+    int istep = 1000;
+    double dstep = (t_max - t_min) / double(istep);
+    x=0.;
+    for (int i = 0; i<istep; i++){
+      double E = (t_min + dstep/2.) + dstep * double(i) + Me;
+      if(ipart ==  12) x += sl_nue_dif_rad_(&enu, &E) * dstep;
+      if(ipart == -12) x += sl_neb_dif_rad_(&enu, &E) * dstep;
+      if(ipart ==  14) x += sl_num_dif_rad_(&enu, &E) * dstep;
+      if(ipart == -14) x += sl_nmb_dif_rad_(&enu, &E) * dstep;
+    }
   }
+  else if(flag == 1) { // should not apply Eth
+    double e1, e2, c1=0., c2=0.;
 
-  double e1, e2, c1=0., c2=0.;
+    int iene = (int)(enu / nuElaEneBinSize);
+    fCsElaTree->GetEntry(iene-1);
+    e1 = NuElaEnergy;
+    if(ipart ==  12) c1 = CsElaNue;
+    if(ipart == -12) c1 = CsElaNeb;
+    if(ipart ==  14) c1 = CsElaNux;
+    if(ipart == -14) c1 = CsElaNxb;
 
-  int iene = (int)(enu / nuElaEneBinSize);
-  fCsElaTree->GetEntry(iene-1);
-  e1 = NuElaEnergy;
-  if(ipart ==  12) c1 = CsElaNue;
-  if(ipart == -12) c1 = CsElaNeb;
-  if(ipart ==  14) c1 = CsElaNux;
-  if(ipart == -14) c1 = CsElaNxb;
+    fCsElaTree->GetEntry(iene);
+    e2 = NuElaEnergy;
+    if(ipart ==  12) c2 = CsElaNue;
+    if(ipart == -12) c2 = CsElaNeb;
+    if(ipart ==  14) c2 = CsElaNux;
+    if(ipart == -14) c2 = CsElaNxb;
 
-  fCsElaTree->GetEntry(iene);
-  e2 = NuElaEnergy;
-  if(ipart ==  12) c2 = CsElaNue;
-  if(ipart == -12) c2 = CsElaNeb;
-  if(ipart ==  14) c2 = CsElaNux;
-  if(ipart == -14) c2 = CsElaNxb;
-
-  x = (c2-c1) / (e2-e1) * (enu - e1) + c1;
-  //std::cout << enu << " " << iene << " " << e1 << " " << e2 << " " << c1 << " " << c2 << " " << x << std::endl;
+    x = (c2-c1) / (e2-e1) * (enu - e1) + c1;
+    //std::cout << enu << " " << iene << " " << e1 << " " << e2 << " " << c1 << " " << c2 << " " << x << std::endl;
+  }
 
   return x;
 
 }
+
+double VectGenNuCrosssection::calcElectronTotEnergyElastic( const double nuEne, const double cost )
+{
+	double alpha = Me / nuEne;
+
+	double e; 
+
+	if( cost > 0. ){
+		e = 2. * alpha * SQ( cost ) 
+			/ ( SQ( 1. + alpha ) - SQ( cost ) )
+			* nuEne 
+			+ Me; //total energy
+	}else{
+		e = 0.;
+	}
+
+	return e;
+}
+
+double VectGenNuCrosssection::calcDeEneDcostElastic( const double nuEne, const double cost )
+{
+	double alpha = Me / nuEne;
+
+	double p = nuEne * 4. * alpha * cost * SQ( 1 + alpha )
+		/ SQ( SQ( 1. + alpha ) - SQ( cost ) );
+
+	return p;
+}
+
+double VectGenNuCrosssection::calcCosTthElastic( const double nuE, const double eEth )
+{
+	double alpha = Me / nuE;
+	double y = ( eEth - Me ) / nuE;
+
+	double cosTth = sqrt( y / ( y + 2. * alpha ) ) * ( 1. + alpha );
+
+	return cosTth;
+}
+
