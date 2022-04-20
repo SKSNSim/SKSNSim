@@ -3,6 +3,9 @@
  *
  * @date 2022-03-09
  * @author Y.Koshio
+ *
+ * @history
+ *  21 APR 2022 S.Izumiyama: integrated flux table class
  */
 
 #include <math.h>
@@ -11,6 +14,8 @@
 #include "VectGenGenerator.hh"
 
 #include "VectGenUtil.hh"
+
+#include "FluxCalculation.hh"
 
 void VectGenGenerator::convDirection( const double eTheta, const double ePhi,
 				      double * eDir )
@@ -573,29 +578,33 @@ void VectGenGenerator::Process(){
 void VectGenGenerator::Process(int NumEv){
 
 	/*-----input file name-----*/
-	// (should be written in VectGenIO)
-	const int nbin = 500;
-	double Ene[nbin], Flux[nbin];
-	ifstream data("../expect/horiuchi/8MeV_Nominal.dat");
-	for(int j=0; j<nbin ;j++){
-	  data >> Ene[j] >> Flux[j];
-	  //std::cout << j << " " << Ene[j] << " " << Flux[j] << std::endl;                                                         
-	}
-	data.close();
+  FluxCalculation &nuflux = *nuflux_dsbn;
+  nuflux.dumpFlux();
+  double nuEne_min = nuEneMin;
+  double nuEne_max = nuEneMax;
+  if( nuEne_min < nuflux.getFluxLimit(true /* true: lower limit, false: higher limit*/) ){
+    nuEne_min = nuflux.getFluxLimit(true);
+    std::cerr << "Flux lower limit is higher than specified value: reset to nu_ene_min = " << nuEne_min << std::endl;
+  }
+  if( nuEne_max > nuflux.getFluxLimit(false) ) {
+    nuEne_max = nuflux.getFluxLimit(false);
+    std::cerr << "Flux upper limit is lower than specified value: reset to nu_ene_max = " << nuEne_max << std::endl;
+  }
+
 
 	/*-----calculate maximum value-----*/
 	double maxP = 0.;
-	for( int j = 0; j < nbin; j++ ){
-	  double nuEne = Ene[j];
+	for( int j = 0; j < int(nuflux.getNBins()); j++ ){
+	  double nuEne = nuflux.getBinnedEnergy(j);
 
-	  if((nuEne < nuEneMin) || (nuEne > nuEneMax)) continue;
+	  if((nuEne < nuEne_min) || (nuEne > nuEne_max)) continue;
 
 	  for( int iCost = 0; iCost < costNBins; iCost++ ){
 	    double cost = costMin + costBinSize * ( double(iCost) + 0.5 );
 	    double eEne, sigm;
 	    nucrs->DcsNuebP_SV(nuEne, cost, eEne, sigm );
 
-	    double p = Flux [j] * sigm;
+	    double p = nuflux.getBinnedFlux(j) * sigm;
 	    if( p > maxP ){ maxP = p; }
 	    //std::cout << nuEne << " " << Flux[j] << " " << sigm << " " << p << " " << maxP << std::endl;                          
 	  }
@@ -614,11 +623,12 @@ void VectGenGenerator::Process(int NumEv){
 
 	int nsub = 0;
 
-	std::ostringstream sout;
-	sout << std::setfill('0') << std::setw(6) << nsub;
-	std::stringstream ssname;
-	ssname << OutDir << "/" << sout.str() << ".root";
-	std::string fname = ssname.str();
+  auto GenerateOutputFilePath = [](std::string odir, int nsub){
+    std::ostringstream sout;
+    sout << odir << "/" <<  std::setfill('0') << std::setw(6) << nsub << ".root";
+    return sout.str();
+  };
+	std::string fname = GenerateOutputFilePath(OutDir, nsub);
 	std::cout << "file name " << fname << std::endl;
 
 	TFile *fout = new TFile(fname.c_str(), "RECREATE");
@@ -675,11 +685,9 @@ void VectGenGenerator::Process(int NumEv){
 		double nuEne, cost, eEne;
 
 		while( 1 ){
-		  nuEne = getRandomReal( nuEneMin, nuEneMax, generator );
+		  nuEne = getRandomReal( nuEne_min, nuEne_max, generator );
 
-		  // only for Horiuchi-san's table...                                                                                     
-		  int ebin = int((nuEne+0.05) * 10.);
-		  double nuFlux = (Flux[ebin+1]-Flux[ebin]) * (nuEne - Ene[ebin]) / (Ene[ebin+1]-Ene[ebin]) + Flux[ebin];
+      const double nuFlux = nuflux.getFlux(nuEne);
 
 		  double sigm;
 		  cost = getRandomReal( costMin, costMax, generator );

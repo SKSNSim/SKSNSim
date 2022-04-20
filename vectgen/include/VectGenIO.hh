@@ -23,7 +23,7 @@ class VectGenIO : VectGenGenerator
 public:
   VectGenIO(){}
   VectGenIO(std::string, int, double, int, std::string, uint);
-  VectGenIO(std::string, uint);
+  VectGenIO(std::string, uint, std::string); // For DSBN vector generator
   ~VectGenIO(){}
 
   void DoProcess();

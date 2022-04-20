@@ -17,6 +17,7 @@
 #include <iomanip>
 #include <stdio.h>
 #include <algorithm>
+#include <memory>
 
 #include "snevtinfo.h"
 #include "mcinfo.h"
@@ -28,6 +29,8 @@
 #include "VectGenNuCrosssection.hh"
 
 #include "VectGenSnRoot.hh"
+
+#include "FluxCalculation.hh"
 
 /**
  * @class Generator
@@ -45,8 +48,8 @@ public:
   void determinePosition(double&, double&, double&);
   void FillEvent();
   void MakeEvent(double, double, int, int, double);
-  void Process();
-  void Process(int);
+  void Process();    // For SN generator
+  void Process(int); // For DSBN vector generator
 
 protected:
 
@@ -59,6 +62,7 @@ protected:
 
   VectGenSnFlux* nuflux;
   VectGenNuCrosssection* nucrs;
+  std::unique_ptr<FluxCalculation> nuflux_dsbn;
 
   //Neutrino oscillation
   double oscnue1, oscnue2, oscneb1, oscneb2, oscnux1, oscnux2, oscnxb1, oscnxb2;
