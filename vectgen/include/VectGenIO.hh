@@ -23,11 +23,18 @@ class VectGenIO : VectGenGenerator
 public:
   VectGenIO(){}
   VectGenIO(std::string, int, double, int, std::string, uint);
-  VectGenIO(std::string, uint, std::string); // For DSBN vector generator
+  VectGenIO(uint); // For DSBN vector generator
+  //VectGenIO(std::string, uint, std::string); // For DSBN vector generator
   ~VectGenIO(){}
 
   void DoProcess();
   void DoProcess(int);
+
+  void SetFluxFile(std::string);
+  void OpenOutputFile(std::string);
+  void CloseOutputFile();
+
+  void SetRefRunNumber(int runNum) { fRefRunNum = runNum; }
 
 private:
 
