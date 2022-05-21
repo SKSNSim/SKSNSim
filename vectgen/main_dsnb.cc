@@ -34,7 +34,7 @@ int main( int argc, char ** argv )
   int c, digit_optind = 0;
   double nuEne_min = -9999.;
   double nuEne_max = 9999.;
-  std::string FluxFile ("../expect/horiuchi/8MeV_Nominal.dat");
+  std::string FluxFile ("dsnb_flux/horiuchi/8MeV_Nominal.dat");
 	uint seed = 0;
   int numEvent = 0;
   int RefRunNum = 0;

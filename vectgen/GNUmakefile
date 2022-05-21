@@ -26,14 +26,14 @@ OBJS = $(patsubst src/%.cc, obj/%.o, $(SRCS))
 
 CFLAGS += -DNO_EXTERN_COMMON_POINTERS
 
-TARGET = main_srn main_snburst
+TARGET = main_dsnb main_snburst
 
 all: $(TARGET)
 
-main: main.o $(OBJS)
-	@LD_RUN_PATH=$(LIBDIR) $(CXX) $(CXXFLAGS) -o $@ main.o $(OBJS) $(LDLIBS)
+main_snburst: main_snburst.o $(OBJS)
+	@LD_RUN_PATH=$(LIBDIR) $(CXX) $(CXXFLAGS) -o $@ main_snburst.o $(OBJS) $(LDLIBS)
 
-main_srn: main_srn.o $(OBJS)
+main_dsnb: main_dsnb.o $(OBJS)
 	@LD_RUN_PATH=$(LIBDIR) $(CXX) $(CXXFLAGS) $(LDLIBS) -o $@ $<
 
 %.o: %.cc

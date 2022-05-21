@@ -19,21 +19,28 @@
 #include <stdexcept>
 #endif
 
-FluxCalculation::FluxCalculation(){
+FluxCalculation::FluxCalculation()
+{
       ene_flux_v = new std::vector<std::pair<double,double> >();
       lower_energy_bin_width = 0.1;
       upper_energy_bin_width = 0.1;
       return;
 }
-FluxCalculation::FluxCalculation(std::string fname){
+
+FluxCalculation::FluxCalculation(std::string fname)
+{
       ene_flux_v = new std::vector<std::pair<double,double> >();
       this->loadFile(fname);
       return;
 }
-FluxCalculation::~FluxCalculation(){
+
+FluxCalculation::~FluxCalculation()
+{
   delete ene_flux_v;
 }
-void FluxCalculation::loadFile(const std::string fname){
+
+void FluxCalculation::loadFile(const std::string fname)
+{
   ene_flux_v->clear();
   std::ifstream datafile(fname.c_str());
   double ene, flux;
@@ -47,12 +54,14 @@ void FluxCalculation::loadFile(const std::string fname){
   return;
 }
 
-void FluxCalculation::dumpFlux(std::ostream &out) const {
+void FluxCalculation::dumpFlux(std::ostream &out) const 
+{
   for(std::vector<std::pair<double, double> >::iterator it = ene_flux_v->begin(); it != ene_flux_v->end(); it++)
     out << it->first << " MeV, " << it->second << std::endl;
 }
 
-void FluxCalculation::sortByEnergy(){
+void FluxCalculation::sortByEnergy()
+{
   if(ene_flux_v == NULL) return;
   // for std::pair, first comparing first-component then comparing second-component
   std::sort(ene_flux_v->begin(), ene_flux_v->end());
@@ -63,7 +72,8 @@ void FluxCalculation::sortByEnergy(){
   return;
 }
 
-double FluxCalculation::getFlux(const double nu_ene_MeV) const {
+double FluxCalculation::getFlux(const double nu_ene_MeV) const 
+{
   // Assumed the data field ene_flux_v is sorted as lowest energy on first 
   // Calculate flux with linear interpolation
   const static double ERROR_CODE = -9999.;
@@ -92,6 +102,5 @@ double FluxCalculation::getFlux(const double nu_ene_MeV) const {
 #endif
 
   return nuFlux;
-
 }
 
