@@ -17,8 +17,9 @@ void ShowUsage(char *arg0){
   std::cerr<<" Options: -f(--flux_file), -h(--help), -r(--ref_runnum), --nu_ene_min, --nu_ene_max \n"
     << "\t-f [flux_data_file], --flux_file [flux_data_file]: specify flux data file to be used" << std::endl
     << "\t-r(--ref_runnum) [reference_run_number]: specify run number stored to output file" << std::endl
-    << "\t-s(--seed) [random seed]: specify random seed number" << std::endl
+    << "\t-s(--seed) [random seed]: (mandatory)specify random seed number" << std::endl
     << "\t-n(--num_event) [number of event]: specify the number of events generated" << std::endl
+    << "\t--out [output_vector_name]: (mandatory) specify the name for output vector file" << std::endl
     << "\t(not working now) --nu_ene_min [energy_in_MeV]: minimum total energy [MeV] to be generated (default = " << DEFAULT_NUENE_MIN << " MeV)" << std::endl
     << "\t(not working now) --nu_ene_max [energy_in_MeV: maximum total energy [MeV] to be generated (default = " << DEFAULT_NUENE_MAX << " MeV)" << std::endl;
   std::cerr<<" return -1"<<std::endl;
@@ -86,17 +87,17 @@ int main( int argc, char ** argv )
             
           case kSeed:
             seed = std::stoi(optarg);
-            std::cerr << "GETOPT: reference run number = " << RefRunNum << std::endl;
+            std::cerr << "GETOPT: random seed = " << seed << std::endl;
             break;
             
           case kNumEvent:
             numEvent = std::stoi(optarg);
-            std::cerr << "GETOPT: reference run number = " << RefRunNum << std::endl;
+            std::cerr << "GETOPT: number of generation event = " << numEvent << std::endl;
             break;
             
           case kOutFile:
             OutputFile = std::string(optarg);
-            std::cerr << "GETOPT: flux data file = " << FluxFile << std::endl;
+            std::cerr << "GETOPT: output file name = " << OutputFile << std::endl;
             break;
 
           case kHelp:
@@ -121,12 +122,12 @@ int main( int argc, char ** argv )
 
       case 's':
         seed = std::stoi(optarg);
-        std::cerr << "GETOPT: reference run number = " << RefRunNum << std::endl;
+        std::cerr << "GETOPT: random seed = " << seed << std::endl;
         break;
 
       case 'n':
         numEvent = std::stoi(optarg);
-        std::cerr << "GETOPT: reference run number = " << RefRunNum << std::endl;
+        std::cerr << "GETOPT: number of generation event = " << numEvent << std::endl;
         break;
             
       case 'h':
@@ -135,14 +136,22 @@ int main( int argc, char ** argv )
         break;
 
       default:
-        std::cerr << "GETOPT: strange argument: code = " << c << std::endl;
+        std::cerr << "GETOPT: strange argument: code = " << c << " is ignored !!"<<std::endl;
     }
   }
 
-  if( optind+3 > argc){
+//  if( optind+3 > argc){
+//    ShowUsage(argv[0]);
+//    return EXIT_FAILURE;
+//  }
+
+  if ( OutputFile == "") {
+    std::cerr <<" Output file name must be specified"<<std::endl; 
     ShowUsage(argv[0]);
     return EXIT_FAILURE;
   }
+
+
 
 //	/*-----Number of Generated Event-----*/
 //	int NumEv = atoi(argv[optind]);

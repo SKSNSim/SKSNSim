@@ -255,7 +255,7 @@ void VectGenIO::DoProcess()
 }
 
 
-void VectGenIO::DoProcess(int NumEv)
+void VectGenIO::DoProcess(int NumEv = 1)
 {
 	Process(NumEv);
 }
