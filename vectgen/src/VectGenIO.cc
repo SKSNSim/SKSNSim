@@ -207,24 +207,24 @@ void VectGenIO::SetFluxFile(std::string fluxFileName)
 //	//(should be here, but now in VectGenGenerator::Process(int)
   nuflux_dsnb.reset(new FluxCalculation(fluxFileName));
 
-  nuflux_dsnb.get()->dumpFlux();
+  nuflux_dsnb->dumpFlux();
   nuEne_min = nuEneMin;
   nuEne_max = nuEneMax;
 
   // Check if the flux energy range is within the generator energy range
-  if( nuEne_min < nuflux_dsnb.get()->getFluxLimit(true /* true: lower limit, false: higher limit*/) ){
-    nuEne_min = nuflux_dsnb.get()->getFluxLimit(true);
+  if( nuEne_min < nuflux_dsnb->getFluxLimit(true /* true: lower limit, false: higher limit*/) ){
+    nuEne_min = nuflux_dsnb->getFluxLimit(true);
     std::cerr << "Flux lower limit is higher than specified value: reset to nu_ene_min = " << nuEne_min << std::endl;
   }
-  if( nuEne_max > nuflux_dsnb.get()->getFluxLimit(false) ) {
-    nuEne_max = nuflux_dsnb.get()->getFluxLimit(false);
+  if( nuEne_max > nuflux_dsnb->getFluxLimit(false) ) {
+    nuEne_max = nuflux_dsnb->getFluxLimit(false);
     std::cerr << "Flux upper limit is lower than specified value: reset to nu_ene_max = " << nuEne_max << std::endl;
   }
 
 	/*-----calculate maximum value-----*/
 	maxProb = 0.;
-	for( int j = 0; j < int(nuflux_dsnb.get()->getNBins()); j++ ){
-	  double nuEne = nuflux_dsnb.get()->getBinnedEnergy(j);
+	for( int j = 0; j < int(nuflux_dsnb->getNBins()); j++ ){
+	  double nuEne = nuflux_dsnb->getBinnedEnergy(j);
 
 	  if((nuEne < nuEne_min) || (nuEne > nuEne_max)) continue;
 
@@ -233,7 +233,7 @@ void VectGenIO::SetFluxFile(std::string fluxFileName)
 	    double eEne, sigm;
 	    nucrs->DcsNuebP_SV(nuEne, cost, eEne, sigm );
 
-	    double p = nuflux_dsnb.get()->getBinnedFlux(j) * sigm;
+	    double p = nuflux_dsnb->getBinnedFlux(j) * sigm;
 	    if( p > maxProb ){ maxProb = p; }
 	    //std::cout << nuEne << " " << Flux[j] << " " << sigm << " " << p << " " << maxP << std::endl;                          
 	  }
