@@ -11,9 +11,9 @@ void ShowUsage(char *arg0){
   std::cerr<< arg0 << " [options] {num_eve} {out_dir} {seed}" << std::endl;
   std::cerr<< "Usage: vector generetaor for DSNB MC" << std::endl;
   std::cerr<<" Argument for "<< arg0 << std::endl;
-  std::cerr<<" 1st: Number of event" << std::endl;
-  std::cerr<<" 2nd: Output directory, default: ./data/"<< std::endl;
-  std::cerr<<" 3rd: Random seed"<< std::endl;
+  //std::cerr<<" 1st: Number of event" << std::endl;
+  //std::cerr<<" 2nd: Output directory, default: ./data/"<< std::endl;
+  //std::cerr<<" 3rd: Random seed"<< std::endl;
   std::cerr<<" Options: -f(--flux_file), -h(--help), -r(--ref_runnum), --nu_ene_min, --nu_ene_max \n"
     << "\t-f [flux_data_file], --flux_file [flux_data_file]: specify flux data file to be used" << std::endl
     << "\t-r(--ref_runnum) [reference_run_number]: specify run number stored to output file" << std::endl
