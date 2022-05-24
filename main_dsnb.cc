@@ -15,13 +15,13 @@ void ShowUsage(char *arg0){
   //std::cerr<<" 2nd: Output directory, default: ./data/"<< std::endl;
   //std::cerr<<" 3rd: Random seed"<< std::endl;
   std::cerr<<" Options: -f(--flux_file), -h(--help), -r(--ref_runnum), --nu_ene_min, --nu_ene_max \n"
-    << "\t-f [flux_data_file], --flux_file [flux_data_file]: specify flux data file to be used" << std::endl
+    << "\t-f(--flux_file) [flux_data_file]: specify flux data file to be used" << std::endl
     << "\t-r(--ref_runnum) [reference_run_number]: specify run number stored to output file" << std::endl
     << "\t-s(--seed) [random seed]: (mandatory)specify random seed number" << std::endl
     << "\t-n(--num_event) [number of event]: specify the number of events generated" << std::endl
     << "\t--out [output_vector_name]: (mandatory) specify the name for output vector file" << std::endl
-    << "\t(not working now) --nu_ene_min [energy_in_MeV]: minimum total energy [MeV] to be generated (default = " << DEFAULT_NUENE_MIN << " MeV)" << std::endl
-    << "\t(not working now) --nu_ene_max [energy_in_MeV: maximum total energy [MeV] to be generated (default = " << DEFAULT_NUENE_MAX << " MeV)" << std::endl;
+    << "\t--nu_ene_min [energy_in_MeV]: minimum total energy [MeV] to be generated (default = " << DEFAULT_NUENE_MIN << " MeV)" << std::endl
+    << "\t--TIMEEVENT [true/false]: if the number of event is decided from live time" << std::endl;
   std::cerr<<" return -1"<<std::endl;
 }
 
@@ -39,12 +39,13 @@ int main( int argc, char ** argv )
 	uint seed = 0;
   int numEvent = 0;
   int RefRunNum = 0;
+  bool useTimeEvent = false;
 	std::string OutputFile("");
   while (1) {
     int this_option_optind = optind ? optind : 1;
     int option_index = 0;
     unsigned long seed_read = 0;
-    enum OPTIONS {kNuEneMin = 0, kNuEneMax, kFluxFile, kRefRunNum, kSeed, kNumEvent, kOutFile, kHelp};
+    enum OPTIONS {kNuEneMin = 0, kNuEneMax, kFluxFile, kRefRunNum, kSeed, kNumEvent, kOutFile, kTimeEvent, kHelp};
     static struct option long_options[] = {
       {"nu_ene_min",  required_argument, 0, 0},
       {"nu_ene_max",  required_argument, 0, 0},
@@ -53,8 +54,9 @@ int main( int argc, char ** argv )
       {"seed",        required_argument, 0, 0},
       {"num_event",   required_argument, 0, 0},
       {"out",         required_argument, 0, 0},
-      {"help",              no_argument, 0, 0},
-      {0,                             0, 0, 0}
+      {"TIMEEVENT",   required_argument, 0, 0},
+      {"help",        no_argument, 0, 0},
+      {0,             0, 0, 0}
     };
 
     c = getopt_long( argc, argv, "hf:r:s:n:v",
@@ -98,6 +100,11 @@ int main( int argc, char ** argv )
           case kOutFile:
             OutputFile = std::string(optarg);
             std::cerr << "GETOPT: output file name = " << OutputFile << std::endl;
+            break;
+
+          case kTimeEvent:
+            useTimeEvent = std::stoi(optarg);
+            std::cerr << "GETOPT: Use livetime info. for number of event = " << useTimeEvent << std::endl;
             break;
 
           case kHelp:
@@ -175,6 +182,7 @@ int main( int argc, char ** argv )
   io->SetFluxFile(FluxFile);
   io->OpenOutputFile(OutputFile);
   io->SetRefRunNumber(RefRunNum);
+  io->SetUseTimeEvent(useTimeEvent);
 
 	io->DoProcess(numEvent);
 

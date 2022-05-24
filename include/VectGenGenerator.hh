@@ -81,6 +81,7 @@ protected:
   TTree* theOTree;
 
   int fRefRunNum;
+  bool bIsUseTimeEvent;
 
   MCInfo* fMC = 0;
 

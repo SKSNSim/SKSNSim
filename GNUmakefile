@@ -15,13 +15,13 @@ include $(SKOFL_ROOT)/config.gmk
 LOCAL_INC	+= -I./include/
 
 LOCAL_LIBS	= $(OBJS) \
-		-lsnlib_1.0 -lsnevtinfo -lsollib_4.0 -llibrary
+		-lsnlib_1.0 -lsnevtinfo -lsollib_4.0 -lsklowe_7.0 -llibrary
 
 #
 #  Objects
 #
-SRCS = $(wildcard src/*.cc)
-OBJS = $(patsubst src/%.cc, obj/%.o, $(SRCS))
+SRCS = $(wildcard src/*.cc src/*.F )
+OBJS = $(patsubst src/%.cc src/%.F,  obj/%.o, $(SRCS))
 #OBJS = ${SRCS:.cc=.o:.F=.o} 
 
 CFLAGS += -DNO_EXTERN_COMMON_POINTERS

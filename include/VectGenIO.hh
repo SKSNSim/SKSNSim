@@ -15,7 +15,25 @@
 
 extern "C" {
 	void sn_sundir_( int *, int *, float *, float *, float *);
+  void read_timevent_( int *, int *);
 }
+
+enum SKGEOM
+{
+    gSK_IV = 4,
+    gSK_V  = 5,
+    gSK_VI = 6,
+};
+
+enum SKRUN
+{
+    SK_IV_BEGIN = 60000,
+    SK_IV_END = 79999,
+    SK_V_BEGIN  = 80000,
+    SK_V_END  = 84999,
+    SK_VI_BEGIN  = 85000,
+};
+
 
 class VectGenIO : VectGenGenerator
 {
@@ -35,6 +53,9 @@ public:
   void CloseOutputFile();
 
   void SetRefRunNumber(int runNum) { fRefRunNum = runNum; }
+  void SetUseTimeEvent(bool b) { bIsUseTimeEvent = b; }
+
+  int ReadTimeEventFile();
 
 private:
 
