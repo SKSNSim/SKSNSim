@@ -44,15 +44,19 @@
       itime_prev(2) = 0
       itime_prev(3) = 0
 
-      if ( (runnum .ge. 60000) .and.  (runnum .lt. 79999) ) then 
-        timefile = "/home/sklowe/realtime_sk4_rep/solar_apr19/timevent/
-     &     timevent.r061525.r077958" 
-      else if ( (runnum .ge. 80000) .and. (runnum .lt. 84999) ) then  
-        timefile = "/home/sklowe/realtime_sk5_rep/solar_nov20/timevent/
-     &     timevent.r080539.r082915" 
-      else if ( runnum .ge. 85000 ) then 
-        timefile = "/home/sklowe/realtime_sk6_rep/solar_may22/timevent/
-     &     livesubruns.r085000.r087073" 
+      if ( (runnum .ge. 85000) .and.  (runnum .lt. 90000) ) then 
+c      if ( (runnum .ge. 60000) .and.  (runnum .lt. 79999) ) then 
+c        timefile =
+c     $    '/home/sklowe/realtime_sk4_rep/solar_apr19/timevent/&
+c     &timevent.r061525.r077958'
+c      else if ( (runnum .ge. 80000) .and. (runnum .lt. 84999) ) then  
+c        timefile = 
+c     $    '/home/sklowe/realtime_sk5_rep/solar_nov20/timevent/timevent.r080539.r0829157'
+c      else if ( runnum .ge. 85000 ) then 
+      print *, runnum
+        timefile = 
+     $'/home/sklowe/realtime_sk6_rep/solar_may22/timevent/livesubruns.r085000.r087073'
+        print *, timefile
       endif
 
       CALL KZINIT
