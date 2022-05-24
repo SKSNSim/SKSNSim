@@ -1,9 +1,9 @@
 
-vectgen/main_snburst
-vectgen/main_snburst.o
+main_snburst
+main_snburst.o
 
-vectgen/main_dsnb
-vectgen/main_dsnb.o
+main_dsnb
+main_dsnb.o
 
 *root
 core.*
