@@ -85,13 +85,13 @@ obj/%.o: src/%.F
 	@echo "[SKSNSim] Building FORTRAN code: $*..."
 	@$(FC) $(FCFLAGS) -c $< -o $@
 
-bin/main_snburst: $(OBJS)
+bin/main_snburst: obj/main_snburst.o $(OBJS)
 	@echo "[SKSNSim] Building executable:	$@..."
-	@LD_RUN_PATH=$(SKOFL) $(CXX) $(CXXFLAGS) -o $@ $(OBJS) $(LDLIBS)
+	@LD_RUN_PATH=$(SKOFL) $(CXX) $(CXXFLAGS) -o $@ $< $(OBJS) $(LDLIBS)
 
-bin/main_dsnb: $(OBJS)
+bin/main_dsnb: obj/main_dsnb.o $(OBJS)
 	@echo "[SKSNSim] Building executable:	$@..."
-	@LD_RUN_PATH=$(SKOFL) $(CXX) $(CXXFLAGS) -o $@ $(OBJS) $(LDLIBS)
+	@LD_RUN_PATH=$(SKOFL) $(CXX) $(CXXFLAGS) -o $@ $< $(OBJS) $(LDLIBS)
 
 obj bin:
 	@mkdir -p $@

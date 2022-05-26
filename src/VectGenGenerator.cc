@@ -648,7 +648,6 @@ void VectGenGenerator::Process(int NumEv){
 
 	/*---- loop ----*/
 	for( int iEvt = 0; iEvt < NumEv; iEvt++ ){
-	  std::cout << iEvt << std::endl;
 
 //		if((iEvt != 0) && (iEvt%NeventFile == 0) ) {
 //

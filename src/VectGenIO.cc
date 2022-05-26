@@ -260,6 +260,7 @@ void VectGenIO::DoProcess(int NumEv)
   if ( bIsUseTimeEvent ) {
     NumEv = ReadTimeEventFile();
   }
+  std::cout <<" Number of generated events: "<<NumEv<<std::endl;
 	Process(NumEv);
 }
 

@@ -37,18 +37,16 @@
 
       integer lenchr
 
-      if ( (runnum .ge. 85000) .and.  (runnum .lt. 90000) ) then 
-c      if ( (runnum .ge. 60000) .and.  (runnum .lt. 79999) ) then 
-c        timefile =
-c     $    '/home/sklowe/realtime_sk4_rep/solar_apr19/timevent/&
-c     &timevent.r061525.r077958'
-c      else if ( (runnum .ge. 80000) .and. (runnum .lt. 84999) ) then  
-c        timefile = 
-c     $    '/home/sklowe/realtime_sk5_rep/solar_nov20/timevent/timevent.r080539.r0829157'
-c      else if ( runnum .ge. 85000 ) then 
+      if ( (runnum .ge. 60000) .and.  (runnum .lt. 79999) ) then 
+        timefile =
+     $    '/home/sklowe/realtime_sk4_rep/solar_apr19/timevent/timevent.r061525.r077958'
+      else if ( (runnum .ge. 80000) .and. (runnum .lt. 84999) ) then  
+        timefile = 
+     $    '/home/sklowe/realtime_sk5_rep/solar_nov20/timevent/timevent.r080539.r082915'
+      else if ( runnum .ge. 85000 ) then 
       print *, runnum
         timefile = 
-     $'/home/sklowe/realtime_sk6_rep/solar_may22/timevent/livesubruns.r085000.r087073'
+     $    '/home/sklowe/realtime_sk6_rep/solar_may22/timevent/timevent.r080539.r087073'
         print *, timefile
       endif
 
@@ -59,22 +57,21 @@ c*** open time event file
       print*,'Open timefile:',timefile
       open(10, file=timefile,
      $     status='old',form='unformatted')
-
       print*,'timefile opened'
 
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-      call set_rflist(21,fname,'LOCAL',' ','WRT',' ',' ',
-     &     'recl=5670 status=unknown',' ',' ')
-      print *, 'open as LOCAL: ', fname(1:lenchr(fname))
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-
       print*,'Start Read '
-
  10   continue
-**** read run number, subrun number, date(yy,mm,dd), time(hh,mm,ss), run time(sec), solar direction(direction cosine toward(?) sun), istat
+****  read run number, subrun number, date(yy,mm,dd), time(hh,mm,ss)
+****  run time(sec), solar direction(direction cosine toward(?) sun), istat
+****  '
       call slredtimev(10,nrun,nsub,idate,itime,tweight,sdir,istat)
       nevents = 0
-
+ 
+      if( nrun .lt. 60000 )then
+        nrun = nrun + 65536         ! for SK-IV analysis
+      endif
+c***      print *, nrun
+ 
       if(istat.ne.0) then !istat=-1 EOF 
           if(lfirst .eq. 1) goto 100  ! at least one sub run is read
           print *, 'reading error! stop'
@@ -130,7 +127,7 @@ c              print *, "Bad subrun!"
       endif
 
       ievent = ievent + 1
-      if(mod(ievent,10000).eq.0) print*,ievent,' is finish'
+c      if(mod(ievent,10000).eq.0) print*,ievent,' is finish'
 
 c*** make vector ("num" times per minute)
       nev = int(tweight/60. * num) + 1
@@ -149,11 +146,12 @@ c       If number of events is fractional, complete by drawing random number
       totaltime = totaltime + tweight
       totevents = totevents + nevents
 cccccccccccccccccccccccccccccccccccccccccccccccc
-      print *, "total ", tweight, nevents, nev, totaltime, totevents
+c      print *, "total ", tweight, nevents, nev, totaltime, totevents
       goto 10
 
 100   continue
       close(10)
+      print *, "total :", totaltime, totevents
 
       return
       END
