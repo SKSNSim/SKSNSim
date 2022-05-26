@@ -22,8 +22,8 @@
       INTEGER IERR,runnum, IDATE(3),ITIME(3),istat, totevents
       INTEGER iwrite,lfbadrun, i
       INTEGER ibad_subrun(3000)
-      INTEGER idate_prev(3)
-      INTEGER itime_prev(3) 
+      INTEGER idate_prev(3)/0, 0, 0/
+      INTEGER itime_prev(3)/0, 0, 0/ 
       REAL tweight, sdir(3), rnd, fracleft
       REAL totaltime
       character*200 timefile, fname
@@ -36,13 +36,6 @@
       real rlu
 
       integer lenchr
-
-      idate_prev(1) = 0
-      idate_prev(2) = 0
-      idate_prev(3) = 0
-      itime_prev(1) = 0
-      itime_prev(2) = 0
-      itime_prev(3) = 0
 
       if ( (runnum .ge. 85000) .and.  (runnum .lt. 90000) ) then 
 c      if ( (runnum .ge. 60000) .and.  (runnum .lt. 79999) ) then 
