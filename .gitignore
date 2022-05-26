@@ -1,11 +1,5 @@
-
-main_snburst
-main_snburst.o
-
-main_dsnb
-main_dsnb.o
-
 *root
 core.*
 
 obj/
+bin/
