@@ -12,7 +12,7 @@ if ($1 == "") then
 endif
 
 #set num_simulation = 1000
-set num_simulation = 10
+set num_simulation = 1
 
 if(! -d ./script/$1) then
     mkdir -p ./script/$1;
