@@ -18,6 +18,14 @@ if(! -d ./script/$1) then
     mkdir -p ./script/$1;
 endif
 
+if(! -d ./data) then
+    mkdir -p ./data;
+endif
+
+if(! -d ./data/$1) then
+    mkdir -p ./data/$1;
+endif
+
 if(! -d ./out/$1) then
     mkdir -p ./out/$1
 endif
@@ -60,7 +68,7 @@ while ($cur_num < $num_simulation)
     echo 'cd ..' >> $ofile
     echo 'source /usr/local/sklib_gcc8/skofl-trunk/env.csh' >> $ofile
     echo 'hostname' >> $ofile
-    echo "./main "$1" "$2" "$3" "$4" "$odir" "$random >> $ofile
+    echo "./main_snburst "$1" "$2" "$3" "$4" "$odir" "$random >> $ofile
 
     chmod 755 $ofile
 
