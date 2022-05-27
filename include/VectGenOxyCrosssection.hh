@@ -17,6 +17,7 @@ public:
 	VectGenOxyCrosssection();
 
 	double CsNuOxy43CC(int, int, int, int, double);
+
 };
 
 #endif

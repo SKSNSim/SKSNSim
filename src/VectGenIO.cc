@@ -101,6 +101,10 @@ VectGenIO::VectGenIO(std::string ModelName, int nuosc, double distIO, int flagIO
 	nucrs = new VectGenNuCrosssection();
 	nucrs->ReadCsNuElastic();
 
+	//Class call of cross-section calculation
+	ocrs = new VectGenOxyCrosssection();
+	osub = new VectGenOxyCrosssectionSub();
+
 
 	// set text file name
 	std::stringstream ssname3;

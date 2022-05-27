@@ -696,11 +696,12 @@ void VectGenGenerator::Process(){
 					for(int ch=0;ch<7;ch++){
 						for(int ex_state=0;ex_state<3;ex_state++){
 							if(rcn==0){
-								nuType = 12; // Nue
+								//electron neutrino
 								double crsOx = ocrs -> CsNuOxy43CC(rcn, state, ex_state, ch, nu_energy);
 								Ocrse0[ex_state][ch].push_back(crsOx);
 							}
 							else if(rcn==1){
+								//anti electron neutrino
 								double crsOx = ocrs -> CsNuOxy43CC(rcn, state, ex_state, ch, nu_energy);
 								Ocrsp0[ex_state][ch].push_back(crsOx);
 							}

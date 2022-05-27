@@ -60,7 +60,7 @@ double VectGenOxyCrosssection::CsNuOxy43CC(int num, int ix, int ex, int ch, doub
 	std::vector<double> exEne[2][5];
 	std::vector<double> rec[2][5];
 	std::vector<double> pro_energy[2][5];
-	if(ix==0) num_ex = 3;
+	if(ix==0)      num_ex = 3;
 	else if(ix==1) num_ex = 15;
 	else if(ix==2) num_ex = 8;
 	else if(ix==3) num_ex = 1;

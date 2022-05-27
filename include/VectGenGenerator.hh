@@ -17,7 +17,6 @@
 #include <iomanip>
 #include <stdio.h>
 #include <algorithm>
-#include <memory>
 
 #include "snevtinfo.h"
 #include "mcinfo.h"
@@ -27,6 +26,9 @@
 #include "VectGenSnConst.hh"
 #include "VectGenSnFlux.hh"
 #include "VectGenNuCrosssection.hh"
+#include "VectGenOxyCrosssection.hh"
+#include "VectGenOxyCrosssection_sub.hh"
+#include "VectGenOxigFunc.hh"
 
 #include "VectGenSnRoot.hh"
 
@@ -35,6 +37,11 @@
 /**
  * @class Generator
  */
+
+extern "C" {
+	void dir_oxigfunc_( double *, double *, double *, double * );
+}
+
 class VectGenGenerator
 {
 public:
@@ -44,12 +51,14 @@ public:
   void convDirection(const double, const double, double*);
   void determineAngleNuebarP(const double, double&, double&, double&);
   void determineAngleElastic(const int, const double, double&, double&, double&);
+  void determineAngleNueO(const int, const int, const int, const int, const double, double&, double&, double&);
   void determineKinematics(const int, const double, double*, MCInfo*);
   void determinePosition(double&, double&, double&);
+  void determineNmomentum(double&, double&, double&);
   void FillEvent();
   void MakeEvent(double, double, int, int, double);
   void Process();    // For SN generator
-  void Process(int); // For DSBN vector generator
+  void Process(int); // For DSBN vector generate
 
 protected:
 
@@ -57,12 +66,17 @@ protected:
   int flag_event;
   double RatioTo10kpc;
   std::string OutDir;
+  std::string ModelName;
   double snDir[3];
   double Rmat[3][3];
 
   VectGenSnFlux* nuflux;
   VectGenNuCrosssection* nucrs;
   std::unique_ptr<FluxCalculation> nuflux_dsbn;
+  VectGenOxyCrosssection* ocrs;
+  VectGenOxyCrosssectionSub* osub;
+  VectGenOxigFunc* reco;
+  VectGenOxigFunc* rece;
 
   //Neutrino oscillation
   double oscnue1, oscnue2, oscneb1, oscneb2, oscnux1, oscnux2, oscnxb1, oscnxb2;
@@ -71,11 +85,20 @@ protected:
   double totNuebarp;
   double totNueElastic, totNuebarElastic, totNuxElastic, totNuxbarElastic;
   double totNueO, totNuebarO;
+  double totNueOsub, totNuebarOsub;
   double totNcNup, totNcNun, totNcNubarp, totNcNubarn;
+
+  //number of particle emitted on deexcitation with CC reaction
+  int numNtNueO[7] = {0, 1, 0, 2, 0, 0, 0};
+  int numPtNueO[7] = {1, 1, 2, 1, 0, 0, 1};
+  int numNtNuebarO[7] = {0, 1, 0, 2, 1, 0, 0};
+  int numPtNuebarO[7] = {0, 0, 1, 0, 1, 1, 2};
+  int numGmNuebarO[7] = {1, 0, 0, 0, 0, 0, 0};
 
 private:
   //store neutrino kinematics into vector for time sorting
   int nReact, nuType;
+  std::string sReact;
   std::vector<SNEvtInfo> vEvtInfo;
 
   // number of events where file switches
