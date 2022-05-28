@@ -625,7 +625,7 @@ void VectGenGenerator::MakeEvent(double time, double nu_energy, int nReact, int 
 			double nuEne = getRandomReal( ene_s, ene_e, generator );
 			double time_s = time - tBinSize/2., time_e = time + tBinSize/2.;
 			double tReact = getRandomReal( time_s, time_e , generator );
-			std::cout << tReact << " " << nuEne << " " << nReact << " " << nuType << " " << rate << std::endl; //nakanisi
+			//std::cout << tReact << " " << nuEne << " " << nReact << " " << nuType << " " << rate << std::endl; //nakanisi
 
 			double ver_x = 9999., ver_y = 9999., ver_z = 9999.;
 			determinePosition( ver_x, ver_y, ver_z );
@@ -670,6 +670,7 @@ void VectGenGenerator::Process(){
 	std::cout << "calculate cross section and fill to array" << std::endl;
 	for(int i_nu_ene =0; i_nu_ene < nuEneNBins; i_nu_ene++) {
 		double nu_energy = nuEneMin + ( double(i_nu_ene) + 0.5 ) * nuEneBinSize;
+		double crsOx = 0.;
 		//if(i_nu_ene % 10 == 0) std::cout << "Neutrino Energy  " << nu_energy << std::endl;
 		/*----- inverse beta decay -----*/
 		if(nu_energy > eEneThr + DeltaM) totcrsIBD[i_nu_ene] = nucrs->CsNuebP_SV(nu_energy);
@@ -693,73 +694,73 @@ void VectGenGenerator::Process(){
 		for(int rcn=0;rcn<2;rcn++){
 			for(int state=0;state<5;state++){
 				if(state==0){
-					for(int ch=0;ch<7;ch++){
-						for(int ex_state=0;ex_state<3;ex_state++){
+					for(int ex_state=0;ex_state<3;ex_state++){
+						for(int ch=0;ch<7;ch++){
 							if(rcn==0){
 								//electron neutrino
-								double crsOx = ocrs -> CsNuOxy43CC(rcn, state, ex_state, ch, nu_energy);
+								crsOx = ocrs -> CsNuOxy43CC(rcn, state, ex_state, ch, nu_energy);
 								Ocrse0[ex_state][ch].push_back(crsOx);
 							}
 							else if(rcn==1){
 								//anti electron neutrino
-								double crsOx = ocrs -> CsNuOxy43CC(rcn, state, ex_state, ch, nu_energy);
+								crsOx = ocrs -> CsNuOxy43CC(rcn, state, ex_state, ch, nu_energy);
 								Ocrsp0[ex_state][ch].push_back(crsOx);
 							}
 						}
 					}
 				}
 				else if(state==1){
-					for(int ch=0;ch<7;ch++){
-						for(int ex_state=0;ex_state<15;ex_state++){
+					for(int ex_state=0;ex_state<15;ex_state++){
+						for(int ch=0;ch<7;ch++){
 							if(rcn==0){
-								double crsOx = ocrs -> CsNuOxy43CC(rcn, state, ex_state, ch, nu_energy);
+								crsOx = ocrs -> CsNuOxy43CC(rcn, state, ex_state, ch, nu_energy);
 								Ocrse1[ex_state][ch].push_back(crsOx);
 							}
 							else if(rcn==1){
-								double crsOx = ocrs -> CsNuOxy43CC(rcn, state, ex_state, ch, nu_energy);
+								crsOx = ocrs -> CsNuOxy43CC(rcn, state, ex_state, ch, nu_energy);
 								Ocrsp1[ex_state][ch].push_back(crsOx);
 							}
 						}
 					}
 				}
 				else if(state==2){
-					for(int ch=0;ch<7;ch++){
-						for(int ex_state=0;ex_state<8;ex_state++){
+					for(int ex_state=0;ex_state<8;ex_state++){
+						for(int ch=0;ch<7;ch++){
 							if(rcn==0){
-								double crsOx = ocrs -> CsNuOxy43CC(rcn, state, ex_state, ch, nu_energy);
+								crsOx = ocrs -> CsNuOxy43CC(rcn, state, ex_state, ch, nu_energy);
 								Ocrse2[ex_state][ch].push_back(crsOx);
 							}
 							else if(rcn==1){
-								double crsOx = ocrs -> CsNuOxy43CC(rcn, state, ex_state, ch, nu_energy);
+								crsOx = ocrs -> CsNuOxy43CC(rcn, state, ex_state, ch, nu_energy);
 								Ocrsp2[ex_state][ch].push_back(crsOx);
 							}
 						}
 					}
 				}
 				else if(state==3){
-					for(int ch=0;ch<7;ch++){
-						for(int ex_state=0;ex_state<1;ex_state++){
+					for(int ex_state=0;ex_state<1;ex_state++){
+						for(int ch=0;ch<7;ch++){
 							if(rcn==0){
-								double crsOx = ocrs -> CsNuOxy43CC(rcn, state, ex_state, ch, nu_energy);
+								crsOx = ocrs -> CsNuOxy43CC(rcn, state, ex_state, ch, nu_energy);
 								Ocrse3[ex_state][ch].push_back(crsOx);
 								//if(ch==0)std::cout << nu_energy << " " << state << " " << ex_state << " " << crsOx << " " << std::endl; //nakanisi
 							}
 							else if(rcn==1){
-								double crsOx = ocrs -> CsNuOxy43CC(rcn, state, ex_state, ch, nu_energy);
+								crsOx = ocrs -> CsNuOxy43CC(rcn, state, ex_state, ch, nu_energy);
 								Ocrsp3[ex_state][ch].push_back(crsOx);
 							}
 						}
 					}
 				}
 				else if(state==4){
-					for(int ch=0;ch<7;ch++){
-						for(int ex_state=0;ex_state<16;ex_state++){
+					for(int ex_state=0;ex_state<16;ex_state++){
+						for(int ch=0;ch<7;ch++){
 							if(rcn==0){
-								double crsOx = ocrs -> CsNuOxy43CC(rcn, state, ex_state, ch, nu_energy);
+								crsOx = ocrs -> CsNuOxy43CC(rcn, state, ex_state, ch, nu_energy);
 								Ocrse4[ex_state][ch].push_back(crsOx);
 							}
 							else if(rcn==1){
-								double crsOx = ocrs -> CsNuOxy43CC(rcn, state, ex_state, ch, nu_energy);
+								crsOx = ocrs -> CsNuOxy43CC(rcn, state, ex_state, ch, nu_energy);
 								Ocrsp4[ex_state][ch].push_back(crsOx);
 							}
 						}
@@ -772,13 +773,13 @@ void VectGenGenerator::Process(){
 			for(int state=0;state<5;state++){
 				for(int ch=0;ch<32;ch++){
 					if(rcn==0){
-						double crsOx = osub -> CsNuOxy43CCSub(rcn, state, ch, nu_energy);
+						crsOx = osub -> CsNuOxy43CCSub(rcn, state, ch, nu_energy);
 						OcrseSub[state][ch].push_back(crsOx);
+						//std::cout << rcn << " " << state << " " << ch << " " << nu_energy << " " << crsOx << std::endl; //nakanisi
 					}
 					if(rcn==1){
-						double crsOx = osub -> CsNuOxy43CCSub(rcn, state, ch, nu_energy);
+						crsOx = osub -> CsNuOxy43CCSub(rcn, state, ch, nu_energy);
 						OcrspSub[state][ch].push_back(crsOx);
-						//if(state==0 && ch==0)std::cout << rcn << " " << state << " " << ch << " " << nu_energy << " " << crsOx << std::endl; //nakanisi
 					}
 				}
 			}
