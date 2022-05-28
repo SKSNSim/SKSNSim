@@ -21,7 +21,9 @@ void ShowUsage(char *arg0){
     << "\t-n(--num_event) [number of event]: specify the number of events generated" << std::endl
     << "\t--out [output_vector_name]: (mandatory) specify the name for output vector file" << std::endl
     << "\t--nu_ene_min [energy_in_MeV]: minimum total energy [MeV] to be generated (default = " << DEFAULT_NUENE_MIN << " MeV)" << std::endl
-    << "\t--TIMEEVENT [true/false]: if the number of event is decided from live time" << std::endl;
+    << "\t--nu_ene_max [energy_in_MeV]: maximum total energy [MeV] to be generated (default = " << DEFAULT_NUENE_MAX << " MeV)" << std::endl
+    << "\t--TIMEEVENT [true/false]: if the number of event is decided from live time" << std::endl
+    << "\t--FLATFLUX  [true/false]: if the flux assume flat " << std::endl;
   std::cerr<<" return -1"<<std::endl;
 }
 
@@ -40,12 +42,13 @@ int main( int argc, char ** argv )
   int numEvent = 0;
   int RefRunNum = 0;
   bool useTimeEvent = false;
+  bool useFlatFlux = false;
 	std::string OutputFile("");
   while (1) {
     int this_option_optind = optind ? optind : 1;
     int option_index = 0;
     unsigned long seed_read = 0;
-    enum OPTIONS {kNuEneMin = 0, kNuEneMax, kFluxFile, kRefRunNum, kSeed, kNumEvent, kOutFile, kTimeEvent, kHelp};
+    enum OPTIONS {kNuEneMin = 0, kNuEneMax, kFluxFile, kRefRunNum, kSeed, kNumEvent, kOutFile, kTimeEvent, kFlatFlux, kHelp};
     static struct option long_options[] = {
       {"nu_ene_min",  required_argument, 0, 0},
       {"nu_ene_max",  required_argument, 0, 0},
@@ -55,6 +58,7 @@ int main( int argc, char ** argv )
       {"num_event",   required_argument, 0, 0},
       {"out",         required_argument, 0, 0},
       {"TIMEEVENT",   required_argument, 0, 0},
+      {"FLATFLUX",    required_argument, 0, 0},
       {"help",        no_argument, 0, 0},
       {0,             0, 0, 0}
     };
@@ -105,6 +109,11 @@ int main( int argc, char ** argv )
           case kTimeEvent:
             useTimeEvent = std::stoi(optarg);
             std::cerr << "GETOPT: Use livetime info. for number of event = " << useTimeEvent << std::endl;
+            break;
+
+          case kFlatFlux:
+            useFlatFlux= std::stoi(optarg);
+            std::cerr << "GETOPT: Use flat flux for positron spectrum = " << useFlatFlux << std::endl;
             break;
 
           case kHelp:
@@ -179,10 +188,13 @@ int main( int argc, char ** argv )
 
 //	VectGenIO *io = new VectGenIO(OutDirIO, seedIO, FluxFile);
 	VectGenIO *io = new VectGenIO(seed);
+  if (nuEne_min>-9998. && nuEne_max< 9998.) io->SetNuEnergyRange(nuEne_min, nuEne_max);
   io->SetFluxFile(FluxFile);
   io->OpenOutputFile(OutputFile);
+
   io->SetRefRunNumber(RefRunNum);
   io->SetUseTimeEvent(useTimeEvent);
+  io->SetUseFlatFlux(useFlatFlux);
 
 	io->DoProcess(numEvent);
 

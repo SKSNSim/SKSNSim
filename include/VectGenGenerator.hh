@@ -38,7 +38,7 @@
 class VectGenGenerator
 {
 public:
-  VectGenGenerator(){}
+  VectGenGenerator();
   ~VectGenGenerator(){}
 
   void convDirection(const double, const double, double*);
@@ -82,6 +82,7 @@ protected:
 
   int fRefRunNum;
   bool bIsUseTimeEvent;
+  bool bUseFlatFlux;
 
   MCInfo* fMC = 0;
 

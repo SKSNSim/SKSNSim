@@ -53,7 +53,9 @@ public:
   void CloseOutputFile();
 
   void SetRefRunNumber(int runNum) { fRefRunNum = runNum; }
+  void SetNuEnergyRange(double ene_min, double ene_max) { nuEne_min = ene_min; nuEne_max = ene_max; }
   void SetUseTimeEvent(bool b) { bIsUseTimeEvent = b; }
+  void SetUseFlatFlux(bool b) { bUseFlatFlux = b; }
 
   int ReadTimeEventFile();
 

@@ -350,3 +350,13 @@ double VectGenNuCrosssection::calcCosTthElastic( const double nuE, const double 
 	return cosTth;
 }
 
+double VectGenNuCrosssection::getEnu(double ee, double costheta)
+{
+  double delta = Mn-Mp, d = (delta*delta - Me*Me)/(2*Mp);
+  double pe=sqrt(ee*ee-Me*Me);
+
+  return((ee+delta+d)/(1.-(ee-pe*costheta)/Mp));
+}
+
+
+

@@ -127,6 +127,7 @@ VectGenIO::VectGenIO(std::string ModelName, int nuosc, double distIO, int flagIO
 }
 
 VectGenIO::VectGenIO( uint seedIO )
+:VectGenGenerator()
 //VectGenIO::VectGenIO(std::string OutDirIO, uint seedIO, std::string FluxFileName)
 {
 	generator = new TRandom3(seedIO);
@@ -142,7 +143,6 @@ VectGenIO::VectGenIO( uint seedIO )
 	VectGenSetBinValues();
 
 //	//Class call of flux/spectrum table
-//	//(should be here, but now in VectGenGenerator::Process(int)
 //  nuflux_dsnb.reset(new FluxCalculation(FluxFileName));
 
 	//Class call of cross-section calculation
@@ -150,17 +150,6 @@ VectGenIO::VectGenIO( uint seedIO )
 	nucrs->ReadCsNuElastic();
 
 	// set output directory for vector root file
-	/*
-	char del ='/';
-	auto subStr = split(ModelName, del);
-	std::stringstream ssname4;
-	//ssname4 << OutDirIO << subStr[0] << "/event/";
-	//ssname4 << OutDirIO << "/" << ModelName << "/event/";
-	ssname4 << OutDirIO << "/event/";
-	OutDir = ssname4.str();
-	*/
-//	OutDir = OutDirIO;
-//	std::cout << OutDir << std::endl;
 }
 
 
@@ -208,8 +197,7 @@ void VectGenIO::SetFluxFile(std::string fluxFileName)
   nuflux_dsnb.reset(new FluxCalculation(fluxFileName));
 
   nuflux_dsnb->dumpFlux();
-  nuEne_min = nuEneMin;
-  nuEne_max = nuEneMax;
+  // Check if the flux energy range is specified by argument
 
   // Check if the flux energy range is within the generator energy range
   if( nuEne_min < nuflux_dsnb->getFluxLimit(true /* true: lower limit, false: higher limit*/) ){
@@ -257,6 +245,7 @@ void VectGenIO::DoProcess()
 
 void VectGenIO::DoProcess(int NumEv)
 {
+  std::cout <<" Do process "<<std::endl;
   if ( bIsUseTimeEvent ) {
     NumEv = ReadTimeEventFile();
   }
@@ -267,6 +256,7 @@ void VectGenIO::DoProcess(int NumEv)
 
 int VectGenIO::ReadTimeEventFile()
 {
+  std::cout <<" Estimate # of event from timevent file "<<std::endl;
   std::string timeFile; 
   int iniRun, endRun;
   if ( fRefRunNum < SK_IV_BEGIN ) {

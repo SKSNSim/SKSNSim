@@ -29,6 +29,7 @@ FluxCalculation::FluxCalculation()
 
 FluxCalculation::FluxCalculation(std::string fname)
 {
+      std::cout << " DSNB flux file: "<<fname<< std::endl;
       ene_flux_v = new std::vector<std::pair<double,double> >();
       this->loadFile(fname);
       return;

@@ -18,6 +18,11 @@
 
 #include "FluxCalculation.hh"
 
+
+VectGenGenerator::VectGenGenerator()
+:nuEne_min(nuEneMin), nuEne_max(nuEneMax)
+{};
+
 void VectGenGenerator::convDirection( const double eTheta, const double ePhi,
 				      double * eDir )
 {
@@ -580,129 +585,41 @@ void VectGenGenerator::Process(int NumEv){
 
 	/*-----input file name-----*/
   FluxCalculation &nuflux = *nuflux_dsnb;
-//  nuflux.dumpFlux();
-//  double nuEne_min = nuEneMin;
-//  double nuEne_max = nuEneMax;
-//  if( nuEne_min < nuflux.getFluxLimit(true /* true: lower limit, false: higher limit*/) ){
-//    nuEne_min = nuflux.getFluxLimit(true);
-//    std::cerr << "Flux lower limit is higher than specified value: reset to nu_ene_min = " << nuEne_min << std::endl;
-//  }
-//  if( nuEne_max > nuflux.getFluxLimit(false) ) {
-//    nuEne_max = nuflux.getFluxLimit(false);
-//    std::cerr << "Flux upper limit is lower than specified value: reset to nu_ene_max = " << nuEne_max << std::endl;
-//  }
-
-//
-//	/*-----calculate maximum value-----*/
-//	double maxP = 0.;
-//	for( int j = 0; j < int(nuflux.getNBins()); j++ ){
-//	  double nuEne = nuflux.getBinnedEnergy(j);
-//
-//	  if((nuEne < nuEne_min) || (nuEne > nuEne_max)) continue;
-//
-//	  for( int iCost = 0; iCost < costNBins; iCost++ ){
-//	    double cost = costMin + costBinSize * ( double(iCost) + 0.5 );
-//	    double eEne, sigm;
-//	    nucrs->DcsNuebP_SV(nuEne, cost, eEne, sigm );
-//
-//	    double p = nuflux.getBinnedFlux(j) * sigm;
-//	    if( p > maxP ){ maxP = p; }
-//	    //std::cout << nuEne << " " << Flux[j] << " " << sigm << " " << p << " " << maxP << std::endl;                          
-//	  }
-//	}
-
-//	/*-----define class-----*/
-//	MCInfo *mc = new MCInfo;
-//	mc->Clear();
-//	mc->SetName("MC");
-//
-//	/*-----define branch-----*/
-//	TList *TopBranch = new TList;
-//	TopBranch->Add(mc);
-//
-//	/*-----make output root file-----*/
-//
-//	int nsub = 0;
-//
-//  auto GenerateOutputFilePath = [](std::string odir, int nsub){
-//    std::ostringstream sout;
-//    sout << odir << "/" <<  std::setfill('0') << std::setw(6) << nsub << ".root";
-//    return sout.str();
-//  };
-//	std::string fname = GenerateOutputFilePath(OutDir, nsub);
-//	std::cout << "file name " << fname << std::endl;
-//
-//	TFile *fout = new TFile(fname.c_str(), "RECREATE");
-//	//------------------------------------------------------------------------
-//	// set write cache to 40MB 
-//	TFileCacheWrite *cachew = new TFileCacheWrite(fout, 40*1024*1024);
-//	//------------------------------------------------------------------------
-//
-//	// define tree
-//	TTree *theOTree = new TTree("data","SK 3 tree");
-//	// new MF
-//	theOTree->SetCacheSize(40*1024*1024);
-//	int bufsize = 8*1024*1024;      // may be this is the best 15-OCT-2007 Y.T.
-//	theOTree->Branch(TopBranch,bufsize);
-  
 
 	/*---- loop ----*/
 	for( int iEvt = 0; iEvt < NumEv; iEvt++ ){
 
-//		if((iEvt != 0) && (iEvt%NeventFile == 0) ) {
-//
-//		  fout->cd();
-//		  theOTree->Write();
-//		  theOTree->Reset();
-//		  fout->Close();
-//		  delete fout;
-//
-//		  // make output root file
-//
-//		  nsub++;
-//
-//		  std::ostringstream sout;
-//		  sout << std::setfill('0') << std::setw(6) << nsub;
-//		  std::stringstream ssname;
-//		  ssname << OutDir << "/" << sout.str() << ".root";
-//		  std::string fname = ssname.str();
-//		  std::cout << "file name " << fname << std::endl;
-//
-//		  fout = new TFile(fname.c_str(), "RECREATE");
-//		  //------------------------------------------------------------------------
-//		  // set write cache to 40MB 
-//		  TFileCacheWrite *cachew = new TFileCacheWrite(fout, 40*1024*1024);
-//		  //------------------------------------------------------------------------
-//
-//		  theOTree = new TTree("data","SK 3 tree");
-//		  theOTree->SetCacheSize(40*1024*1024);
-//		  theOTree->Branch(TopBranch,bufsize);
-//
-//		}
 
-		// determine neutrino and positron energy, and its direction                                                              
 		double nuEne, cost, eEne;
-		while( 1 ){
-		  nuEne = getRandomReal( nuEne_min, nuEne_max, generator );
+    double nEne;
+    if (bUseFlatFlux) {
+      eEne = getRandomReal( nuEne_min, nuEne_max, generator );
+      cost = getRandomReal( costMin, costMax, generator ); // angle from neutrino direction
+      nuEne = nucrs->getEnu(eEne, cost);
+    }
+    else {
+      // determine neutrino and positron energy, and its direction                                                              
+      while( 1 ){
+        nuEne = getRandomReal( nuEne_min, nuEne_max, generator );
 
-      const double nuFlux = nuflux.getFlux(nuEne);
+        const double nuFlux = nuflux.getFlux(nuEne);
 
-		  double sigm;
-		  cost = getRandomReal( costMin, costMax, generator );
-		  nucrs->DcsNuebP_SV(nuEne, cost, eEne, sigm );
+        double sigm;
+        cost = getRandomReal( costMin, costMax, generator );
+        nucrs->DcsNuebP_SV(nuEne, cost, eEne, sigm );
 
-		  double p = nuFlux * sigm;
-		  double x = getRandomReal( 0., maxProb, generator );
-		  if( x < p ) break;
-		}
-
-		// determine neutrino direction
-		double nuDir[3];
-		double theta = getRandomReal( 0., 1., generator ) * M_PI;
-		double phi = getRandomReal( 0., 1., generator ) * 2. * M_PI;
-		nuDir[0] = sin( theta ) * cos( phi );
-		nuDir[1] = sin( theta ) * sin( phi );
-		nuDir[2] = cos( theta );
+        double p = nuFlux * sigm;
+        double x = getRandomReal( 0., maxProb, generator );
+        if( x < p ) break;
+      }
+    }
+    // determine neutrino direction
+    double nuDir[3];
+    double theta = getRandomReal( 0., 1., generator ) * M_PI;
+    double phi = getRandomReal( 0., 1., generator ) * 2. * M_PI;
+    nuDir[0] = sin( theta ) * cos( phi );
+    nuDir[1] = sin( theta ) * sin( phi );
+    nuDir[2] = cos( theta );
 
 		// Rotation matrix of neutrino direction
 		double Rmat[3][3];
@@ -799,7 +716,8 @@ void VectGenGenerator::Process(int NumEv){
 		fMC->pvc[3][0] = (fMC->pvc[0][0]) - (fMC->pvc[1][0]); // MOMENTUM OF I-TH PARTICLE ( MEV/C )
 		fMC->pvc[3][1] = (fMC->pvc[0][1]) - (fMC->pvc[1][1]);
 		fMC->pvc[3][2] = (fMC->pvc[0][2]) - (fMC->pvc[1][2]);
-		fMC->energy[3] = sqrt(SQ( fMC->pvc[2][0] ) + SQ( fMC->pvc[2][1] ) + SQ( fMC->pvc[2][2] )  + SQ( Mn )); // ENERGY ( MEV )
+		fMC->energy[3] = sqrt(SQ( fMC->pvc[3][0] ) + SQ( fMC->pvc[3][1] ) + SQ( fMC->pvc[3][2] )  + SQ( Mn )); // ENERGY ( MEV )
+		//fMC->energy[3] = sqrt(SQ( fMC->pvc[2][0] ) + SQ( fMC->pvc[2][1] ) + SQ( fMC->pvc[2][2] )  + SQ( Mn )); // ENERGY ( MEV )
 		fMC->iorgvc[3] = 1;  // ID OF ORIGIN PARTICLE  PARENT PARTICLE
 		fMC->ivtivc[3] = 1;  // VERTEX # ( INITIAL )
 		fMC->iflgvc[3] = 0; // FINAL STATE FLAG

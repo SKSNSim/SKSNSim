@@ -44,6 +44,7 @@ public:
   double calcElectronTotEnergyElastic(const double, const double);
   double calcDeEneDcostElastic(const double, const double);
   double calcCosTthElastic(const double, const double);
+  double getEnu(double, double);
 
 private:
   TFile* fCsElaFile;
