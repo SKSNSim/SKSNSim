@@ -652,6 +652,8 @@ void VectGenGenerator::MakeEvent(double time, double nu_energy, int nReact, int 
 void VectGenGenerator::Process(){
 
 	/*---- Fill total cross section into array to avoid repeating calculation ----*/
+	double nuEne_min = nuEneMin;
+	double nuEne_max = nuEneMax;
 	double totcrsIBD[nuEneNBins] = {0.};
 	double totcrsNue[nuEneNBins] = {0.}, totcrsNueb[nuEneNBins] = {0.}, totcrsNux[nuEneNBins] = {0.}, totcrsNuxb[nuEneNBins] = {0.};
 	std::vector<double> Ocrse0[16][7];
@@ -669,7 +671,7 @@ void VectGenGenerator::Process(){
 
 	std::cout << "calculate cross section and fill to array" << std::endl;
 	for(int i_nu_ene =0; i_nu_ene < nuEneNBins; i_nu_ene++) {
-		double nu_energy = nuEneMin + ( double(i_nu_ene) + 0.5 ) * nuEneBinSize;
+		double nu_energy = nuEne_min + ( double(i_nu_ene) + 0.5 ) * nuEneBinSize;
 		double crsOx = 0.;
 		//if(i_nu_ene % 10 == 0) std::cout << "Neutrino Energy  " << nu_energy << std::endl;
 		/*----- inverse beta decay -----*/
@@ -802,7 +804,7 @@ void VectGenGenerator::Process(){
 		double rate;
 		for(int i_nu_ene =0; i_nu_ene < nuEneNBins; i_nu_ene++) {
 
-			double nu_energy = nuEneMin + ( double(i_nu_ene) + 0.5 ) * nuEneBinSize;
+			double nu_energy = nuEne_min + ( double(i_nu_ene) + 0.5 ) * nuEneBinSize;
 
 			double nspcne = nuflux->VectGenSnNspeNue(time, nu_energy); //Nue
 			double nspcneb = nuflux->VectGenSnNspeNueb(time, nu_energy); //Nuebar
