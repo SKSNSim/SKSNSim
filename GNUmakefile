@@ -30,8 +30,8 @@ TARGET = main_srn main_snburst
 
 all: $(TARGET)
 
-main: main.o $(OBJS)
-	@LD_RUN_PATH=$(LIBDIR) $(CXX) $(CXXFLAGS) -o $@ main.o $(OBJS) $(LDLIBS)
+main_snburst: main_snburst.o $(OBJS)
+	@LD_RUN_PATH=$(LIBDIR) $(CXX) $(CXXFLAGS) -o $@ $< $(LDLIBS)
 
 main_srn: main_srn.o $(OBJS)
 	@LD_RUN_PATH=$(LIBDIR) $(CXX) $(CXXFLAGS) $(LDLIBS) -o $@ $<
