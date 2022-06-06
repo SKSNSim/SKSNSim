@@ -575,13 +575,13 @@ void VectGenGenerator::Process(){
 
 }
 
-void VectGenGenerator::Process(int NumEv){
+void VectGenGenerator::Process(int NumEv){ // For DSBN vector generator
 
 	/*-----input file name-----*/
   FluxCalculation &nuflux = *nuflux_dsbn;
   nuflux.dumpFlux();
-  double nuEne_min = nuEneMin;
-  double nuEne_max = nuEneMax;
+  double nuEne_min = nuDSNBFluxEneMax;
+  double nuEne_max = nuDSNBFluxEneMin;
   if( nuEne_min < nuflux.getFluxLimit(true /* true: lower limit, false: higher limit*/) ){
     nuEne_min = nuflux.getFluxLimit(true);
     std::cerr << "Flux lower limit is higher than specified value: reset to nu_ene_min = " << nuEne_min << std::endl;

@@ -1,9 +1,10 @@
 
 #include "VectGenIO.hh"
+#include "VectGenSetBin.hh"
 #include <getopt.h>
 
-constexpr double DEFAULT_NUENE_MIN = 5.;
-constexpr double DEFAULT_NUENE_MAX = 100.;
+constexpr double DEFAULT_NUENE_MIN = 10.0; // number from VectGenSetBin.hh::nuEneMin/Max
+constexpr double DEFAULT_NUENE_MAX = 50.0;
 
 void ShowUsage(char *arg0){
   std::cerr<< arg0 << " [options] {num_eve} {out_dir} {seed}" << std::endl;
@@ -14,8 +15,8 @@ void ShowUsage(char *arg0){
   std::cerr<<" 3rd: Random seed"<< std::endl;
   std::cerr<<" Options: -f, -h, --flux_file, --nu_ene_{min,max} \n"
     << "\t-f {flux_data_file}, --flux_file {flux_data_file}: specify flux data file to be used" << std::endl
-    << "\t(not working now) --nu_ene_min {energy_in_MeV}: minimum total energy [MeV] to be generated (default = " << DEFAULT_NUENE_MIN << " MeV)" << std::endl
-    << "\t(not working now) --nu_ene_max {energy_in_MeV}: maximum total energy [MeV] to be generated (default = " << DEFAULT_NUENE_MAX << " MeV)" << std::endl;
+    << "\t--nu_ene_min {energy_in_MeV}: minimum total energy [MeV] to be generated (default = " << DEFAULT_NUENE_MIN << " MeV)" << std::endl
+    << "\t--nu_ene_max {energy_in_MeV}: maximum total energy [MeV] to be generated (default = " << DEFAULT_NUENE_MAX << " MeV)" << std::endl;
   std::cerr<<" return -1"<<std::endl;
 }
 
@@ -27,8 +28,8 @@ int main( int argc, char ** argv )
   //=====================
   // argument controll
   int c, digit_optind = 0;
-  double nuEne_min = -9999.;
-  double nuEne_max = 9999.;
+  double nuEne_min = -1.0;
+  double nuEne_max = -1.0;
   std::string FluxFile ("../expect/horiuchi/8MeV_Nominal.dat");
   while (1) {
     int this_option_optind = optind ? optind : 1;
@@ -106,7 +107,7 @@ int main( int argc, char ** argv )
 
 	/*-----Geneartion-----*/
 
-	VectGenIO *io = new VectGenIO(OutDirIO, seedIO, FluxFile);
+	VectGenIO *io = new VectGenIO(OutDirIO, seedIO, FluxFile, nuEne_min, nuEne_max);
 
 	io->DoProcess(NumEv);
 

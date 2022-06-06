@@ -73,6 +73,9 @@ protected:
   double totNueO, totNuebarO;
   double totNcNup, totNcNun, totNcNubarp, totNcNubarn;
 
+  // flux lower/uppper bound for DSNB vect-gen
+  double nuDSNBFluxEneMax, nuDSNBFluxEneMin;
+
 private:
   //store neutrino kinematics into vector for time sorting
   int nReact, nuType;

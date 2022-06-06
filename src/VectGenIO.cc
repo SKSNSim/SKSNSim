@@ -126,7 +126,7 @@ VectGenIO::VectGenIO(std::string ModelName, int nuosc, double distIO, int flagIO
 
 }
 
-VectGenIO::VectGenIO(std::string OutDirIO, uint seedIO, std::string FluxFileName)
+VectGenIO::VectGenIO(std::string OutDirIO, uint seedIO, std::string FluxFileName, double eneMin, double eneMax) // For DSBN vector generator
 {
 	generator = new TRandom3(seedIO);
 	/*
@@ -139,6 +139,8 @@ VectGenIO::VectGenIO(std::string OutDirIO, uint seedIO, std::string FluxFileName
 
 	/*-----set binning-----*/
 	VectGenSetBinValues();
+  nuDSNBFluxEneMax = eneMax != -1.0? eneMax: nuEneMax; // -1.0 came from default value (user does not specified energy range)
+  nuDSNBFluxEneMin = eneMin != -1.0? eneMin: nuEneMin;
 
 	//Class call of flux/spectrum table
 	//(should be here, but now in VectGenGenerator::Process(int)
