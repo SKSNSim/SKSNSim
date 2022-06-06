@@ -798,10 +798,10 @@ void VectGenGenerator::Process(int NumEv){
 
 		// Neutron
 		mc->ipvc[3] = 2112; // neutron
-		mc->pvc[3][0] = (mc->pvc[0][0]) - (mc->pvc[1][0]); // MOMENTUM OF I-TH PARTICLE ( MEV/C )
-		mc->pvc[3][1] = (mc->pvc[0][1]) - (mc->pvc[1][1]);
-		mc->pvc[3][2] = (mc->pvc[0][2]) - (mc->pvc[1][2]);
-		mc->energy[3] = sqrt(SQ( mc->pvc[2][0] ) + SQ( mc->pvc[2][1] ) + SQ( mc->pvc[2][2] )  + SQ( Mn )); // ENERGY ( MEV )
+		mc->pvc[3][0] = (mc->pvc[0][0]) - (mc->pvc[2][0]); // MOMENTUM OF I-TH PARTICLE ( MEV/C ): p_proton + p_neutrion = p_positron + p_neutron, and here assuming p_proton = 0
+		mc->pvc[3][1] = (mc->pvc[0][1]) - (mc->pvc[2][1]);
+		mc->pvc[3][2] = (mc->pvc[0][2]) - (mc->pvc[2][2]);
+		mc->energy[3] = sqrt(SQ( mc->pvc[3][0] ) + SQ( mc->pvc[3][1] ) + SQ( mc->pvc[3][2] )  + SQ( Mn )); // ENERGY ( MEV )
 		mc->iorgvc[3] = 1;  // ID OF ORIGIN PARTICLE  PARENT PARTICLE
 		mc->ivtivc[3] = 1;  // VERTEX # ( INITIAL )
 		mc->iflgvc[3] = 0; // FINAL STATE FLAG
