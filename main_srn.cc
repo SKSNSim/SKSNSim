@@ -14,6 +14,7 @@ void ShowUsage(char *arg0){
   std::cerr<<" 2nd: Output directory, default: ./data/"<< std::endl;
   std::cerr<<" 3rd: Random seed"<< std::endl;
   std::cerr<<" Options: -f, -h, --flux_file, --nu_ene_{min,max} \n"
+    << "\t-h, --help: show this help" << std::endl
     << "\t-f {flux_data_file}, --flux_file {flux_data_file}: specify flux data file to be used" << std::endl
     << "\t--nu_ene_min {energy_in_MeV}: minimum total energy [MeV] to be generated (default = " << DEFAULT_NUENE_MIN << " MeV)" << std::endl
     << "\t--nu_ene_max {energy_in_MeV}: maximum total energy [MeV] to be generated (default = " << DEFAULT_NUENE_MAX << " MeV)" << std::endl;
