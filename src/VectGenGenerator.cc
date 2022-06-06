@@ -581,7 +581,7 @@ void VectGenGenerator::Process(){
 
 }
 
-void VectGenGenerator::Process(int NumEv){
+void VectGenGenerator::Process(int NumEv){ // For DSBN vector generator
 
 	/*-----input file name-----*/
   FluxCalculation &nuflux = *nuflux_dsnb;
@@ -713,16 +713,15 @@ void VectGenGenerator::Process(int NumEv){
 
 		// Neutron
 		fMC->ipvc[3] = 2112; // neutron
-		fMC->pvc[3][0] = (fMC->pvc[0][0]) - (fMC->pvc[1][0]); // MOMENTUM OF I-TH PARTICLE ( MEV/C )
-		fMC->pvc[3][1] = (fMC->pvc[0][1]) - (fMC->pvc[1][1]);
-		fMC->pvc[3][2] = (fMC->pvc[0][2]) - (fMC->pvc[1][2]);
+		fMC->pvc[3][0] = (fMC->pvc[0][0]) - (fMC->pvc[2][0]); // MOMENTUM OF I-TH PARTICLE ( MEV/C ): p_proton + p_neutrion = p_positron + p_neutron, and here assuming p_proton = 0
+		fMC->pvc[3][1] = (fMC->pvc[0][1]) - (fMC->pvc[2][1]);
+		fMC->pvc[3][2] = (fMC->pvc[0][2]) - (fMC->pvc[2][2]);
 		fMC->energy[3] = sqrt(SQ( fMC->pvc[3][0] ) + SQ( fMC->pvc[3][1] ) + SQ( fMC->pvc[3][2] )  + SQ( Mn )); // ENERGY ( MEV )
-		//fMC->energy[3] = sqrt(SQ( fMC->pvc[2][0] ) + SQ( fMC->pvc[2][1] ) + SQ( fMC->pvc[2][2] )  + SQ( Mn )); // ENERGY ( MEV )
 		fMC->iorgvc[3] = 1;  // ID OF ORIGIN PARTICLE  PARENT PARTICLE
 		fMC->ivtivc[3] = 1;  // VERTEX # ( INITIAL )
 		fMC->iflgvc[3] = 0; // FINAL STATE FLAG
 		fMC->icrnvc[3] = 1;  // CHERENKOV FLAG
-		fMC->ivtfvc[3] = 1;  // VERTEX # ( FINAL )
+    fMC->ivtfvc[3] = 1;  // VERTEX # ( FINAL )
 
     fMC->mcinfo[0] = fRefRunNum;
 

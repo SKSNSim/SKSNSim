@@ -128,7 +128,6 @@ VectGenIO::VectGenIO(std::string ModelName, int nuosc, double distIO, int flagIO
 
 VectGenIO::VectGenIO( uint seedIO )
 :VectGenGenerator()
-//VectGenIO::VectGenIO(std::string OutDirIO, uint seedIO, std::string FluxFileName)
 {
 	generator = new TRandom3(seedIO);
 	/*
@@ -141,9 +140,6 @@ VectGenIO::VectGenIO( uint seedIO )
 
 	/*-----set binning-----*/
 	VectGenSetBinValues();
-
-//	//Class call of flux/spectrum table
-//  nuflux_dsnb.reset(new FluxCalculation(FluxFileName));
 
 	//Class call of cross-section calculation
 	nucrs = new VectGenNuCrosssection();
