@@ -1,14 +1,16 @@
 
 #include "VectGenIO.hh"
+#include "VectGenSetBin.hh"
 #include <getopt.h>
 #include <string>
 #include <iostream>
 
-constexpr double DEFAULT_NUENE_MIN = 5.;
-constexpr double DEFAULT_NUENE_MAX = 100.;
+const double DEFAULT_NUENE_MIN = nuEneMin;
+const double DEFAULT_NUENE_MAX = nuEneMax;
+const std::string DEFAULT_FLUX_FILE ("dsnb_flux/horiuchi/8MeV_Nominal.dat");
 
 void ShowUsage(char *arg0){
-  std::cerr<< arg0 << " [options] {num_eve} {out_dir} {seed}" << std::endl;
+  std::cerr<< arg0 << " [options] --out {out_dir} -s {seed}" << std::endl;
   std::cerr<< "Usage: vector generetaor for DSNB MC" << std::endl;
   std::cerr<<" Argument for "<< arg0 << std::endl;
   //std::cerr<<" 1st: Number of event" << std::endl;
@@ -37,7 +39,7 @@ int main( int argc, char ** argv )
   int c, digit_optind = 0;
   double nuEne_min = -9999.;
   double nuEne_max = 9999.;
-  std::string FluxFile ("dsnb_flux/horiuchi/8MeV_Nominal.dat");
+  std::string FluxFile (DEFAULT_FLUX_FILE);
 	uint seed = 0;
   int numEvent = 0;
   int RefRunNum = 0;
@@ -47,7 +49,6 @@ int main( int argc, char ** argv )
   while (1) {
     int this_option_optind = optind ? optind : 1;
     int option_index = 0;
-    unsigned long seed_read = 0;
     enum OPTIONS {kNuEneMin = 0, kNuEneMax, kFluxFile, kRefRunNum, kSeed, kNumEvent, kOutFile, kTimeEvent, kFlatFlux, kHelp};
     static struct option long_options[] = {
       {"nu_ene_min",  required_argument, 0, 0},
@@ -168,27 +169,19 @@ int main( int argc, char ** argv )
   }
 
 
-
-//	/*-----Number of Generated Event-----*/
-//	int NumEv = atoi(argv[optind]);
-
-//	/*-----Output directory-----*/
-//	std::string OutDirIO("./data/");
-//	OutDirIO = std::string(argv[optind +1]);
-
-//	/*-----random number initialization-----*/
-//	uint seedIO = 0;
-//	seedIO = atoi(argv[optind + 2]);
-
-  /*---- Flux data ----------------*/
-  // Already loaded
-
-
 	/*-----Geneartion-----*/
-
-//	VectGenIO *io = new VectGenIO(OutDirIO, seedIO, FluxFile);
 	VectGenIO *io = new VectGenIO(seed);
   if (nuEne_min>-9998. && nuEne_max< 9998.) io->SetNuEnergyRange(nuEne_min, nuEne_max);
+  else if (nuEne_min>-9998. && nuEne_max> 9998.)
+  {
+    std::cerr << "[error] spcify upper limit also by --nu_ene_max {x_MeV}" << std::endl;
+    return EXIT_FAILURE;
+  }
+  else if (nuEne_min<-9998. && nuEne_max< 9998.)
+  {
+    std::cerr << "[error] spcify lower limit also by --nu_ene_min {x_MeV}" << std::endl;
+    return EXIT_FAILURE;
+  }
   io->SetFluxFile(FluxFile);
   io->OpenOutputFile(OutputFile);
 
