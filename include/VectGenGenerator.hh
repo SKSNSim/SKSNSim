@@ -38,7 +38,7 @@
 class VectGenGenerator
 {
 public:
-  VectGenGenerator(){}
+  VectGenGenerator();
   ~VectGenGenerator(){}
 
   void convDirection(const double, const double, double*);
@@ -62,7 +62,7 @@ protected:
 
   VectGenSnFlux* nuflux;
   VectGenNuCrosssection* nucrs;
-  std::unique_ptr<FluxCalculation> nuflux_dsbn;
+  std::unique_ptr<FluxCalculation> nuflux_dsnb;
 
   //Neutrino oscillation
   double oscnue1, oscnue2, oscneb1, oscneb2, oscnux1, oscnux2, oscnxb1, oscnxb2;
@@ -72,6 +72,19 @@ protected:
   double totNueElastic, totNuebarElastic, totNuxElastic, totNuxbarElastic;
   double totNueO, totNuebarO;
   double totNcNup, totNcNun, totNcNubarp, totNcNubarn;
+
+  // parameters
+  double nuEne_min, nuEne_max, maxProb;
+
+  // MC data
+  TFile* fOutFile;
+  TTree* theOTree;
+
+  int fRefRunNum;
+  bool bIsUseTimeEvent;
+  bool bUseFlatFlux;
+
+  MCInfo* fMC = 0;
 
 private:
   //store neutrino kinematics into vector for time sorting
