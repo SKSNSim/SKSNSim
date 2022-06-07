@@ -30,7 +30,7 @@ int main( int argc, char ** argv )
 	int flagIO = atoi(argv[4]);
 
 	/*-----Output directory-----*/
-	std::string OutDirIO("./data/");
+	std::string OutDirIO("./data");
 	if(argc > 5) OutDirIO = std::string(argv[5]);
 
 	/*-----random number initialization-----*/
