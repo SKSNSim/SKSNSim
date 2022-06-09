@@ -35,6 +35,13 @@
 /**
  * @class Generator
  */
+
+enum PositionType{
+  mInnerFV = 0,  // 0
+  mInnerID,  // 1
+  mEntireTank  // 2
+} ;
+
 class VectGenGenerator
 {
 public:
@@ -45,7 +52,7 @@ public:
   void determineAngleNuebarP(const double, double&, double&, double&);
   void determineAngleElastic(const int, const double, double&, double&, double&);
   void determineKinematics(const int, const double, double*, MCInfo*);
-  void determinePosition(double&, double&, double&);
+  void determinePosition(int, double&, double&, double&);
   void FillEvent();
   void MakeEvent(double, double, int, int, double);
   void Process();    // For SN generator

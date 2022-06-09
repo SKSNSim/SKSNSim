@@ -250,15 +250,39 @@ void VectGenGenerator::determineKinematics( const int nReact, const double nuEne
 	return;
 }
 
-void VectGenGenerator::determinePosition( double &x, double &y, double &z )
+void VectGenGenerator::determinePosition(int positionType, double &x, double &y, double &z )
 {
+  double rPositionRange, hPositionRange;
+  switch (positionType)
+  {
+    case mInnerFV: //Fiducial volume
+        rPositionRange = RINTK - 200.;
+        hPositionRange = ZPINTK - 200.;
+        break;
+
+    case mInnerID: //entire ID volume
+        rPositionRange = RINTK;
+        hPositionRange = ZPINTK;
+        break;
+            
+    case mEntireTank: //entire detector volume (including OD)
+        rPositionRange = DITKTK;
+        hPositionRange = ZPTKTK;
+        break;
+
+    default: //entire ID volume
+        rPositionRange = RINTK;
+        hPositionRange = ZPINTK;
+  }
+      
 	//random inside the full tank (32.5kton)
-	double r2 = getRandomReal( 0., 1., generator ) * RINTK * RINTK ;
+	double r2 = getRandomReal( 0., 1., generator ) * rPositionRange*rPositionRange ;
 	double r = sqrt( r2 );
 	double phi = getRandomReal( 0., 1., generator ) * 2. * M_PI;
 	x = r * cos( phi );
 	y = r * sin( phi );
-	z = ZMINTK + getRandomReal( 0., 1., generator ) * ( ZPINTK - ZMINTK );
+	z = -hPositionRange + getRandomReal( 0., 1., generator ) * 2.*hPositionRange;
+
 	return;
 }
 
@@ -425,7 +449,7 @@ void VectGenGenerator::MakeEvent(double time, double nu_energy, int nReact, int 
 			double tReact = getRandomReal( time_s, time_e , generator );
 
 			double ver_x = 9999., ver_y = 9999., ver_z = 9999.;
-			determinePosition( ver_x, ver_y, ver_z );
+			determinePosition(mInnerID, ver_x, ver_y, ver_z );
 
 			SNEvtInfo evtInfo;
 			//evtInfo.iEvt = dRandTotEvts;
@@ -635,7 +659,7 @@ void VectGenGenerator::Process(int NumEv){ // For DSBN vector generator
 
 		// interaction point
 		double ver_x, ver_y, ver_z;
-		determinePosition( ver_x, ver_y, ver_z );
+		determinePosition(mInnerFV, ver_x, ver_y, ver_z );
 
 		// Fill into class
 		// MCVERTEX (see $SKOFL_ROOT/inc/vcvrtx.h )                                                                               
