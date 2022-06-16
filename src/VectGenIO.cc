@@ -130,7 +130,8 @@ VectGenIO::VectGenIO(std::string ModelName, int nuosc, double distIO, int flagIO
 
 }
 
-VectGenIO::VectGenIO(std::string OutDirIO, uint seedIO, std::string FluxFileName)
+VectGenIO::VectGenIO( uint seedIO )
+:VectGenGenerator()
 {
 	generator = new TRandom3(seedIO);
 	/*
@@ -144,26 +145,89 @@ VectGenIO::VectGenIO(std::string OutDirIO, uint seedIO, std::string FluxFileName
 	/*-----set binning-----*/
 	VectGenSetBinValues();
 
-	//Class call of flux/spectrum table
-	//(should be here, but now in VectGenGenerator::Process(int)
-  nuflux_dsbn.reset(new FluxCalculation(FluxFileName));
-
 	//Class call of cross-section calculation
 	nucrs = new VectGenNuCrosssection();
 	nucrs->ReadCsNuElastic();
 
 	// set output directory for vector root file
-	/*
-	char del ='/';
-	auto subStr = split(ModelName, del);
-	std::stringstream ssname4;
-	//ssname4 << OutDirIO << subStr[0] << "/event/";
-	//ssname4 << OutDirIO << "/" << ModelName << "/event/";
-	ssname4 << OutDirIO << "/event/";
-	OutDir = ssname4.str();
-	*/
-	OutDir = OutDirIO;
-	std::cout << OutDir << std::endl;
+}
+
+
+void VectGenIO::OpenOutputFile(std::string output = "")
+{
+	/*-----define class-----*/
+	fMC = new MCInfo;
+	fMC->Clear();
+	fMC->SetName("MC");
+
+	/*-----define branch-----*/
+	TList *TopBranch = new TList;
+	TopBranch->Add(fMC);
+
+	fOutFile = new TFile(output.c_str(), "RECREATE");
+
+	//------------------------------------------------------------------------
+	// set write cache to 40MB 
+	TFileCacheWrite *cachew = new TFileCacheWrite(fOutFile, 40*1024*1024);
+	//------------------------------------------------------------------------
+
+	// define tree
+	theOTree = new TTree("data", "SK 5 tree");
+	// new MF
+	theOTree->SetCacheSize(40*1024*1024);
+	int bufsize = 8*1024*1024;      // may be this is the best 15-OCT-2007 Y.T.
+	theOTree->Branch(TopBranch,bufsize);
+
+}
+
+void VectGenIO::CloseOutputFile()
+{
+	fOutFile->cd();
+	theOTree->Write();
+	theOTree->Reset();
+	fOutFile->Close();
+	delete fOutFile;
+}
+
+
+void VectGenIO::SetFluxFile(std::string fluxFileName)
+{
+//	//Class call of flux/spectrum table
+//	//(should be here, but now in VectGenGenerator::Process(int)
+  nuflux_dsnb.reset(new FluxCalculation(fluxFileName));
+
+  nuflux_dsnb->dumpFlux();
+  // Check if the flux energy range is specified by argument
+
+  // Check if the flux energy range is within the generator energy range
+  if( nuEne_min < nuflux_dsnb->getFluxLimit(true /* true: lower limit, false: higher limit*/) ){
+    nuEne_min = nuflux_dsnb->getFluxLimit(true);
+    std::cerr << "Flux lower limit is higher than specified value: reset to nu_ene_min = " << nuEne_min << std::endl;
+  }
+  if( nuEne_max > nuflux_dsnb->getFluxLimit(false) ) {
+    nuEne_max = nuflux_dsnb->getFluxLimit(false);
+    std::cerr << "Flux upper limit is lower than specified value: reset to nu_ene_max = " << nuEne_max << std::endl;
+  }
+
+	/*-----calculate maximum value-----*/
+	maxProb = 0.;
+	for( int j = 0; j < int(nuflux_dsnb->getNBins()); j++ ){
+	  double nuEne = nuflux_dsnb->getBinnedEnergy(j);
+
+	  if((nuEne < nuEne_min) || (nuEne > nuEne_max)) continue;
+
+	  for( int iCost = 0; iCost < costNBins; iCost++ ){
+	    double cost = costMin + costBinSize * ( double(iCost) + 0.5 );
+	    double eEne, sigm;
+	    nucrs->DcsNuebP_SV(nuEne, cost, eEne, sigm );
+
+	    double p = nuflux_dsnb->getBinnedFlux(j) * sigm;
+	    if( p > maxProb ){ maxProb = p; }
+	    //std::cout << nuEne << " " << Flux[j] << " " << sigm << " " << p << " " << maxP << std::endl;                          
+	  }
+	}
+
+  return;
 }
 
 void VectGenIO::DoProcess()
@@ -178,7 +242,40 @@ void VectGenIO::DoProcess()
 
 }
 
+
 void VectGenIO::DoProcess(int NumEv)
 {
+  std::cout <<" Do process "<<std::endl;
+  if ( bIsUseTimeEvent ) {
+    NumEv = ReadTimeEventFile();
+  }
+  std::cout <<" Number of generated events: "<<NumEv<<std::endl;
 	Process(NumEv);
+}
+
+
+int VectGenIO::ReadTimeEventFile()
+{
+  std::cout <<" Estimate # of event from timevent file "<<std::endl;
+  std::string timeFile; 
+  int iniRun, endRun;
+  if ( fRefRunNum < SK_IV_BEGIN ) {
+    std::cout << "reference run number is not correct"<<std::endl;
+  } 
+  else if ( SK_IV_BEGIN <= fRefRunNum && fRefRunNum < SK_IV_END ) { 
+    timeFile = "/home/sklowe/realtime_sk4_rep/solar_apr19/timevent/timevent.r061525.r077958"; 
+    iniRun = SK_IV_BEGIN; endRun = SK_IV_END;
+  }
+  else if ( SK_V_BEGIN <= fRefRunNum && fRefRunNum < SK_V_END ) { 
+    timeFile = "/home/sklowe/realtime_sk5_rep/solar_nov20/timevent/timevent.r080539.r082915"; 
+    iniRun = SK_V_BEGIN; endRun = SK_V_END;
+  }
+  else if ( SK_VI_BEGIN <= fRefRunNum ) { 
+    timeFile = "/home/sklowe/realtime_sk6_rep/solar_may22/timevent/livesubruns.r085000.r087073"; 
+    iniRun = SK_VI_BEGIN; endRun = 90000;
+  }
+  int nEvent;
+  read_timevent_( &fRefRunNum, &nEvent);
+
+  return nEvent;
 }

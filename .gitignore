@@ -1,2 +1,5 @@
-core*
+*root
+core.*
+
 obj/
+bin/

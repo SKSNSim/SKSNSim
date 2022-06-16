@@ -41,11 +41,16 @@
 extern "C" {
 	void dir_oxigfunc_( double *, double *, double *, double * );
 }
+enum PositionType{
+  mInnerFV = 0,  // 0
+  mInnerID,  // 1
+  mEntireTank  // 2
+} ;
 
 class VectGenGenerator
 {
 public:
-  VectGenGenerator(){}
+  VectGenGenerator();
   ~VectGenGenerator(){}
 
   void convDirection(const double, const double, double*);
@@ -53,8 +58,12 @@ public:
   void determineAngleElastic(const int, const double, double&, double&, double&);
   void determineAngleNueO(const int, const int, const int, const int, const double, double&, double&, double&);
   void determineKinematics(const int, const double, double*, MCInfo*);
+<<<<<<< HEAD
   void determinePosition(double&, double&, double&);
   void determineNmomentum(double&, double&, double&);
+=======
+  void determinePosition(int, double&, double&, double&);
+>>>>>>> 71b7c0f840571830eb3165bc355b5d0c78dd0db7
   void FillEvent();
   void MakeEvent(double, double, int, int, double);
   void Process();    // For SN generator
@@ -72,11 +81,15 @@ protected:
 
   VectGenSnFlux* nuflux;
   VectGenNuCrosssection* nucrs;
+<<<<<<< HEAD
   std::unique_ptr<FluxCalculation> nuflux_dsbn;
   VectGenOxyCrosssection* ocrs;
   VectGenOxyCrosssectionSub* osub;
   VectGenOxigFunc* reco;
   VectGenOxigFunc* rece;
+=======
+  std::unique_ptr<FluxCalculation> nuflux_dsnb;
+>>>>>>> 71b7c0f840571830eb3165bc355b5d0c78dd0db7
 
   //Neutrino oscillation
   double oscnue1, oscnue2, oscneb1, oscneb2, oscnux1, oscnux2, oscnxb1, oscnxb2;
@@ -88,12 +101,27 @@ protected:
   double totNueOsub, totNuebarOsub;
   double totNcNup, totNcNun, totNcNubarp, totNcNubarn;
 
+<<<<<<< HEAD
   //number of particle emitted on deexcitation with CC reaction
   int numNtNueO[7] = {0, 1, 0, 2, 0, 0, 0};
   int numPtNueO[7] = {1, 1, 2, 1, 0, 0, 1};
   int numNtNuebarO[7] = {0, 1, 0, 2, 1, 0, 0};
   int numPtNuebarO[7] = {0, 0, 1, 0, 1, 1, 2};
   int numGmNuebarO[7] = {1, 0, 0, 0, 0, 0, 0};
+=======
+  // parameters
+  double nuEne_min, nuEne_max, maxProb;
+
+  // MC data
+  TFile* fOutFile;
+  TTree* theOTree;
+
+  int fRefRunNum;
+  bool bIsUseTimeEvent;
+  bool bUseFlatFlux;
+
+  MCInfo* fMC = 0;
+>>>>>>> 71b7c0f840571830eb3165bc355b5d0c78dd0db7
 
 private:
   //store neutrino kinematics into vector for time sorting
