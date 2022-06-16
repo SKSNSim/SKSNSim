@@ -3,4 +3,4 @@
 #cd ..
 source /usr/local/sklib_gcc8/skofl-trunk/env.csh
 hostname
-./main_snburst nakazato/intp2002.data 0 1 0 1000
+./bin/main_snburst nakazato/intp2002.data 0 1 0 1000
