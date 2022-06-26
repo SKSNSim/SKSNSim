@@ -110,7 +110,7 @@ double VectGenOxyCrosssectionSub::CsNuOxy43CCSub(int num, int ix, int ch, double
 			//else{
 			//	rec_energy = 0.;
 			//}
-			if(rec_energy>0.){
+			if(rec_energy>Me){
 				totcsnueo[ch] = (((crs[num][ix][ch].at(i)-crs[num][ix][ch].at(i-1))/(Enu[num][ix].at(i)-Enu[num][ix].at(i-1)))*enu + crs[num][ix][ch].at(i-1) - ((crs[num][ix][ch].at(i)-crs[num][ix][ch].at(i-1))/(Enu[num][ix].at(i)-Enu[num][ix].at(i-1)))*Enu[num][ix].at(i-1));
 				//std::cout << fileSize[num][ix] << " " << num << " " << ix << " " << ch << " " << i << " " << enu << " " << Enu[num][ix].at(i) << " " << Enu[num][ix].at(i-1) << " " << totcsnueo[ch] << std::endl;
 				if(totcsnueo[ch]>0.){
