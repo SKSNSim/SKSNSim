@@ -90,7 +90,7 @@ double VectGenOxyCrosssection::CsNuOxy43CC(int num, int ix, int ex, int ch, doub
 				else{
 					rec_energy[ex] = 0.;
 				}
-				if(rec_energy[ex]>5.){
+				//if(rec_energy[ex]>5.){
 				if(rec_energy[ex]>Me){
 						//int ie = int(enu) - int(nuene[num][ix].at(i)-nuene[num][ix].at(i-1));
 						if(ch==0)totcsnueo[ex][ch] = (((crs0[num][ix][ex].at(i)-crs0[num][ix][ex].at(i-1))/(nuene[num][ix].at(i)-nuene[num][ix].at(i-1)))*enu + crs0[num][ix][ex].at(i-1) - ((crs0[num][ix][ex].at(i)-crs0[num][ix][ex].at(i-1))/(nuene[num][ix].at(i)-nuene[num][ix].at(i-1)))*nuene[num][ix].at(i-1)) * 1.0e-26;
