@@ -35,17 +35,24 @@
 /**
  * @class Generator
  */
+
+enum PositionType{
+  mInnerFV = 0,  // 0
+  mInnerID,  // 1
+  mEntireTank  // 2
+} ;
+
 class VectGenGenerator
 {
 public:
-  VectGenGenerator(){}
+  VectGenGenerator();
   ~VectGenGenerator(){}
 
   void convDirection(const double, const double, double*);
   void determineAngleNuebarP(const double, double&, double&, double&);
   void determineAngleElastic(const int, const double, double&, double&, double&);
   void determineKinematics(const int, const double, double*, MCInfo*);
-  void determinePosition(double&, double&, double&);
+  void determinePosition(int, double&, double&, double&);
   void FillEvent();
   void MakeEvent(double, double, int, int, double);
   void Process();    // For SN generator
@@ -62,7 +69,7 @@ protected:
 
   VectGenSnFlux* nuflux;
   VectGenNuCrosssection* nucrs;
-  std::unique_ptr<FluxCalculation> nuflux_dsbn;
+  std::unique_ptr<FluxCalculation> nuflux_dsnb;
 
   //Neutrino oscillation
   double oscnue1, oscnue2, oscneb1, oscneb2, oscnux1, oscnux2, oscnxb1, oscnxb2;
@@ -73,8 +80,18 @@ protected:
   double totNueO, totNuebarO;
   double totNcNup, totNcNun, totNcNubarp, totNcNubarn;
 
-  // flux lower/uppper bound for DSNB vect-gen
-  double nuDSNBFluxEneMax, nuDSNBFluxEneMin;
+  // parameters
+  double nuEne_min, nuEne_max, maxProb;
+
+  // MC data
+  TFile* fOutFile;
+  TTree* theOTree;
+
+  int fRefRunNum;
+  bool bIsUseTimeEvent;
+  bool bUseFlatFlux;
+
+  MCInfo* fMC = 0;
 
 private:
   //store neutrino kinematics into vector for time sorting

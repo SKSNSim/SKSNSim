@@ -12,10 +12,16 @@
 
 #include "VectGenSnConst.hh"
 #include "VectGenGenerator.hh"
+#include "VectGenSetBin.hh"
 
 #include "VectGenUtil.hh"
 
 #include "FluxCalculation.hh"
+
+
+VectGenGenerator::VectGenGenerator()
+:nuEne_min(nuEneMin), nuEne_max(nuEneMax)
+{};
 
 void VectGenGenerator::convDirection( const double eTheta, const double ePhi,
 				      double * eDir )
@@ -244,15 +250,39 @@ void VectGenGenerator::determineKinematics( const int nReact, const double nuEne
 	return;
 }
 
-void VectGenGenerator::determinePosition( double &x, double &y, double &z )
+void VectGenGenerator::determinePosition(int positionType, double &x, double &y, double &z )
 {
+  double rPositionRange, hPositionRange;
+  switch (positionType)
+  {
+    case mInnerFV: //Fiducial volume
+        rPositionRange = RINTK - 200.;
+        hPositionRange = ZPINTK - 200.;
+        break;
+
+    case mInnerID: //entire ID volume
+        rPositionRange = RINTK;
+        hPositionRange = ZPINTK;
+        break;
+            
+    case mEntireTank: //entire detector volume (including OD)
+        rPositionRange = DITKTK;
+        hPositionRange = ZPTKTK;
+        break;
+
+    default: //entire ID volume
+        rPositionRange = RINTK;
+        hPositionRange = ZPINTK;
+  }
+      
 	//random inside the full tank (32.5kton)
-	double r2 = getRandomReal( 0., 1., generator ) * RINTK * RINTK ;
+	double r2 = getRandomReal( 0., 1., generator ) * rPositionRange*rPositionRange ;
 	double r = sqrt( r2 );
 	double phi = getRandomReal( 0., 1., generator ) * 2. * M_PI;
 	x = r * cos( phi );
 	y = r * sin( phi );
-	z = ZMINTK + getRandomReal( 0., 1., generator ) * ( ZPINTK - ZMINTK );
+	z = -hPositionRange + getRandomReal( 0., 1., generator ) * 2.*hPositionRange;
+
 	return;
 }
 
@@ -419,7 +449,7 @@ void VectGenGenerator::MakeEvent(double time, double nu_energy, int nReact, int 
 			double tReact = getRandomReal( time_s, time_e , generator );
 
 			double ver_x = 9999., ver_y = 9999., ver_z = 9999.;
-			determinePosition( ver_x, ver_y, ver_z );
+			determinePosition(mInnerID, ver_x, ver_y, ver_z );
 
 			SNEvtInfo evtInfo;
 			//evtInfo.iEvt = dRandTotEvts;
@@ -578,133 +608,42 @@ void VectGenGenerator::Process(){
 void VectGenGenerator::Process(int NumEv){ // For DSBN vector generator
 
 	/*-----input file name-----*/
-  FluxCalculation &nuflux = *nuflux_dsbn;
-  nuflux.dumpFlux();
-  double nuEne_min = nuDSNBFluxEneMax;
-  double nuEne_max = nuDSNBFluxEneMin;
-  if( nuEne_min < nuflux.getFluxLimit(true /* true: lower limit, false: higher limit*/) ){
-    nuEne_min = nuflux.getFluxLimit(true);
-    std::cerr << "Flux lower limit is higher than specified value: reset to nu_ene_min = " << nuEne_min << std::endl;
-  }
-  if( nuEne_max > nuflux.getFluxLimit(false) ) {
-    nuEne_max = nuflux.getFluxLimit(false);
-    std::cerr << "Flux upper limit is lower than specified value: reset to nu_ene_max = " << nuEne_max << std::endl;
-  }
-
-
-	/*-----calculate maximum value-----*/
-	double maxP = 0.;
-	for( int j = 0; j < int(nuflux.getNBins()); j++ ){
-	  double nuEne = nuflux.getBinnedEnergy(j);
-
-	  if((nuEne < nuEne_min) || (nuEne > nuEne_max)) continue;
-
-	  for( int iCost = 0; iCost < costNBins; iCost++ ){
-	    double cost = costMin + costBinSize * ( double(iCost) + 0.5 );
-	    double eEne, sigm;
-	    nucrs->DcsNuebP_SV(nuEne, cost, eEne, sigm );
-
-	    double p = nuflux.getBinnedFlux(j) * sigm;
-	    if( p > maxP ){ maxP = p; }
-	    //std::cout << nuEne << " " << Flux[j] << " " << sigm << " " << p << " " << maxP << std::endl;                          
-	  }
-	}
-
-	/*-----define class-----*/
-	MCInfo *mc = new MCInfo;
-	mc->Clear();
-	mc->SetName("MC");
-
-	/*-----define branch-----*/
-	TList *TopBranch = new TList;
-	TopBranch->Add(mc);
-
-	/*-----make output root file-----*/
-
-	int nsub = 0;
-
-  auto GenerateOutputFilePath = [](std::string odir, int nsub){
-    std::ostringstream sout;
-    sout << odir << "/" <<  std::setfill('0') << std::setw(6) << nsub << ".root";
-    return sout.str();
-  };
-	std::string fname = GenerateOutputFilePath(OutDir, nsub);
-	std::cout << "file name " << fname << std::endl;
-
-	TFile *fout = new TFile(fname.c_str(), "RECREATE");
-	//------------------------------------------------------------------------
-	// set write cache to 40MB 
-	TFileCacheWrite *cachew = new TFileCacheWrite(fout, 40*1024*1024);
-	//------------------------------------------------------------------------
-
-	// define tree
-	TTree *theOTree = new TTree("data","SK 3 tree");
-	// new MF
-	theOTree->SetCacheSize(40*1024*1024);
-	int bufsize = 8*1024*1024;      // may be this is the best 15-OCT-2007 Y.T.
-	theOTree->Branch(TopBranch,bufsize);
-
+  FluxCalculation &nuflux = *nuflux_dsnb;
 
 	/*---- loop ----*/
 	for( int iEvt = 0; iEvt < NumEv; iEvt++ ){
-	  std::cout << iEvt << std::endl;
 
-		if((iEvt != 0) && (iEvt%NeventFile == 0) ) {
-
-		  fout->cd();
-		  theOTree->Write();
-		  theOTree->Reset();
-		  fout->Close();
-		  delete fout;
-
-		  // make output root file
-
-		  nsub++;
-
-		  std::ostringstream sout;
-		  sout << std::setfill('0') << std::setw(6) << nsub;
-		  std::stringstream ssname;
-		  ssname << OutDir << "/" << sout.str() << ".root";
-		  std::string fname = ssname.str();
-		  std::cout << "file name " << fname << std::endl;
-
-		  fout = new TFile(fname.c_str(), "RECREATE");
-		  //------------------------------------------------------------------------
-		  // set write cache to 40MB 
-		  TFileCacheWrite *cachew = new TFileCacheWrite(fout, 40*1024*1024);
-		  //------------------------------------------------------------------------
-
-		  theOTree = new TTree("data","SK 3 tree");
-		  theOTree->SetCacheSize(40*1024*1024);
-		  theOTree->Branch(TopBranch,bufsize);
-
-		}
-
-		// determine neutrino and positron energy, and its direction                                                              
 
 		double nuEne, cost, eEne;
+    double nEne;
+    if (bUseFlatFlux) {
+      eEne = getRandomReal( nuEne_min, nuEne_max, generator );
+      cost = getRandomReal( costMin, costMax, generator ); // angle from neutrino direction
+      nuEne = nucrs->getEnu(eEne, cost);
+    }
+    else {
+      // determine neutrino and positron energy, and its direction                                                              
+      while( 1 ){
+        nuEne = getRandomReal( nuEne_min, nuEne_max, generator );
 
-		while( 1 ){
-		  nuEne = getRandomReal( nuEne_min, nuEne_max, generator );
+        const double nuFlux = nuflux.getFlux(nuEne);
 
-      const double nuFlux = nuflux.getFlux(nuEne);
+        double sigm;
+        cost = getRandomReal( costMin, costMax, generator );
+        nucrs->DcsNuebP_SV(nuEne, cost, eEne, sigm );
 
-		  double sigm;
-		  cost = getRandomReal( costMin, costMax, generator );
-		  nucrs->DcsNuebP_SV(nuEne, cost, eEne, sigm );
-
-		  double p = nuFlux * sigm;
-		  double x = getRandomReal( 0., maxP, generator );
-		  if( x < p ) break;
-		}
-
-		// determine neutrino direction
-		double nuDir[3];
-		double theta = getRandomReal( 0., 1., generator ) * M_PI;
-		double phi = getRandomReal( 0., 1., generator ) * 2. * M_PI;
-		nuDir[0] = sin( theta ) * cos( phi );
-		nuDir[1] = sin( theta ) * sin( phi );
-		nuDir[2] = cos( theta );
+        double p = nuFlux * sigm;
+        double x = getRandomReal( 0., maxProb, generator );
+        if( x < p ) break;
+      }
+    }
+    // determine neutrino direction
+    double nuDir[3];
+    double theta = getRandomReal( 0., 1., generator ) * M_PI;
+    double phi = getRandomReal( 0., 1., generator ) * 2. * M_PI;
+    nuDir[0] = sin( theta ) * cos( phi );
+    nuDir[1] = sin( theta ) * sin( phi );
+    nuDir[2] = cos( theta );
 
 		// Rotation matrix of neutrino direction
 		double Rmat[3][3];
@@ -720,45 +659,45 @@ void VectGenGenerator::Process(int NumEv){ // For DSBN vector generator
 
 		// interaction point
 		double ver_x, ver_y, ver_z;
-		determinePosition( ver_x, ver_y, ver_z );
+		determinePosition(mInnerFV, ver_x, ver_y, ver_z );
 
 		// Fill into class
 		// MCVERTEX (see $SKOFL_ROOT/inc/vcvrtx.h )                                                                               
-		mc->nvtxvc = 1;
-		mc->pvtxvc[0][0] = float(ver_x);
-		mc->pvtxvc[0][1] = float(ver_y);
-		mc->pvtxvc[0][2] = float(ver_z);
-		mc->iflvvc[0] = 1;
-		mc->iparvc[0] = 0;
-		mc->timvvc[0] = 0.;
+		fMC->nvtxvc = 1;
+		fMC->pvtxvc[0][0] = float(ver_x);
+		fMC->pvtxvc[0][1] = float(ver_y);
+		fMC->pvtxvc[0][2] = float(ver_z);
+		fMC->iflvvc[0] = 1;
+		fMC->iparvc[0] = 0;
+		fMC->timvvc[0] = 0.;
 
 		// IBD interaction
 
-		mc->nvc = 4;
+		fMC->nvc = 4;
 
 		// Original neutrino
-		mc->ipvc[0] = -12; // anti-electron neutrino
-		mc->energy[0] = nuEne; // ENERGY ( MEV )
-		mc->pvc[0][0] = nuEne * nuDir[0]; // MOMENTUM OF I-TH PARTICLE ( MEV/C )
-		mc->pvc[0][1] = nuEne * nuDir[1];
-		mc->pvc[0][2] = nuEne * nuDir[2];
-		mc->iorgvc[0] = 0;  // ID OF ORIGIN PARTICLE  PARENT PARTICLE
-		mc->ivtivc[0] = 0;  // VERTEX # ( INITIAL )
-		mc->iflgvc[0] = -1; // FINAL STATE FLAG
-		mc->icrnvc[0] = 0;  // CHERENKOV FLAG
-		mc->ivtfvc[0] = 1;  // VERTEX # ( FINAL )
+		fMC->ipvc[0] = -12; // anti-electron neutrino
+		fMC->energy[0] = nuEne; // ENERGY ( MEV )
+		fMC->pvc[0][0] = nuEne * nuDir[0]; // MOMENTUM OF I-TH PARTICLE ( MEV/C )
+		fMC->pvc[0][1] = nuEne * nuDir[1];
+		fMC->pvc[0][2] = nuEne * nuDir[2];
+		fMC->iorgvc[0] = 0;  // ID OF ORIGIN PARTICLE  PARENT PARTICLE
+		fMC->ivtivc[0] = 0;  // VERTEX # ( INITIAL )
+		fMC->iflgvc[0] = -1; // FINAL STATE FLAG
+		fMC->icrnvc[0] = 0;  // CHERENKOV FLAG
+		fMC->ivtfvc[0] = 1;  // VERTEX # ( FINAL )
 
 		// Original proton
-		mc->ipvc[1] = 2212; // proton
-		mc->energy[1] = Mp; // ENERGY ( MEV )
-		mc->pvc[1][0] = 0.; // MOMENTUM OF I-TH PARTICLE ( MEV/C )
-		mc->pvc[1][1] = 0.;
-		mc->pvc[1][2] = 0.;
-		mc->iorgvc[1] = 0;  // ID OF ORIGIN PARTICLE  PARENT PARTICLE
-		mc->ivtivc[1] = 0;  // VERTEX # ( INITIAL )
-		mc->iflgvc[1] = -1; // FINAL STATE FLAG
-		mc->icrnvc[1] = 0;  // CHERENKOV FLAG
-		mc->ivtfvc[1] = 1;  // VERTEX # ( FINAL )
+		fMC->ipvc[1] = 2212; // proton
+		fMC->energy[1] = Mp; // ENERGY ( MEV )
+		fMC->pvc[1][0] = 0.; // MOMENTUM OF I-TH PARTICLE ( MEV/C )
+		fMC->pvc[1][1] = 0.;
+		fMC->pvc[1][2] = 0.;
+		fMC->iorgvc[1] = 0;  // ID OF ORIGIN PARTICLE  PARENT PARTICLE
+		fMC->ivtivc[1] = 0;  // VERTEX # ( INITIAL )
+		fMC->iflgvc[1] = -1; // FINAL STATE FLAG
+		fMC->icrnvc[1] = 0;  // CHERENKOV FLAG
+		fMC->ivtfvc[1] = 1;  // VERTEX # ( FINAL )
 
 		// Positron
 
@@ -785,37 +724,31 @@ void VectGenGenerator::Process(int NumEv){ // For DSBN vector generator
 		//------------------------------------------------------------------------
 
 		// Positron
-		mc->ipvc[2] = -11; // positron
-		mc->energy[2] = eEne; // total ENERGY ( MEV )
-		mc->pvc[2][0] = amom * eDir[0]; // MOMENTUM OF I-TH PARTICLE ( MEV/C )
-		mc->pvc[2][1] = amom * eDir[1];
-		mc->pvc[2][2] = amom * eDir[2];
-		mc->iorgvc[2] = 1;  // ID OF ORIGIN PARTICLE  PARENT PARTICLE
-		mc->ivtivc[2] = 1;  // VERTEX # ( INITIAL )
-		mc->iflgvc[2] = 0; // FINAL STATE FLAG
-		mc->icrnvc[2] = 1;  // CHERENKOV FLAG
-		mc->ivtfvc[2] = 1;  // VERTEX # ( FINAL )
+		fMC->ipvc[2] = -11; // positron
+		fMC->energy[2] = eEne; // total ENERGY ( MEV )
+		fMC->pvc[2][0] = amom * eDir[0]; // MOMENTUM OF I-TH PARTICLE ( MEV/C )
+		fMC->pvc[2][1] = amom * eDir[1];
+		fMC->pvc[2][2] = amom * eDir[2];
+		fMC->iorgvc[2] = 1;  // ID OF ORIGIN PARTICLE  PARENT PARTICLE
+		fMC->ivtivc[2] = 1;  // VERTEX # ( INITIAL )
+		fMC->iflgvc[2] = 0; // FINAL STATE FLAG
+		fMC->icrnvc[2] = 1;  // CHERENKOV FLAG
+		fMC->ivtfvc[2] = 1;  // VERTEX # ( FINAL )
 
 		// Neutron
-		mc->ipvc[3] = 2112; // neutron
-		mc->pvc[3][0] = (mc->pvc[0][0]) - (mc->pvc[2][0]); // MOMENTUM OF I-TH PARTICLE ( MEV/C ): p_proton + p_neutrion = p_positron + p_neutron, and here assuming p_proton = 0
-		mc->pvc[3][1] = (mc->pvc[0][1]) - (mc->pvc[2][1]);
-		mc->pvc[3][2] = (mc->pvc[0][2]) - (mc->pvc[2][2]);
-		mc->energy[3] = sqrt(SQ( mc->pvc[3][0] ) + SQ( mc->pvc[3][1] ) + SQ( mc->pvc[3][2] )  + SQ( Mn )); // ENERGY ( MEV )
-		mc->iorgvc[3] = 1;  // ID OF ORIGIN PARTICLE  PARENT PARTICLE
-		mc->ivtivc[3] = 1;  // VERTEX # ( INITIAL )
-		mc->iflgvc[3] = 0; // FINAL STATE FLAG
-		mc->icrnvc[3] = 1;  // CHERENKOV FLAG
-		mc->ivtfvc[3] = 1;  // VERTEX # ( FINAL )
+		fMC->ipvc[3] = 2112; // neutron
+		fMC->pvc[3][0] = (fMC->pvc[0][0]) - (fMC->pvc[2][0]); // MOMENTUM OF I-TH PARTICLE ( MEV/C ): p_proton + p_neutrion = p_positron + p_neutron, and here assuming p_proton = 0
+		fMC->pvc[3][1] = (fMC->pvc[0][1]) - (fMC->pvc[2][1]);
+		fMC->pvc[3][2] = (fMC->pvc[0][2]) - (fMC->pvc[2][2]);
+		fMC->energy[3] = sqrt(SQ( fMC->pvc[3][0] ) + SQ( fMC->pvc[3][1] ) + SQ( fMC->pvc[3][2] )  + SQ( Mn )); // ENERGY ( MEV )
+		fMC->iorgvc[3] = 1;  // ID OF ORIGIN PARTICLE  PARENT PARTICLE
+		fMC->ivtivc[3] = 1;  // VERTEX # ( INITIAL )
+		fMC->iflgvc[3] = 0; // FINAL STATE FLAG
+		fMC->icrnvc[3] = 1;  // CHERENKOV FLAG
+    fMC->ivtfvc[3] = 1;  // VERTEX # ( FINAL )
+
+    fMC->mcinfo[0] = fRefRunNum;
 
 		theOTree->Fill();
-
 	}
-
-	fout->cd();
-	theOTree->Write();
-	theOTree->Reset();
-	fout->Close();
-	delete fout;
-
 }
