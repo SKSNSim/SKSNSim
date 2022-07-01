@@ -659,7 +659,7 @@ void VectGenGenerator::Process(int NumEv){ // For DSBN vector generator
 
 		// interaction point
 		double ver_x, ver_y, ver_z;
-		determinePosition(mInnerFV, ver_x, ver_y, ver_z );
+		determinePosition(mInnerID, ver_x, ver_y, ver_z );
 
 		// Fill into class
 		// MCVERTEX (see $SKOFL_ROOT/inc/vcvrtx.h )                                                                               
