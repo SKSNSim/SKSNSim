@@ -12,6 +12,7 @@
 #include <math.h>
 
 #include "VectGenSnConst.hh"
+#include "VectGenSetBin.hh"
 #include "VectGenOxyCrosssection.hh"
 
 using namespace std;
@@ -83,7 +84,7 @@ double VectGenOxyCrosssection::CsNuOxy43CC(int num, int ix, int ex, int ch, doub
 		//for(int j=0;j<num_ex;j++){
 		double totcsnueo[16][7] = {{0.}};
 			if(i > 0 && enu < nuene[num][ix].at(i) && enu > nuene[num][ix].at(i-1)){
-				if((enu-exEne[num][ix].at(ex))>0.){
+				if((enu-exEne[num][ix].at(ex))>Me){
 					rec_energy[ex] = enu - exEne[num][ix].at(ex);
 					//std::cout << i << " " << ix << " " << num_ex << " " << j << " " << enu << " " << exEne[num][ix].at(j) << " " << rec_energy[j] << std::endl;
 				}
@@ -91,7 +92,7 @@ double VectGenOxyCrosssection::CsNuOxy43CC(int num, int ix, int ex, int ch, doub
 					rec_energy[ex] = 0.;
 				}
 				//if(rec_energy[ex]>5.){
-				if(rec_energy[ex]>Me){
+				if(rec_energy[ex]>eEneThr){
 						//int ie = int(enu) - int(nuene[num][ix].at(i)-nuene[num][ix].at(i-1));
 						if(ch==0)totcsnueo[ex][ch] = (((crs0[num][ix][ex].at(i)-crs0[num][ix][ex].at(i-1))/(nuene[num][ix].at(i)-nuene[num][ix].at(i-1)))*enu + crs0[num][ix][ex].at(i-1) - ((crs0[num][ix][ex].at(i)-crs0[num][ix][ex].at(i-1))/(nuene[num][ix].at(i)-nuene[num][ix].at(i-1)))*nuene[num][ix].at(i-1)) * 1.0e-26;
 						if(ch==1)totcsnueo[ex][ch] = (((crs1[num][ix][ex].at(i)-crs1[num][ix][ex].at(i-1))/(nuene[num][ix].at(i)-nuene[num][ix].at(i-1)))*enu + crs1[num][ix][ex].at(i-1) - ((crs1[num][ix][ex].at(i)-crs1[num][ix][ex].at(i-1))/(nuene[num][ix].at(i)-nuene[num][ix].at(i-1)))*nuene[num][ix].at(i-1)) * 1.0e-26;
