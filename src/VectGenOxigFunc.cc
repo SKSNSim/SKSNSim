@@ -164,16 +164,16 @@ double VectGenOxigFunc::RecEneCC(int num, int ix, int ex, int ch, double enu)
 
 	if(ch==8){
 		if(num==0){
-			//if(enu > 15.4){
+			if(enu > 15.4){
 				recEnergy = enu - 15.4;
-			//}
-			//else recEnergy = 0.;
+			}
+			else recEnergy = 0.;
 		}
 		if(num==1){
-			//if(enu > 11.4){
+			if(enu > 11.4){
 				recEnergy = enu - 11.4;
-			//}
-			//else recEnergy = 0.;
+			}
+			else recEnergy = 0.;
 		}
 	}
 
