@@ -611,8 +611,11 @@ void VectGenGenerator::Process(int NumEv){ // For DSBN vector generator
   FluxCalculation &nuflux = *nuflux_dsnb;
 
 	/*---- loop ----*/
-	for( int iEvt = 0; iEvt < NumEv; iEvt++ ){
+  int subrun[2000];
+  if ( bIsUseTimeEvent ) 
+    ReadTimeEventFile(&NumEv, subrun);
 
+	for( int iEvt = 0; iEvt < NumEv; iEvt++ ){
 
 		double nuEne, cost, eEne;
     double nEne;
@@ -748,7 +751,35 @@ void VectGenGenerator::Process(int NumEv){ // For DSBN vector generator
     fMC->ivtfvc[3] = 1;  // VERTEX # ( FINAL )
 
     fMC->mcinfo[0] = fRefRunNum;
+    fMC->mcinfo[1] = subrun[iEvt];
+    std::cout <<subrun[iEvt]<<std::endl;
 
 		theOTree->Fill();
 	}
+}
+
+
+void VectGenGenerator::ReadTimeEventFile(int *nEvent, int subrun[])
+{
+  std::cout <<" Estimate # of event from timevent file "<<std::endl;
+  std::string timeFile; 
+  int iniRun, endRun;
+  if ( fRefRunNum < SK_IV_BEGIN ) {
+    std::cout << "reference run number is not correct"<<std::endl;
+  } 
+  else if ( SK_IV_BEGIN <= fRefRunNum && fRefRunNum < SK_IV_END ) { 
+    timeFile = "/home/sklowe/realtime_sk4_rep/solar_apr19/timevent/timevent.r061525.r077958"; 
+    iniRun = SK_IV_BEGIN; endRun = SK_IV_END;
+  }
+  else if ( SK_V_BEGIN <= fRefRunNum && fRefRunNum < SK_V_END ) { 
+    timeFile = "/home/sklowe/realtime_sk5_rep/solar_nov20/timevent/timevent.r080539.r082915"; 
+    iniRun = SK_V_BEGIN; endRun = SK_V_END;
+  }
+  else if ( SK_VI_BEGIN <= fRefRunNum ) { 
+    timeFile = "/home/sklowe/realtime_sk6_rep/solar_may22/timevent/livesubruns.r085000.r087073"; 
+    iniRun = SK_VI_BEGIN; endRun = 90000;
+  }
+  read_timevent_( &fRefRunNum, nEvent, subrun);
+
+  return;
 }
