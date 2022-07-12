@@ -15,7 +15,7 @@
 
 extern "C" {
 	void sn_sundir_( int *, int *, float *, float *, float *);
-  void read_timevent_( int *, int *);
+  //void read_timevent_( int *, int *);
 }
 
 enum SKGEOM
