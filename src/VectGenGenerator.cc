@@ -632,10 +632,10 @@ void VectGenGenerator::FillEvent()
 	fprintf( stdout, "   nuebar + e = %d\n", totGenNuebarElastic );
 	fprintf( stdout, "   nux + e = %d\n", totGenNuxElastic );
 	fprintf( stdout, "   nuxbar + e = %d\n", totGenNuxbarElastic );
-	fprintf( stdout, "   nue + o = %d\n", totGenNueO );
-	fprintf( stdout, "   nuebar + o = %d\n", totGenNuebarO );
-	fprintf( stdout, "   nue + o sub = %d\n", totGenNueOsub );
-	fprintf( stdout, "   nuebar + o sub = %d\n", totGenNuebarOsub );
+	fprintf( stdout, "   nue + o = %d\n", totGenNueO+totGenNueOsub );
+	fprintf( stdout, "   nuebar + o = %d\n", totGenNuebarO+totGenNuebarOsub );
+	//fprintf( stdout, "   nue + o sub = %d\n", totGenNueOsub );
+	//fprintf( stdout, "   nuebar + o sub = %d\n", totGenNuebarOsub );
 	fprintf( stdout, "------------------------------------\n" );
 
 	fout->cd();
@@ -648,8 +648,10 @@ void VectGenGenerator::MakeEvent(double time, double nu_energy, int nReact, int 
 
 	double totcrsIBD[nuEneNBins] = {0.};
 	double dRandTotEvts = generator->Poisson(rate);
+	//if(time<0.005)std::cout << time << " " << nu_energy << " " << nReact << " " << nuType << " " << rate << std::endl; //nakanisi
 
 	if(dRandTotEvts > 0){
+		std::cout << "MakeEvent " << time << " " << nu_energy << " " << nReact << " " << nuType << " " << rate << " " << dRandTotEvts << std::endl; //nakanisi
 		for(int i=0; i<dRandTotEvts; i++){
 			double ene_s = nu_energy - nuEneBinSize/2., ene_e = nu_energy + nuEneBinSize/2.;
 			double nuEne = getRandomReal( ene_s, ene_e, generator );
@@ -681,6 +683,7 @@ void VectGenGenerator::MakeEvent(double time, double nu_energy, int nReact, int 
 
 void VectGenGenerator::Process(){
 
+	std::cout << "Prcess of sn_burst side" << std::endl;//nakanisi
 	/*---- Fill total cross section into array to avoid repeating calculation ----*/
 	double nuEne_min = nuEneMin;
 	double nuEne_max = nuEneMax;
@@ -843,6 +846,7 @@ void VectGenGenerator::Process(){
 			/*----- inverse beta decay -----*/
 			
 			rate = Const_p * (oscneb1*nspcneb + oscneb2*nspcnx) * totcrsIBD[i_nu_ene] * nuEneBinSize * tBinSize * RatioTo10kpc;
+			//std::cout << "rate is: " << time << " " << nu_energy << " " << totcrsIBD[i_nu_ene] << " " << rate << std::endl; //nakanisi
 			totNuebarp += rate;
 			if(flag_event == 1) {
 			  nReact = 0;
@@ -1103,10 +1107,10 @@ void VectGenGenerator::Process(){
 	fprintf( stdout, "   nuebar + e = %e\n", totNuebarElastic );
 	fprintf( stdout, "   nux + e = %e\n", totNuxElastic );
 	fprintf( stdout, "   nuxbar + e = %e\n", totNuxbarElastic );
-	fprintf( stdout, "   nue + O = %e\n", totNueO );
-	fprintf( stdout, "   nuebar + O = %e\n", totNuebarO );
-	fprintf( stdout, "   nue + O sub = %e\n", totNueOsub );
-	fprintf( stdout, "   nuebar + O sub = %e\n", totNuebarOsub );
+	fprintf( stdout, "   nue + O = %e\n", totNueO+totNueOsub );
+	fprintf( stdout, "   nuebar + O = %e\n", totNuebarO+totNuebarOsub );
+	//fprintf( stdout, "   nue + O sub = %e\n", totNueOsub );
+	//fprintf( stdout, "   nuebar + O sub = %e\n", totNuebarOsub );
 	fprintf( stdout, "------------------------------------\n" );
 
 	std::cout << "end calculation of each expected event number" << std::endl; //nakanisi
@@ -1135,6 +1139,7 @@ void VectGenGenerator::Process(){
 
 void VectGenGenerator::Process(int NumEv){ // For DSBN vector generator
 
+	std::cout << "Process of dsnb side" << std::endl; //nakanisi
 	/*-----input file name-----*/
   FluxCalculation &nuflux = *nuflux_dsnb;
 

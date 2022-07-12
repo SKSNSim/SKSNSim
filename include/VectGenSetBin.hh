@@ -13,16 +13,16 @@ double eEneThr = 5.0;// MeV, electron total energy threshold
 //const double nuEneMin = 0.0; //MeV, minimum neutrino energy 
 //const double nuEneMax = 100.0; //MeV, maximum neutrino energy 
 //const double nuEneMax = 60.0; //Nakahata
-const double nuEneMin = 10.0; //MeV, minimum neutrino energy (Horiuchi SRN)
-const double nuEneMax = 50.0; //MeV, maximum neutrino energy (Horiuchi SRN)
-const int nuEneNBins = 1000; // number of bins for nu energy
+const double nuEneMin = 0.0; //MeV, minimum neutrino energy (Horiuchi SRN)
+const double nuEneMax = 300.0; //MeV, maximum neutrino energy (Horiuchi SRN)
+const int nuEneNBins = 3000; // number of bins for nu energy
 //const int nuEneNBins = 120; // Nakahata
 double nuEneBinSize;
 
 const double tStart = 0.;    //sec, SN explosion start time
 //const double tStart = 0.02;    //Nakahata
-//const double tEnd = 20.0;    //sec, SN explotion end time
-const double tEnd = 18.0;    //sec, SN explotion end time
+const double tEnd = 20.0;    //sec, SN explotion end time
+//const double tEnd = 18.0;    //sec, SN explotion end time
 const double tBinSize = 1.0e-3;  //sec, time interval
 //const double tBinSize = 1.0e-2;  //Nakahata
 int tNBins;

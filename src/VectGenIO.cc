@@ -238,7 +238,7 @@ void VectGenIO::DoProcess()
 	//std::cout << "each event number is "<< totNuebarp << " " << totNueElastic << " " << totNuebarElastic << " " << totNuxElastic << " " << totNuxbarElastic << std::endl;
 
 	std::ofstream ofs(FileText.c_str());
-	ofs << totNuebarp << " " << totNueElastic << " " << totNuebarElastic << " " << totNuxElastic << " " << totNuxbarElastic << std::endl;
+	ofs << totNuebarp << " " << totNueElastic << " " << totNuebarElastic << " " << totNuxElastic << " " << totNuxbarElastic << " " << totNueO+totNueOsub << " " << totNuebarO+totNuebarOsub << std::endl;
 
 }
 
