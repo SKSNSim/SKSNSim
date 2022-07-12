@@ -247,35 +247,9 @@ void VectGenIO::DoProcess(int NumEv)
 {
   std::cout <<" Do process "<<std::endl;
   if ( bIsUseTimeEvent ) {
-    NumEv = ReadTimeEventFile();
+    NumEv = 0; // tentative;
   }
   std::cout <<" Number of generated events: "<<NumEv<<std::endl;
 	Process(NumEv);
 }
 
-
-int VectGenIO::ReadTimeEventFile()
-{
-  std::cout <<" Estimate # of event from timevent file "<<std::endl;
-  std::string timeFile; 
-  int iniRun, endRun;
-  if ( fRefRunNum < SK_IV_BEGIN ) {
-    std::cout << "reference run number is not correct"<<std::endl;
-  } 
-  else if ( SK_IV_BEGIN <= fRefRunNum && fRefRunNum < SK_IV_END ) { 
-    timeFile = "/home/sklowe/realtime_sk4_rep/solar_apr19/timevent/timevent.r061525.r077958"; 
-    iniRun = SK_IV_BEGIN; endRun = SK_IV_END;
-  }
-  else if ( SK_V_BEGIN <= fRefRunNum && fRefRunNum < SK_V_END ) { 
-    timeFile = "/home/sklowe/realtime_sk5_rep/solar_nov20/timevent/timevent.r080539.r082915"; 
-    iniRun = SK_V_BEGIN; endRun = SK_V_END;
-  }
-  else if ( SK_VI_BEGIN <= fRefRunNum ) { 
-    timeFile = "/home/sklowe/realtime_sk6_rep/solar_may22/timevent/livesubruns.r085000.r087073"; 
-    iniRun = SK_VI_BEGIN; endRun = 90000;
-  }
-  int nEvent;
-  read_timevent_( &fRefRunNum, &nEvent);
-
-  return nEvent;
-}

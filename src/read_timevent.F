@@ -1,6 +1,6 @@
 **********************************************************************
 *     ---------------------------------------- 
-      subroutine read_timevent(runnum, totevents)
+      subroutine read_timevent(runnum, totevents, subrun)
 *     ----------------------------------------
 *
 *     ( purpose )
@@ -28,9 +28,10 @@
       REAL totaltime
       character*200 timefile, fname
       INTEGER nrun,nsub
+      INTEGER subrun(2000)
       logical*4 ex
       integer lfirst
-      integer*4 nevents, nev, ievent
+      integer*4 nevents, nev, ievent, iev
       integer num
       parameter(num = 1) ! Number of events per minute
       real rlu
@@ -143,10 +144,16 @@ c       If number of events is fractional, complete by drawing random number
         nevents = nevents + 1
       enddo
 
+      DO I=1,nevents
+        iev = I+totevents
+        if (iev .ge. 2000) print *, "too large subrun!!!!"
+        subrun(iev) = nsub
+      enddo
+
       totaltime = totaltime + tweight
       totevents = totevents + nevents
 cccccccccccccccccccccccccccccccccccccccccccccccc
-c      print *, "total ", tweight, nevents, nev, totaltime, totevents
+      print *, "tweight/nevent/nev/totalt/totaln ", tweight, nevents, nev, totaltime, totevents
       goto 10
 
 100   continue
