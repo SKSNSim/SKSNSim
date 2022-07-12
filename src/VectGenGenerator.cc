@@ -651,7 +651,7 @@ void VectGenGenerator::MakeEvent(double time, double nu_energy, int nReact, int 
 	//if(time<0.005)std::cout << time << " " << nu_energy << " " << nReact << " " << nuType << " " << rate << std::endl; //nakanisi
 
 	if(dRandTotEvts > 0){
-		std::cout << "MakeEvent " << time << " " << nu_energy << " " << nReact << " " << nuType << " " << rate << " " << dRandTotEvts << std::endl; //nakanisi
+		//std::cout << "MakeEvent " << time << " " << nu_energy << " " << nReact << " " << nuType << " " << rate << " " << dRandTotEvts << std::endl; //nakanisi
 		for(int i=0; i<dRandTotEvts; i++){
 			double ene_s = nu_energy - nuEneBinSize/2., ene_e = nu_energy + nuEneBinSize/2.;
 			double nuEne = getRandomReal( ene_s, ene_e, generator );
