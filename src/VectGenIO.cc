@@ -101,6 +101,10 @@ VectGenIO::VectGenIO(std::string ModelName, int nuosc, double distIO, int flagIO
 	nucrs = new VectGenNuCrosssection();
 	nucrs->ReadCsNuElastic();
 
+	//Class call of cross-section calculation
+	ocrs = new VectGenOxyCrosssection();
+	osub = new VectGenOxyCrosssectionSub();
+
 
 	// set text file name
 	std::stringstream ssname3;
@@ -234,7 +238,7 @@ void VectGenIO::DoProcess()
 	//std::cout << "each event number is "<< totNuebarp << " " << totNueElastic << " " << totNuebarElastic << " " << totNuxElastic << " " << totNuxbarElastic << std::endl;
 
 	std::ofstream ofs(FileText.c_str());
-	ofs << totNuebarp << " " << totNueElastic << " " << totNuebarElastic << " " << totNuxElastic << " " << totNuxbarElastic << std::endl;
+	ofs << totNuebarp << " " << totNueElastic << " " << totNuebarElastic << " " << totNuxElastic << " " << totNuxbarElastic << " " << totNueO+totNueOsub << " " << totNuebarO+totNuebarOsub << std::endl;
 
 }
 
