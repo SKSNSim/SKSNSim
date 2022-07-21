@@ -1,5 +1,6 @@
 *root
 core.*
+main_srn
 
 obj/
 bin/
