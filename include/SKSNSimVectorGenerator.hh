@@ -89,12 +89,14 @@ class SKSNSimVectorGenerator {
     double m_generator_energy_max;
 
     TRandom3 randomgenerator;
+
+    static double FindMaxProb ( SKSNSimFluxModel &, SKSNSimCrosssectionModel &);
     
   public:
     SKSNSimVectorGenerator(){}
     ~SKSNSimVectorGenerator(){}
-    void SetFluxModel(SKSNSimFluxModel *fm){ fluxmodels.push_back(std::move(std::unique_ptr<SKSNSimFluxModel>(fm)));}
-    void SetXSecModel(SKSNSimCrosssectionModel *xm){ xsecmodels.push_back(std::move(std::unique_ptr<SKSNSimCrosssectionModel>(xm)));}
+    void AddFluxModel(SKSNSimFluxModel *fm){ fluxmodels.push_back(std::move(std::unique_ptr<SKSNSimFluxModel>(fm)));} // after this, the pointer will be managed by SKSNSimVectorGenerator class
+    void AddXSecModel(SKSNSimCrosssectionModel *xm){ xsecmodels.push_back(std::move(std::unique_ptr<SKSNSimCrosssectionModel>(xm)));} // after this, the pointer will be managed by SKSNSimVectorGenerator class
     SKSNSimSNEventVector GenerateEvent();
     SKSNSimSNEventVector GenerateEventIBD();
     std::vector<SKSNSimSNEventVector> GenerateEvents(int);
