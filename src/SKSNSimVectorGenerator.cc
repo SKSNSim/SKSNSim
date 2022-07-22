@@ -81,7 +81,7 @@ double SKSNSimVectorGenerator::FindMaxProb ( SKSNSimFluxModel &flux, SKSNSimCros
     const double ene =  ene_min +  diff_ene* double(i);
     for(size_t j = 0; j < nbin_cost; j++){
       const double cost =  cost_min +  diff_cost* double(i);
-      const double p = flux.GetFlux(ene) * xsec.GetDiffCrosssection(ene, cost).second;
+      const double p = flux.GetFlux(ene) * xsec.GetDiffCrosssection(ene, cost).first;
       if(maxP < p) maxP = p;
     }
   }
@@ -89,42 +89,54 @@ double SKSNSimVectorGenerator::FindMaxProb ( SKSNSimFluxModel &flux, SKSNSimCros
 }
 
 
+double SKSNSimVectorGenerator::SetMaximumHitProbability(){
+  // TODO fix to use appropriate combination of flux and xsec models
+  if( fluxmodels.size() < 1 || xsecmodels.size() < 1 ){
+    m_max_hit_probability = -1.0;
+    return m_max_hit_probability;
+  }
+  m_max_hit_probability = FindMaxProb(*fluxmodels[0], *xsecmodels[0]);
+  return m_max_hit_probability;
+}
+
 SKSNSimSNEventVector SKSNSimVectorGenerator::GenerateEventIBD() {
   SKSNSimSNEventVector ev;
 
   double nuEne, cost, eEne;
   double nEne;
 
+  TRandom &rng = randomgenerator;
   if(fluxmodels.size() == 0) return ev;
   SKSNSimFluxModel &flux = *fluxmodels[0]; // TODO modify for user to select models
   if(xsecmodels.size() == 0) return ev;
   SKSNSimCrosssectionModel &xsec = *xsecmodels[0]; // TODO modify for user to select models
 
-  const double maxProb = FindMaxProb(*fluxmodels[0], *xsecmodels[0]);
-  auto getRandomReal = std::bind([](double min, double max, TRandom &rng){ return rng.Uniform(max - min) + min; }, std::placeholders::_1, std::placeholders::_2, randomgenerator);
   auto SQ = [](double a){ return a*a;};
 
   // determine neutrino and positron energy, and its direction
   while( 1 ){
-    nuEne = getRandomReal( GetEnergyMin(), GetEnergyMax());
+    nuEne = rng.Uniform( GetEnergyMin(), GetEnergyMax());
 
     const double nuFlux = flux.GetFlux(nuEne);
 
     double sigm;
-    cost = getRandomReal( -1., 1.);
+    cost = rng.Uniform( -1., 1.);
     auto xsecpair = xsec.GetDiffCrosssection(nuEne, cost);
-    eEne = xsecpair.first;
-    sigm = xsecpair.second;
+    eEne = xsecpair.second;
+    sigm = xsecpair.first;
 
     double p = nuFlux * sigm;
-    double x = getRandomReal( 0., maxProb);
+    double x = rng.Uniform( 0., m_max_hit_probability);
     if( x < p ) break;
   }
+#ifdef DEBUG
+  std::cout << "In GenerateEventIBD: eEne = " << eEne << std::endl;
+#endif
 
   // determine neutrino direction
   //double nuDir[3];
-  double theta = getRandomReal( 0., 1.) * M_PI;
-  double phi = getRandomReal( 0., 1.) * 2. * M_PI;
+  double theta = rng.Uniform(M_PI);
+  double phi = rng.Uniform(2. * M_PI);
   UtilVector3<double> nuDir ( std::sin(theta)*std::cos(phi),
                                         sin(theta)*sin(phi),
                                                  cos(theta));
@@ -178,7 +190,7 @@ SKSNSimSNEventVector SKSNSimVectorGenerator::GenerateEventIBD() {
   // Positron
   double amom = sqrt(SQ( eEne ) - SQ( Me ));
   double eTheta = acos( cost );
-  double ePhi = getRandomReal( -M_PI,  M_PI);
+  double ePhi = rng.Uniform( -M_PI,  M_PI);
 
   // conversion the positron direction along the neutrino direction
 

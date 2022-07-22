@@ -47,7 +47,7 @@ void SKSNSimFluxCustom::loadFile(const std::string fname)
   return;
 }
 
-void SKSNSimFluxCustom::dumpFlux(std::ostream &out) const 
+void SKSNSimFluxCustom::DumpFlux(std::ostream &out) const 
 {
   for(std::vector<std::pair<double, double> >::iterator it = ene_flux_v->begin(); it != ene_flux_v->end(); it++)
     out << it->first << " MeV, " << it->second << std::endl;

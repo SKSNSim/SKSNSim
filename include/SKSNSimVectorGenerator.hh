@@ -45,14 +45,13 @@ class SKSNSimSNEventVector {
     SKSNSimSNEventVector() {};
     ~SKSNSimSNEventVector() {};
     int AddVertex(
-        double, double, double, // x,y,z
-        int, int, // iflvvc, iparvc,
-        double); // time
+        double x, double y, double z,
+        int iflvvc, int iparvc,
+        double time){ m_vertexs.push_back(VERTEX{x,y,z,iflvvc, iparvc, time}); return m_vertexs.size();}
     int AddTrack(
-        int, double, // pid, energy
-        double, double, double, // momentum x,y,z
-        int, int, int, int, int // iorgvc, ivtivc, ivtfvc, iflgvc, icrnvc
-        );
+        int pid, double energy, // pid, energy
+        double px, double py, double pz, // momentum x,y,z
+        int iorgvc, int ivtivc, int ivtfvc, int iflgvc, int icrnvc){ m_tracks.push_back(TRACK{pid,energy, px, py, pz, iorgvc, ivtivc, ivtfvc, iflgvc, icrnvc}); return m_tracks.size(); }
     int SetRunnum(int r) { m_runnum = r; return m_runnum; }
     int SetSubRunnum(int sr) { m_subrunnum = sr; return m_subrunnum; }
     int GetRunnum() const { return m_runnum; }
@@ -88,15 +87,19 @@ class SKSNSimVectorGenerator {
     double m_generator_energy_min;
     double m_generator_energy_max;
 
+    double m_max_hit_probability; // maximum of (flux) x (xsec) // should be updated with new flux or xsec models
+
     TRandom3 randomgenerator;
 
     static double FindMaxProb ( SKSNSimFluxModel &, SKSNSimCrosssectionModel &);
+
+    double SetMaximumHitProbability();
     
   public:
     SKSNSimVectorGenerator(){}
     ~SKSNSimVectorGenerator(){}
-    void AddFluxModel(SKSNSimFluxModel *fm){ fluxmodels.push_back(std::move(std::unique_ptr<SKSNSimFluxModel>(fm)));} // after this, the pointer will be managed by SKSNSimVectorGenerator class
-    void AddXSecModel(SKSNSimCrosssectionModel *xm){ xsecmodels.push_back(std::move(std::unique_ptr<SKSNSimCrosssectionModel>(xm)));} // after this, the pointer will be managed by SKSNSimVectorGenerator class
+    void AddFluxModel(SKSNSimFluxModel *fm){ fluxmodels.push_back(std::move(std::unique_ptr<SKSNSimFluxModel>(fm))); SetMaximumHitProbability(); } // after this, the pointer will be managed by SKSNSimVectorGenerator class
+    void AddXSecModel(SKSNSimCrosssectionModel *xm){ xsecmodels.push_back(std::move(std::unique_ptr<SKSNSimCrosssectionModel>(xm))); SetMaximumHitProbability(); } // after this, the pointer will be managed by SKSNSimVectorGenerator class
     SKSNSimSNEventVector GenerateEvent();
     SKSNSimSNEventVector GenerateEventIBD();
     std::vector<SKSNSimSNEventVector> GenerateEvents(int);
@@ -105,6 +108,8 @@ class SKSNSimVectorGenerator {
     double SetEnergyMax(const double e){ m_generator_energy_max = e; return m_generator_energy_max;}
     double GetEnergyMin() const {return m_generator_energy_min;}
     double GetEnergyMax() const {return m_generator_energy_max;}
+    void SetRandomSeed(const unsigned s) { randomgenerator.SetSeed(s); }
+    unsigned GetRandomSeed(const int s) { return randomgenerator.GetSeed(); }
 };
 
 #endif

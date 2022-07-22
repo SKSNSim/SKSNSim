@@ -40,7 +40,6 @@ class SKSNSimFluxCustom : SKSNSimFluxModel {
       return  lower_limit? ene_flux_v->front().first - lower_energy_bin_width/2.0: ene_flux_v->back().first + upper_energy_bin_width/2.0;
     }
     // This throws std::out_of_range when the energy is out of range of loaded flux data
-    void dumpFlux(std::ostream &out = std::cout) const;
     inline double getBinnedFlux(const int bin) const {return ene_flux_v->at(bin).second;};
     inline double getBinnedEnergy(const int bin) const {return ene_flux_v->at(bin).first;};
     inline size_t getNBins() const {return (ene_flux_v != NULL) ? ene_flux_v->size(): 0;};
@@ -49,6 +48,7 @@ class SKSNSimFluxCustom : SKSNSimFluxModel {
     SKSNSimFluxCustom();
     SKSNSimFluxCustom(const std::string fname);
     ~SKSNSimFluxCustom(){}
+    void DumpFlux(std::ostream &out = std::cout) const;
     double GetFlux(const double) const;
     double GetEnergyLimitMax() const { return getFluxLimit(false); }
     double GetEnergyLimitMin() const { return getFluxLimit(true); }
@@ -74,6 +74,7 @@ class SKSNSimFluxDSNBHoriuchi : SKSNSimFluxModel {
     double GetFlux(const double e) const { return customflux->GetFlux(e); }
     double GetEnergyLimitMax() const { return customflux->GetEnergyLimitMax(); }
     double GetEnergyLimitMin() const { return customflux->GetEnergyLimitMin(); }
+    void DumpFlux(std::ostream &out = std::cout) const { customflux->DumpFlux(out);};
 };
 
 class SKSNSimFluxFlat : SKSNSimFluxModel {

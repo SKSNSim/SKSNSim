@@ -4,8 +4,8 @@
  * Cross section interface
  *************************************/
 
-#ifndef __SKSNSIMCROSSSECTION_H__
-#define __SKSNSIMCROSSSECTION_H__
+#ifndef __SKSNSIMCROSSSECTION_H_INCLUDED__
+#define __SKSNSIMCROSSSECTION_H_INCLUDED__
 
 #include <utility>
 
@@ -31,7 +31,7 @@ class SKSNSimXSecIBDSV : SKSNSimCrosssectionModel {
     SKSNSimXSecIBDSV(){}
     ~SKSNSimXSecIBDSV(){}
     double GetCrosssection(double e) { return 0.0;}
-    std::pair<double,double> GetDiffCrosssection(double e, double r) { return std::make_pair(0.0,0.0);}
+    std::pair<double,double> GetDiffCrosssection(double, double);
 };
 
 class SKSNSimXSecNuElastic : SKSNSimCrosssectionModel {
