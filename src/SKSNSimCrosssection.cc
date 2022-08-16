@@ -6,6 +6,8 @@
 
 #include <cmath>
 #include <iostream>
+#include <fstream>
+#include <pdg_codes.h>
 #include "SKSNSimCrosssection.hh"
 #include "SKSNSimConstant.hh"
 
@@ -25,12 +27,13 @@ std::pair<double,double> SKSNSimXSecIBDSV::GetDiffCrosssection(double enu /* MeV
   /// 2020.05 rewrite to C++ by H.MHarada
   /*********************************************************************/
 
-  double Delta_CM, G_COUPLING, RHO_NC, totcs, totep;
-  //double IBD_THR, ETHRE, IBD_SIG0;
 
-  //     Computations using masses   
-  double ave_nucleon_mass = (Mn + Mp)/2.;
-  Delta_CM = (Mn*Mn - Mp*Mp - Me*Me)/(2.*Mp);
+  // Computations using masses   
+  constexpr double MnMn = Mn*Mn;
+  constexpr double MeMe = Me*Me;
+  constexpr double MpMp = Mp*Mp;
+  constexpr double ave_nucleon_mass = (Mn + Mp)/2.;
+  constexpr double Delta_CM = (MnMn - MpMp - MeMe)/(2.*Mp);
 
   //      Fermi coupling constant
   constexpr double HBAR_C2 = 0.3893793656e-21;// (MeV^2 * cm^2) ... ( plank-constant * photon-velocity )^2
@@ -41,26 +44,24 @@ std::pair<double,double> SKSNSimXSecIBDSV::GetDiffCrosssection(double enu /* MeV
   constexpr double ALPHA = 1. / 137.035999139;
 
   //MESH_ES = 100;
-  //RHO_NC = 1.0126;
-  totcs = 0.;
-  totep = 0.;
+  // constexpr double RHO_NC = 1.0126;
 
 
-  //IBD_THR  = ((N_MASS+E_MASS)*(N_MASS+E_MASS)- P_MASS*P_MASS)/ (2.*P_MASS);
-  //ETHRE = 0.;
+  //constexpr double IBD_THR  = ((N_MASS+E_MASS)*(N_MASS+E_MASS)- P_MASS*P_MASS)/ (2.*P_MASS);
+  //constexpr double ETHRE = 0.;
 
   // Positron energy:                                                                                                                                                                    
   const double epsilon = enu/Mp;// formula (8)
   const double kappa = std::pow(1.+epsilon,2) - std::pow(epsilon*costheta,2);// in sentence below formula (21)
-  const double Epo = ((enu-Delta_CM)*(1.+epsilon)+epsilon*costheta*sqrt(pow(enu-Delta_CM,2)-Me*Me*kappa))/kappa;// formula (21)
+  const double Epo = ((enu-Delta_CM)*(1.+epsilon)+epsilon*costheta*sqrt(pow(enu-Delta_CM,2)-MeMe*kappa))/kappa;// formula (21)
 
   // Parameters
-  const double Ppo = sqrt(Epo*Epo-Me*Me);// formula (21)
+  const double Ppo = sqrt(Epo*Epo-MeMe);// formula (21)
   const double dE_dCosT = Ppo*epsilon/(1.+epsilon*(1.-costheta*Epo/Ppo));// trans. formula (20)
 
   // Belows are written in formula (3) - (11)
-  const double s_minus_u = 2.*Mp*(enu+Epo)-Me*Me;// above of formula (11)
-  const double t = Mn*Mn-Mp*Mp-2.*Mp*(enu-Epo);// above of formula (11)
+  const double s_minus_u = 2.*Mp*(enu+Epo)-MeMe;// above of formula (11)
+  const double t = MnMn-MpMp-2.*Mp*(enu-Epo);// above of formula (11)
 
   // formula (7)      
   const double x  = t /(4.*pow(ave_nucleon_mass,2.)); // part of numerator of 1st formula (7) 
@@ -74,22 +75,22 @@ std::pair<double,double> SKSNSimXSecIBDSV::GetDiffCrosssection(double enu /* MeV
   const double g2 = 2.*g1*pow(ave_nucleon_mass,2.)/(Mpi*Mpi-t);
 
   //bolow A,B,C calculation is formula (6)      
-  const double A = 1./16.*((t-Me*Me)
-            *(4.*pow(f1,2.)*(4.*pow(ave_nucleon_mass,2.)+t+Me*Me)
-                + 4.*pow(g1,2.)*(-4*pow(ave_nucleon_mass,2.)+t+Me*Me)
-                + pow(f2,2.)*(t*t/pow(ave_nucleon_mass,2.)+4.*t+4.*Me*Me)
-                + 4*Me*Me*t*pow(g2,2.)/pow(ave_nucleon_mass,2.)
-                + 8.*f1*f2*(2*t+Me*Me)
-                + 16*Me*Me*g1*g2)
+  const double A = 1./16.*((t-MeMe)
+            *(4.*pow(f1,2.)*(4.*pow(ave_nucleon_mass,2.)+t+MeMe)
+                + 4.*pow(g1,2.)*(-4*pow(ave_nucleon_mass,2.)+t+MeMe)
+                + pow(f2,2.)*(t*t/pow(ave_nucleon_mass,2.)+4.*t+4.*MeMe)
+                + 4*MeMe*t*pow(g2,2.)/pow(ave_nucleon_mass,2.)
+                + 8.*f1*f2*(2*t+MeMe)
+                + 16*MeMe*g1*g2)
             - pow(DeltaM,2.)
-            *((4.*pow(f1,2.)+t*pow(f2,2.)/pow(ave_nucleon_mass,2.))*(4.*pow(ave_nucleon_mass,2.)+t-Me*Me)
-                + 4.*pow(g1,2.)*(4.*pow(ave_nucleon_mass,2.)-t+Me*Me)
-                + 4.*Me*Me*pow(g2,2.)*(t-Me*Me)/pow(ave_nucleon_mass,2.)
-                + 8.*f1*f2*(2.*t-Me*Me)
-                + 16.*Me*Me*g1*g2)
-            - 32.*Me*Me*ave_nucleon_mass*DeltaM*g1*(f1+f2));
+            *((4.*pow(f1,2.)+t*pow(f2,2.)/pow(ave_nucleon_mass,2.))*(4.*pow(ave_nucleon_mass,2.)+t-MeMe)
+                + 4.*pow(g1,2.)*(4.*pow(ave_nucleon_mass,2.)-t+MeMe)
+                + 4.*MeMe*pow(g2,2.)*(t-MeMe)/pow(ave_nucleon_mass,2.)
+                + 8.*f1*f2*(2.*t-MeMe)
+                + 16.*MeMe*g1*g2)
+            - 32.*MeMe*ave_nucleon_mass*DeltaM*g1*(f1+f2));
 
-  const double B = 1./16.*(16.*t*g1*(f1+f2) + 4.*Me*Me*DeltaM*(pow(f2,2.)+f1*f2+2.*g1*g2)/ave_nucleon_mass);
+  const double B = 1./16.*(16.*t*g1*(f1+f2) + 4.*MeMe*DeltaM*(pow(f2,2.)+f1*f2+2.*g1*g2)/ave_nucleon_mass);
 
   const double C = 1./16.*(4.*(pow(f1,2)+pow(g1,2)) - t*pow(f2,2.)/pow(ave_nucleon_mass,2.));
 
@@ -107,4 +108,427 @@ std::pair<double,double> SKSNSimXSecIBDSV::GetDiffCrosssection(double enu /* MeV
   std::cout << "In SKSNSimXSecIBDSV: (sigm, Epo) = ( " << dcs << ", " << Epo << " )" << std::endl;
 #endif
   return std::make_pair(dcs, Epo);
+}
+
+double SKSNSimXSecIBDSV::GetCrosssection(double enu)
+{
+  /*
+     Total cross section of nu_e_bar + p --> e^+  + n  interaction
+     using the precise calculation by Strumia and Vissani
+     enu : Neutrino energy in MeV
+     (Epo : Positoron total energy in MeV, should be later)
+     return : Total cross section (cm^2)
+  */
+
+  double totcsnuebp_SV = 0;
+  const double Ee = enu - DeltaM;
+  if(Ee <= Me) return 0.0;
+
+  constexpr double COSTHETARANGELOW  = -1.;
+  constexpr double COSTHETARANGEHIGH =  1.;
+  constexpr int    NBIN = 200;
+  constexpr double BINWIDTH = (COSTHETARANGEHIGH - COSTHETARANGELOW)/double(NBIN);
+  constexpr double HALFBINWIDTH = BINWIDTH / 2.0;
+  constexpr double COSTHETARANGELOWINCLBIAS = COSTHETARANGELOW + HALFBINWIDTH;
+  for(int b=0; b<NBIN; b++){
+    double costheta = COSTHETARANGELOWINCLBIAS + BINWIDTH * double(b);
+    double dcs0, Epo0;
+    auto result = GetDiffCrosssection(enu, costheta);
+    totcsnuebp_SV += result.first;
+  }
+  totcsnuebp_SV *= BINWIDTH;
+
+  //cout << totcsnuebp_SV << endl;
+  return totcsnuebp_SV;
+}
+
+std::pair<double,double> SKSNSimXSecIBDVB::GetDiffCrosssection(double enu, double costheta)
+{
+  /*
+    get differential cross section of nue_bar P and positron energy
+         enu : Neutrino energy in MeV
+    costheta : 
+         Epo : Positron total energy in MeV
+         dcs : Differenctial cross section d sigma / d cos(theta) (cm^2)
+
+    "The angular distribution of the reaction nu_e_bar + p -> e+ + n"
+     P.Vogel and J.F.Beacom [arXiv:hep-ph/9903554 1 Apr 1999]
+  */
+
+  const double Epo0 = enu - DeltaM;
+  constexpr double MeMe = Me*Me;
+  constexpr double MpMp = Mp*Mp;
+  constexpr double Delta_R_inner = 0.024; // inner radiative correction
+  constexpr double f     = 1.;
+  constexpr double g     = 1.26; // axial-vector coupling constant
+
+  if(Epo0 < Me) return std::make_pair(0.0, 0.0);
+
+  const double Pe0 = sqrt(pow(Epo0, 2.) - MeMe); // positron momemtum
+
+  // formula(9)
+  const double sigma0 = pow(Gf,2.) * pow(costheta_cabibo,2.) / PI * (1. + Delta_R_inner) / pow(HBARC,2.) * 1.0E-26;
+
+  // formula(13)
+  constexpr double ave_nucleon_mass = (Mp + Mn)/2.; // average nucleon mass
+  const double v_e_0    = Pe0 / Epo0; // velocity
+  const double y        = sqrt((pow(DeltaM,2.) - MeMe)/2.);
+
+  const double Epo = Epo0 * (1.- enu / ave_nucleon_mass * (1.- v_e_0 *costheta)) - pow(y,2.) / ave_nucleon_mass;
+
+  if(Epo < Me) return std::make_pair(0.0, 0.0);
+
+
+  // formula(15)
+  constexpr double f2   = 3.706; // nu_p - nu_n (magnetic moment)
+  const double gamma = 2*(f + f2) * g * ((2*Epo0 + DeltaM) * (1. - v_e_0 * costheta) - MeMe / Epo0) + (pow(f,2.) + pow(g,2.)) * (DeltaM * (1. + v_e_0 * costheta) + MeMe / Epo0) + (pow(f,2.) + 3 * pow(g,2.)) * ((Epo0 + DeltaM)*(1. - 1./v_e_0 * costheta) - DeltaM) + (pow(f,2.) - pow(g,2.)) * ((Epo0 + DeltaM) * (1. - 1./v_e_0 * costheta) - DeltaM) * v_e_0 * costheta;
+
+  // formula(14)
+  const double Pe1 = sqrt(pow(Epo, 2.) - MeMe); // positron momemtum
+  const double v_e_1 = Pe1 / Epo; // velocity
+
+  const double dcs = sigma0 / 2. * ((pow(f,2.) + 3 * pow(g,2.)) + (pow(f,2.) - pow(g,2.)) * v_e_1 * costheta) * Epo * Pe1 - sigma0 / 2 *(gamma / ave_nucleon_mass) * Epo0 * Pe0;
+  //cout << dcs << " " << sigma0 << " " << gamma << " " << v_e_1 << " " << costheta << endl;
+
+  return std::make_pair(dcs, Epo);
+}
+
+double SKSNSimXSecIBDVB::GetCrosssection(double enu)
+{
+  /*
+    Total cross section of nu_e_bar + p --> e^+  + n  interaction
+    using the precise calculation by Vogel and Beacom
+        enu : Neutrino energy in MeV
+	(Epo : Positoron total energy in MeV, should be later)
+     return : Total cross section (cm^2)
+  */
+
+  double totcsnuebp_vb = 0;
+  const double Ee = enu - DeltaM;
+  if(Ee < 3.0 /* MeV */) return 0.0;
+
+  constexpr double COSTHETARANGELOW  = -1.;
+  constexpr double COSTHETARANGEHIGH =  1.;
+  constexpr int    NBIN = 200;
+  constexpr double BINWIDTH = (COSTHETARANGEHIGH - COSTHETARANGELOW)/double(NBIN);
+  constexpr double HALFBINWIDTH = BINWIDTH / 2.0;
+  constexpr double COSTHETARANGELOWINCLBIAS = COSTHETARANGELOW + HALFBINWIDTH;
+  for(int b=0; b<NBIN; b++){
+    double costheta = COSTHETARANGELOWINCLBIAS + BINWIDTH * double(b);
+    double dcs0, Epo0;
+    auto result = GetDiffCrosssection(enu, costheta);
+    totcsnuebp_vb += result.first;
+  }
+  totcsnuebp_vb *= BINWIDTH;
+
+  //cout << totcsnuebp_SV << endl;
+  return totcsnuebp_vb;
+}
+
+double SKSNSimXSecNuElastic::GetCrosssection(double enu, int ipart, FLAGETHR flag)
+{
+  /*
+    Total cross section of nu + e --> nu + e  interaction
+    using the precise calculation by Bahcall refer from sollib/sl_elctot_rad.F
+        enu : Neutrino energy in MeV
+     return : Total cross section (cm^2)
+  */
+
+  if(!((ipart == PDG_ELECTRON_NEUTRINO) || (ipart == - PDG_ELECTRON_NEUTRINO) || (ipart == PDG_MUON_NEUTRINO) || (ipart == -PDG_MUON_NEUTRINO))){
+    std::cerr << "Not support particle code " << ipart << std::endl;
+    exit(1);
+  }
+
+  double x = 0.;
+  if(enu <= nuElaEneMin || enu >= nuElaEneMax) return x;
+
+  if(flag == ETHRON) { // should apply Eth
+    constexpr double t_min = eEneThr - Me;
+    const double t_max = 2.*enu*enu/(Me+2.*enu);
+
+    if(t_min > t_max){
+      x = 0.;
+      return x;
+    }
+
+    constexpr int istep = 1000;
+    const double dstep = (t_max - t_min) / double(istep);
+    x=0.;
+    for (int i = 0; i<istep; i++){
+      double E = (t_min + dstep/2.) + dstep * double(i) + Me;
+      switch (ipart)
+      {
+        case  PDG_ELECTRON_NEUTRINO: x += sl_nue_dif_rad_(&enu, &E) * dstep; break;
+        case -PDG_ELECTRON_NEUTRINO: x += sl_neb_dif_rad_(&enu, &E) * dstep; break;
+        case  PDG_MUON_NEUTRINO:     x += sl_num_dif_rad_(&enu, &E) * dstep; break;
+        case -PDG_MUON_NEUTRINO:     x += sl_nmb_dif_rad_(&enu, &E) * dstep; break;
+        default: std::cerr << "Should not appear this message: " << __FILE__ << " L:" << __LINE__ << std::endl; break;
+      }
+    }
+  }
+  else if(flag == ETHROFF) { // should not apply Eth
+    double e1, e2, c1=0., c2=0.;
+
+    const int iene = (int)(enu / nuElaEneBinSize);
+    fCsElaTree->GetEntry(iene-1);
+    e1 = NuElaEnergy;
+    if(ipart ==  12) c1 = CsElaNue;
+    if(ipart == -12) c1 = CsElaNeb;
+    if(ipart ==  14) c1 = CsElaNux;
+    if(ipart == -14) c1 = CsElaNxb;
+
+    fCsElaTree->GetEntry(iene);
+    e2 = NuElaEnergy;
+    if(ipart ==  12) c2 = CsElaNue;
+    if(ipart == -12) c2 = CsElaNeb;
+    if(ipart ==  14) c2 = CsElaNux;
+    if(ipart == -14) c2 = CsElaNxb;
+
+    x = (c2-c1) / (e2-e1) * (enu - e1) + c1;
+    //std::cout << enu << " " << iene << " " << e1 << " " << e2 << " " << c1 << " " << c2 << " " << x << std::endl;
+  }
+
+  return x;
+
+}
+
+void SKSNSimXSecNuElastic::OpenCsElaFile(){
+  fCsElaFile.reset(new TFile(CSELAFILENAME.c_str(), "READ"));
+  fCsElaTree.reset((TTree*)fCsElaFile->Get("nuela"));
+  fCsElaTree->SetBranchAddress("nuene", &NuElaEnergy);
+  fCsElaTree->SetBranchAddress("cnue", &CsElaNue);
+  fCsElaTree->SetBranchAddress("cnux", &CsElaNux);
+  fCsElaTree->SetBranchAddress("cneb", &CsElaNeb);
+  fCsElaTree->SetBranchAddress("cnxb", &CsElaNxb);
+}
+
+void SKSNSimXSecNuElastic::CloseCsElaFile(){
+  fCsElaFile->Close();
+}
+
+std::pair<double,double> GetDiffCrosssection(double e, double r){
+  std::cerr << "Not supported: " << __FILE__ << " GetDiffCrosssection(...) for NuElastic XSec model" << std::endl;
+  return std::make_pair(0.0,0.0);
+}
+
+void SKSNSimXSecNuOxygen::LoadFile(INISTATE ini){
+  const static std::string rctn[NTYPE] = {"nue", "neb"};
+  if (!isOpened[ini]) {
+    std::cout << "new file open (num, ix, isOpen): " << std::get<0>(ini) << " " << std::get<1>(ini) << " " << isOpened[ini] << std::endl;
+    const std::string target = Form("/disk1/disk02/usr6/nakanisi/SuperNova/time-vect300/oscillation/oxygen/crsox%s%dstate.dat",rctn[std::get<0>(ini)].c_str(),std::get<1>(ini));
+    std::ifstream ifs(target);
+
+    if(!ifs){
+      std::cerr << "file does not exist" << std::endl;
+      std::cerr << "file name is" << " " << target << std::endl;
+      exit(EXIT_FAILURE);
+    }
+
+    double tmp, tmp_e0;
+    double tmp_num, tmp_ex, tmp_rec, tmp_pro, tmp_sum;
+    double tmp_cs[NCHANNEL];
+    int index = 0;
+    while(ifs>>tmp>>tmp_e0){
+      nuene[ini].push_back(tmp_e0);
+      for(int j=0;j<GetNumEx(std::get<1>(ini));j++){
+        ifs >>tmp_num>>tmp_ex>>tmp_rec>>tmp_pro>>tmp_sum>>tmp_cs[0]>>tmp_cs[1]>>tmp_cs[2]>>tmp_cs[3]>>tmp_cs[4]>>tmp_cs[5]>>tmp_cs[6];
+        index++;
+        exEne[ini].push_back(tmp_ex);
+        rec[ini].push_back(tmp_rec);
+        pro_energy[ini].push_back(tmp_pro);
+        for(int k = 0; k < NCHANNEL; k++){
+          INIFINSTATE inifin = convToINIFINSTATE(ini, j, k);
+          crs[inifin].push_back(tmp_cs[k]);
+        }
+      }
+    }
+    fileSize[ini] = index;
+    //std::cout << fileSize[num][ix] << std::endl;
+    //std::cout << num << " " << ix << " " << index << std::endl;
+    //std::cout << exEne[num][ix].at(0) << " " << exEne[num][ix].at(1) << " " << exEne[num][ix].at(2) << std::endl;
+    //
+    isOpened[ini] = true;
+    ifs.close();
+  }
+}
+
+void SKSNSimXSecNuOxygen::InitializeTable(){
+  isOpened.clear();
+  rec.clear();
+  pro_energy.clear();
+  fileSize.clear();
+  exNum.clear();
+  exEne.clear();
+  nuene.clear();
+  crs.clear();
+  for(int t = 0; t < NTYPE; t++){
+    exNum[convToINISTATE(t,0)] = 3;
+    exNum[convToINISTATE(t,1)] = 15;
+    exNum[convToINISTATE(t,2)] = 8;
+    exNum[convToINISTATE(t,3)] = 1;
+    exNum[convToINISTATE(t,4)] = 6;
+    for(int ix = 0; ix < NIXSTATE; ix++){
+      INISTATE ini = convToINISTATE(t,ix);
+      isOpened[ini] = false;
+      rec[ini].clear();
+      pro_energy[ini].clear();
+      exEne[ini].clear();
+      nuene.clear();
+      fileSize[ini] = 0;
+      for(int ex = 0; ex < NEXSTATE; ex++){
+        for(int ch = 0; ch < NCHANNEL; ch++){
+          INIFINSTATE inifin = convToINIFINSTATE(ini,ex,ch);
+          crs[inifin].clear();
+        }
+      }
+    }
+  }
+}
+
+double SKSNSimXSecNuOxygen::GetCrosssection(double enu, INIFINSTATE inifin)
+{
+  /*
+   * Total cross section of nu_e + O --> e^- + X, nu_e_bar + O --> e^+ + X interaction
+   */
+
+  double totcso = 0;
+
+  const INISTATE ini = GetINISTATE(inifin);
+  const int ex = std::get<2>(inifin);
+  const int ch = std::get<3>(inifin);
+  LoadFile(ini);
+  double rec_energy = 0.0;
+  auto findBin = [ini] (double e, const std::vector<double> &enebin){
+    for(int i = 0; i < 20; i++){
+      if( i > 0 && e < enebin.at(i) && e > enebin.at(i-1)) return i;
+    }
+    return -1;
+  };
+
+  int ienebin = findBin(enu, nuene[ini]); 
+  if( ienebin == -1 ) return .0;
+  rec_energy = enu - exEne[ini].at(ex);
+  if(rec_energy > Me && rec_energy>eEneThr){
+    totcso = (((crs[inifin].at(ienebin)-crs[inifin].at(ienebin-1))/(nuene[ini].at(ienebin)-nuene[ini].at(ienebin-1)))*enu + crs[inifin].at(ienebin-1) - ((crs[inifin].at(ienebin)-crs[inifin].at(ienebin-1))/(nuene[ini].at(ienebin)-nuene[ini].at(ienebin-1)))*nuene[ini].at(ienebin-1)) * 1.0e-26;
+  }
+  else
+    totcso = 0.;
+  return totcso;
+}
+
+std::pair<double,double> SKSNSimXSecNuOxygen::GetDiffCrosssection(double e, double r)
+{
+  std::cerr << "Not supported: " << __FILE__ << " GetDiffCrosssection(...) for NuOxygen XSec model" << std::endl;
+  return std::make_pair(0.0,0.0);
+}
+
+void SKSNSimXSecNuOxygenSub::LoadFile(INISTATE ini){
+  const static std::string rctn[NTYPE] = {"nue", "neb"};
+  if (!isOpened[ini]) {
+    std::cout << "new file open (num, ix, isOpen): " << std::get<0>(ini) << " " << std::get<1>(ini) << " " << isOpened[ini] << std::endl;
+    const std::string target = Form("/disk1/disk02/usr6/nakanisi/SuperNova/time-vect300/oscillation/oxygen/sub3-1/dat/sub%s%dstate.dat",rctn[std::get<0>(ini)].c_str(),std::get<1>(ini));
+    std::ifstream ifs(target);
+
+    if(!ifs){
+      std::cerr << "file does not exist" << std::endl;
+      std::cerr << "file name is" << " " << target << std::endl;
+      exit(EXIT_FAILURE);
+    }
+
+    double tmp, tmp_e0;
+    //double tmp_num, tmp_ex, tmp_rec, tmp_pro, tmp_sum;
+    double tmp_cs[NCHANNEL];
+    int index = 0;
+    while(!ifs.eof()){
+      ifs >>tmp_e0>>
+        tmp_cs[0]>>tmp_cs[1]>>tmp_cs[2]>>tmp_cs[3]>>tmp_cs[4]
+        >>tmp_cs[5]>>tmp_cs[6]>>tmp_cs[7]>>tmp_cs[8]>>tmp_cs[9]
+        >>tmp_cs[10]>>tmp_cs[11]>>tmp_cs[12]>>tmp_cs[13]>>tmp_cs[14]
+        >>tmp_cs[15]>>tmp_cs[16]>>tmp_cs[17]>>tmp_cs[18]>>tmp_cs[19]
+        >>tmp_cs[20]>>tmp_cs[21]>>tmp_cs[22]>>tmp_cs[23]>>tmp_cs[24]
+        >>tmp_cs[25]>>tmp_cs[26]>>tmp_cs[27]>>tmp_cs[28]>>tmp_cs[29]
+        >>tmp_cs[30]>>tmp_cs[31];
+
+      index++;
+      Enu[ini].push_back(tmp_e0);
+      for(int k = 0; k < NCHANNEL; k++){
+        INIFINSTATE inifin = convToINIFINSTATE(ini, k);
+        crs[inifin].push_back(tmp_cs[k]);
+      }
+    }
+    fileSize[ini] = index-1;
+    //std::cout << fileSize[num][ix] << std::endl;
+    //std::cout << num << " " << ix << " " << index << std::endl;
+    //std::cout << exEne[num][ix].at(0) << " " << exEne[num][ix].at(1) << " " << exEne[num][ix].at(2) << std::endl;
+    //
+    isOpened[ini] = true;
+    ifs.close();
+  }
+}
+
+void SKSNSimXSecNuOxygenSub::InitializeTable(){
+  isOpened.clear();
+  fileSize.clear();
+  Enu.clear();
+  crs.clear();
+  for(int t = 0; t < NTYPE; t++){
+    for(int ix = 0; ix < NIXSTATE; ix++){
+      INISTATE ini = convToINISTATE(t,ix);
+      isOpened[ini] = false;
+      Enu[ini].clear();
+      fileSize[ini] = 0;
+      for(int ch = 0; ch < NCHANNEL; ch++){
+        INIFINSTATE inifin = convToINIFINSTATE(ini,ch);
+        crs[inifin].clear();
+      }
+    }
+  }
+}
+
+double SKSNSimXSecNuOxygenSub::GetCrosssection(double enu, INIFINSTATE inifin)
+{
+  /*
+   * Total cross section of nu_e + O --> e^- + X, nu_e_bar + O --> e^+ + X interaction
+   */
+
+  double totcso = 0;
+
+  const INISTATE ini = GetINISTATE(inifin);
+  const int ch = std::get<2>(inifin);
+  LoadFile(ini);
+  double rec_energy = 0.0;
+  auto findBin = [ini] (double e, const std::vector<double> &enebin){
+    for(int i = 0; i < 20; i++){
+      if( i > 0 && e < enebin.at(i) && e > enebin.at(i-1)) return i;
+    }
+    return -1;
+  };
+
+  int ienebin = findBin(enu, Enu[ini]); 
+  if( ienebin == -1 ) return .0;
+  switch( std::get<0>(ini)){
+    case 0: // nue
+      rec_energy = enu - 15.4;
+      break;
+    case 1:
+      rec_energy = enu - 11.4;
+      break;
+    default:
+      std::cerr <<"This sould not be appeared: " << __FILE__ << " L:" << __LINE__ << std::endl;
+      rec_energy = 0.0;
+      break;
+  }
+
+  if(rec_energy > Me){
+    totcso = (((crs[inifin].at(ienebin)-crs[inifin].at(ienebin-1))/(Enu[ini].at(ienebin)-Enu[ini].at(ienebin-1)))*enu + crs[inifin].at(ienebin-1) - ((crs[inifin].at(ienebin)-crs[inifin].at(ienebin-1))/(Enu[ini].at(ienebin)-Enu[ini].at(ienebin-1)))*Enu[ini].at(ienebin-1)) * 1.0e-26;
+  }
+  else
+    totcso = 0.;
+  return totcso;
+}
+
+std::pair<double,double> SKSNSimXSecNuOxygenSub::GetDiffCrosssection(double e, double r)
+{
+  std::cerr << "Not supported: " << __FILE__ << " GetDiffCrosssection(...) for NuOxygen XSec model (sub)" << std::endl;
+  return std::make_pair(0.0,0.0);
 }
