@@ -16,7 +16,7 @@
 #include <stdexcept>
 #endif
 
-SKSNSimFluxCustom::SKSNSimFluxCustom()
+SKSNSimDSNBFluxCustom::SKSNSimDSNBFluxCustom()
 {
       ene_flux_v = std::make_unique<std::vector<std::pair<double,double>>>();
       lower_energy_bin_width = 0.1;
@@ -24,7 +24,7 @@ SKSNSimFluxCustom::SKSNSimFluxCustom()
       return;
 }
 
-SKSNSimFluxCustom::SKSNSimFluxCustom(const std::string fname)
+SKSNSimDSNBFluxCustom::SKSNSimDSNBFluxCustom(const std::string fname)
 {
       std::cout << " DSNB flux file: "<<fname<< std::endl;
       ene_flux_v = std::make_unique<std::vector<std::pair<double,double>>>();
@@ -32,7 +32,7 @@ SKSNSimFluxCustom::SKSNSimFluxCustom(const std::string fname)
       return;
 }
 
-void SKSNSimFluxCustom::loadFile(const std::string fname)
+void SKSNSimDSNBFluxCustom::loadFile(const std::string fname)
 {
   ene_flux_v->clear();
   std::ifstream datafile(fname.c_str());
@@ -47,13 +47,13 @@ void SKSNSimFluxCustom::loadFile(const std::string fname)
   return;
 }
 
-void SKSNSimFluxCustom::DumpFlux(std::ostream &out) const 
+void SKSNSimDSNBFluxCustom::DumpFlux(std::ostream &out) const 
 {
   for(std::vector<std::pair<double, double> >::iterator it = ene_flux_v->begin(); it != ene_flux_v->end(); it++)
     out << it->first << " MeV, " << it->second << std::endl;
 }
 
-void SKSNSimFluxCustom::sortByEnergy()
+void SKSNSimDSNBFluxCustom::sortByEnergy()
 {
   if(ene_flux_v == NULL) return;
   // for std::pair, first comparing first-component then comparing second-component
@@ -65,7 +65,7 @@ void SKSNSimFluxCustom::sortByEnergy()
   return;
 }
 
-double SKSNSimFluxCustom::GetFlux(const double nu_ene_MeV) const 
+double SKSNSimDSNBFluxCustom::GetFlux(const double nu_ene_MeV, const double time_sec, const FLUXNUTYPE nutype) const 
 {
   // Assumed the data field ene_flux_v is sorted as lowest energy on first 
   // Calculate flux with linear interpolation

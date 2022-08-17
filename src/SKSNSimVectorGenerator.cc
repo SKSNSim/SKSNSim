@@ -81,7 +81,7 @@ double SKSNSimVectorGenerator::FindMaxProb ( SKSNSimFluxModel &flux, SKSNSimCros
     const double ene =  ene_min +  diff_ene* double(i);
     for(size_t j = 0; j < nbin_cost; j++){
       const double cost =  cost_min +  diff_cost* double(i);
-      const double p = flux.GetFlux(ene) * xsec.GetDiffCrosssection(ene, cost).first;
+      const double p = flux.GetFlux(ene, 0.0, SKSNSimFluxModel::FLUXNUEB) * xsec.GetDiffCrosssection(ene, cost).first;
       if(maxP < p) maxP = p;
     }
   }
@@ -117,7 +117,7 @@ SKSNSimSNEventVector SKSNSimVectorGenerator::GenerateEventIBD() {
   while( 1 ){
     nuEne = rng.Uniform( GetEnergyMin(), GetEnergyMax());
 
-    const double nuFlux = flux.GetFlux(nuEne);
+    const double nuFlux = flux.GetFlux(nuEne, 0.0, SKSNSimFluxModel::FLUXNUEB);
 
     double sigm;
     cost = rng.Uniform( -1., 1.);
