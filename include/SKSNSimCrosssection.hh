@@ -28,6 +28,15 @@ class SKSNSimCrosssectionModel {
     virtual std::pair<double,double> /* <cm^2, MeV> */ GetDiffCrosssection(double /* MeV */, double /* a.u. */) = 0; // energy -> angle -> (xsec, scattered energy)
 };
 
+class SKSNSimXSecFlat : SKSNSimCrosssectionModel {
+  // Flat cross section: always return 1.0
+  public:
+    SKSNSimXSecFlat(){}
+    ~SKSNSimXSecFlat(){}
+    double GetCrosssection(double e){ return 1.0;}
+    std::pair<double,double> GetDiffCrosssection(double e, double r) { return std::make_pair(1.0, e);};
+};
+
 class SKSNSimXSecIBDVB : SKSNSimCrosssectionModel {
   // Cross section model of IBD by Vogel and Beacom
   public:
