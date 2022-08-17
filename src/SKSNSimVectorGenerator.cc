@@ -105,7 +105,7 @@ SKSNSimSNEventVector SKSNSimVectorGenerator::GenerateEventIBD() {
   double nuEne, cost, eEne;
   double nEne;
 
-  TRandom &rng = randomgenerator;
+  TRandom &rng = *randomgenerator;
   if(fluxmodels.size() == 0) return ev;
   SKSNSimFluxModel &flux = *fluxmodels[0]; // TODO modify for user to select models
   if(xsecmodels.size() == 0) return ev;
@@ -161,7 +161,7 @@ SKSNSimSNEventVector SKSNSimVectorGenerator::GenerateEventIBD() {
     const double z = -hPositionRange + rng.Uniform( 2.*hPositionRange);
 
     return UtilVector3<double>(x,y,z);
-  }, randomgenerator);
+  }, *randomgenerator);
   const auto xyz = determinePosition();
 
   // Fill into class

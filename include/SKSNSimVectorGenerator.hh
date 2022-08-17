@@ -89,7 +89,7 @@ class SKSNSimVectorGenerator {
 
     double m_max_hit_probability; // maximum of (flux) x (xsec) // should be updated with new flux or xsec models
 
-    TRandom3 randomgenerator;
+    std::shared_ptr<TRandom> randomgenerator;
 
     static double FindMaxProb ( SKSNSimFluxModel &, SKSNSimCrosssectionModel &);
 
@@ -108,8 +108,7 @@ class SKSNSimVectorGenerator {
     double SetEnergyMax(const double e){ m_generator_energy_max = e; return m_generator_energy_max;}
     double GetEnergyMin() const {return m_generator_energy_min;}
     double GetEnergyMax() const {return m_generator_energy_max;}
-    void SetRandomSeed(const unsigned s) { randomgenerator.SetSeed(s); }
-    unsigned GetRandomSeed(const int s) { return randomgenerator.GetSeed(); }
+    void   SetRandomGenerator(std::shared_ptr<TRandom> rng) { randomgenerator = rng; }
 };
 
 #endif
