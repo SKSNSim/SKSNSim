@@ -12,10 +12,18 @@ if ($1 == "") then
 endif
 
 #set num_simulation = 1000
-set num_simulation = 10
+set num_simulation = 1
 
 if(! -d ./script/$1) then
     mkdir -p ./script/$1;
+endif
+
+if(! -d ./data) then
+    mkdir -p ./data;
+endif
+
+if(! -d ./data/$1) then
+    mkdir -p ./data/$1;
 endif
 
 if(! -d ./out/$1) then
@@ -60,7 +68,7 @@ while ($cur_num < $num_simulation)
     echo 'cd ..' >> $ofile
     echo 'source /usr/local/sklib_gcc8/skofl-trunk/env.csh' >> $ofile
     echo 'hostname' >> $ofile
-    echo "./main "$1" "$2" "$3" "$4" "$odir" "$random >> $ofile
+    echo "./bin/main "$1" "$2" "$3" "$4" "$odir" "$random >> $ofile
 
     chmod 755 $ofile
 

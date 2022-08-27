@@ -17,7 +17,6 @@
 #include <iomanip>
 #include <stdio.h>
 #include <algorithm>
-#include <memory>
 
 #include "snevtinfo.h"
 #include "mcinfo.h"
@@ -27,6 +26,9 @@
 #include "VectGenSnConst.hh"
 #include "VectGenSnFlux.hh"
 #include "VectGenNuCrosssection.hh"
+#include "VectGenOxyCrosssection.hh"
+#include "VectGenOxyCrosssection_sub.hh"
+#include "VectGenOxigFunc.hh"
 
 #include "VectGenSnRoot.hh"
 
@@ -35,21 +37,46 @@
 /**
  * @class Generator
  */
+extern "C" {
+  void read_timevent_( int *, int *, int*);
+}
+
+extern "C" {
+	void dir_oxigfunc_( double *, double *, double *, double * );
+}
+enum PositionType{
+  mInnerFV = 0,  // 0
+  mInnerID,  // 1
+  mEntireTank  // 2
+} ;
+
+enum SKRUN
+{
+    SK_IV_BEGIN = 60000,
+    SK_IV_END = 79999,
+    SK_V_BEGIN  = 80000,
+    SK_V_END  = 84999,
+    SK_VI_BEGIN  = 85000,
+};
+
 class VectGenGenerator
 {
 public:
-  VectGenGenerator(){}
+  VectGenGenerator();
   ~VectGenGenerator(){}
 
   void convDirection(const double, const double, double*);
   void determineAngleNuebarP(const double, double&, double&, double&);
   void determineAngleElastic(const int, const double, double&, double&, double&);
+  void determineAngleNueO(const int, const int, const int, const int, const double, double&, double&, double&);
   void determineKinematics(const int, const double, double*, MCInfo*);
-  void determinePosition(double&, double&, double&);
+  void determinePosition(int, double&, double&, double&);
+  void determineNmomentum(double&, double&, double&);
   void FillEvent();
   void MakeEvent(double, double, int, int, double);
   void Process();    // For SN generator
   void Process(int); // For DSBN vector generator
+  void ReadTimeEventFile(int* numevent, int subrun[]);
 
 protected:
 
@@ -57,12 +84,17 @@ protected:
   int flag_event;
   double RatioTo10kpc;
   std::string OutDir;
+  std::string ModelName;
   double snDir[3];
   double Rmat[3][3];
 
   VectGenSnFlux* nuflux;
   VectGenNuCrosssection* nucrs;
-  std::unique_ptr<FluxCalculation> nuflux_dsbn;
+  std::unique_ptr<FluxCalculation> nuflux_dsnb;
+  VectGenOxyCrosssection* ocrs;
+  VectGenOxyCrosssectionSub* osub;
+  VectGenOxigFunc* reco;
+  VectGenOxigFunc* rece;
 
   //Neutrino oscillation
   double oscnue1, oscnue2, oscneb1, oscneb2, oscnux1, oscnux2, oscnxb1, oscnxb2;
@@ -71,14 +103,33 @@ protected:
   double totNuebarp;
   double totNueElastic, totNuebarElastic, totNuxElastic, totNuxbarElastic;
   double totNueO, totNuebarO;
+  double totNueOsub, totNuebarOsub;
   double totNcNup, totNcNun, totNcNubarp, totNcNubarn;
 
-  // flux lower/uppper bound for DSNB vect-gen
-  double nuDSNBFluxEneMax, nuDSNBFluxEneMin;
+  // parameters
+  double nuEne_min, nuEne_max, maxProb;
+
+  //number of particle emitted on deexcitation with CC reaction
+  int numNtNueO[7] = {0, 1, 0, 2, 0, 0, 0};
+  int numPtNueO[7] = {1, 1, 2, 1, 0, 0, 1};
+  int numNtNuebarO[7] = {0, 1, 0, 2, 1, 0, 0};
+  int numPtNuebarO[7] = {0, 0, 1, 0, 1, 1, 2};
+  int numGmNuebarO[7] = {1, 0, 0, 0, 0, 0, 0};
+
+  // MC data
+  TFile* fOutFile;
+  TTree* theOTree;
+
+  int fRefRunNum;
+  bool bIsUseTimeEvent;
+  bool bUseFlatFlux;
+
+  MCInfo* fMC = 0;
 
 private:
   //store neutrino kinematics into vector for time sorting
   int nReact, nuType;
+  std::string sReact;
   std::vector<SNEvtInfo> vEvtInfo;
 
   // number of events where file switches
