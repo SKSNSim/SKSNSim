@@ -1308,6 +1308,7 @@ void VectGenGenerator::Process(int NumEv){ // For DSBN vector generator
     << obs_prob * max_flux_xsec * (nuEne_max - nuEne_min) * (costMax - costMin)
     << " +- " << max_flux_xsec * (nuEne_max - nuEne_min)* (costMax - costMin) * sqrt( obs_prob * (1.0-obs_prob) / double(n_totalthrow)) << std::endl;
   std::cout << "Relative error = " << sqrt( (1.0-obs_prob) / (obs_prob * double(n_totalthrow))) << std::endl;
+  std::cout << "max_flux_xsec / nuEneMax / nuEneMin / costMax / costMin = " << max_flux_xsec << " / " << nuEne_max << " / " << nuEne_min << " / " << costMax << " / " << costMin << std::endl;
 }
 
 void VectGenGenerator::ReadTimeEventFile(int *nEvent, int subrun[])
