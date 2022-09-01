@@ -3,6 +3,8 @@
  *
  * @date 2022-03-09
  * @author Y.Koshio
+ *
+ * @history
  */
 
 #include <math.h>
@@ -1143,6 +1145,11 @@ void VectGenGenerator::Process(int NumEv){ // For DSBN vector generator
 	/*-----input file name-----*/
   FluxCalculation &nuflux = *nuflux_dsnb;
 
+  /*---- for calculation of integrated flux -------*/
+  unsigned long long n_totalthrow = 0;
+  unsigned long long n_rnghit = 0;
+  double max_flux_xsec = maxProb;
+
 	/*---- loop ----*/
   int subrun[2000];
   if ( bIsUseTimeEvent ) 
@@ -1170,7 +1177,11 @@ void VectGenGenerator::Process(int NumEv){ // For DSBN vector generator
 
         double p = nuFlux * sigm;
         double x = getRandomReal( 0., maxProb, generator );
-        if( x < p ) break;
+        n_totalthrow++;
+        if( x < p ){
+          n_rnghit++;
+          break;
+        }
       }
     }
     // determine neutrino direction
@@ -1289,8 +1300,16 @@ void VectGenGenerator::Process(int NumEv){ // For DSBN vector generator
 
 		theOTree->Fill();
 	}
-}
 
+  std::cout << "VectGenGenerator() finished ===============================" << std::endl;
+  const double obs_prob = double(n_rnghit)/double(n_totalthrow);
+  std::cout << "Status : nhits / ntotal = " << n_rnghit << " / " << n_totalthrow << " = " << obs_prob << std::endl;
+  std::cout << "Integrator estimation I := integaral( flux * sigma ) = "
+    << obs_prob * max_flux_xsec * (nuEne_max - nuEne_min) * (costMax - costMin)
+    << " +- " << max_flux_xsec * (nuEne_max - nuEne_min)* (costMax - costMin) * sqrt( obs_prob * (1.0-obs_prob) / double(n_totalthrow)) << std::endl;
+  std::cout << "Relative error = " << sqrt( (1.0-obs_prob) / (obs_prob * double(n_totalthrow))) << std::endl;
+  std::cout << "max_flux_xsec / nuEneMax / nuEneMin / costMax / costMin = " << max_flux_xsec << " / " << nuEne_max << " / " << nuEne_min << " / " << costMax << " / " << costMin << std::endl;
+}
 
 void VectGenGenerator::ReadTimeEventFile(int *nEvent, int subrun[])
 {
