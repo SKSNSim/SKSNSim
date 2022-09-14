@@ -3,6 +3,8 @@
  *
  * @date 2022-03-09
  * @author Y.Koshio
+ *
+ * @history
  */
 
 #include <math.h>
@@ -351,7 +353,11 @@ void VectGenGenerator::determineKinematics( const int nReact, const double nuEne
 							mc->pvc[mc->nvc][0] = x;
 							mc->pvc[mc->nvc][1] = y;
 							mc->pvc[mc->nvc][2] = z;
+<<<<<<< HEAD
 							mc->iorgvc[mc->nvc] = 1;  // ID OF ORIGINAL PARTICLE PARENT PARTICLE
+=======
+							mc->iorgvc[mc->nvc] = 0;  // ID OF ORIGINAL PARTICLE PARENT PARTICLE
+>>>>>>> origin
 							mc->ivtivc[mc->nvc] = 1;  // VERTEX # ( INITIAL )
 							mc->iflgvc[mc->nvc] = 0;  // FINAL STATE FLAG
                             mc->icrnvc[mc->nvc] = 1;  // CHERENKOV FLAG
@@ -376,7 +382,11 @@ void VectGenGenerator::determineKinematics( const int nReact, const double nuEne
 								mc->pvc[mc->nvc][0] = x;
 								mc->pvc[mc->nvc][1] = y;
 								mc->pvc[mc->nvc][2] = z;
+<<<<<<< HEAD
 								mc->iorgvc[mc->nvc] = 1;  // ID OF ORIGINAL PARTICLE PARENT PARTICLE
+=======
+								mc->iorgvc[mc->nvc] = 0;  // ID OF ORIGINAL PARTICLE PARENT PARTICLE
+>>>>>>> origin
 								mc->ivtivc[mc->nvc] = 1;  // VERTEX # ( INITIAL )
 								mc->iflgvc[mc->nvc] = 0;  // FINAL STATE FLAG
 								mc->icrnvc[mc->nvc] = 1;  // CHERENKOV FLAG
@@ -394,7 +404,11 @@ void VectGenGenerator::determineKinematics( const int nReact, const double nuEne
 							mc->pvc[mc->nvc][0] = x;
 							mc->pvc[mc->nvc][1] = y;
 							mc->pvc[mc->nvc][2] = z;
+<<<<<<< HEAD
 							mc->iorgvc[mc->nvc] = 1;  // ID OF ORIGINAL PARTICLE PARENT PARTICLE
+=======
+							mc->iorgvc[mc->nvc] = 0;  // ID OF ORIGINAL PARTICLE PARENT PARTICLE
+>>>>>>> origin
 							mc->ivtivc[mc->nvc] = 1;  // VERTEX # ( INITIAL )
 							mc->iflgvc[mc->nvc] = 0;  // FINAL STATE FLAG
 							mc->icrnvc[mc->nvc] = 1;  // CHERENKOV FLAG
@@ -1146,10 +1160,16 @@ void VectGenGenerator::Process(int NumEv){ // For DSBN vector generator
 	/*-----input file name-----*/
   FluxCalculation &nuflux = *nuflux_dsnb;
 
+  /*---- for calculation of integrated flux -------*/
+  unsigned long long n_totalthrow = 0;
+  unsigned long long n_rnghit = 0;
+  double max_flux_xsec = maxProb;
+
 	/*---- loop ----*/
+  int subrun[2000];
+  if ( bIsUseTimeEvent ) 
+    ReadTimeEventFile(&NumEv, subrun);
 	for( int iEvt = 0; iEvt < NumEv; iEvt++ ){
-
-
 		double nuEne, cost, eEne;
     double nEne;
     if (bUseFlatFlux) {
@@ -1170,7 +1190,11 @@ void VectGenGenerator::Process(int NumEv){ // For DSBN vector generator
 
         double p = nuFlux * sigm;
         double x = getRandomReal( 0., maxProb, generator );
-        if( x < p ) break;
+        n_totalthrow++;
+        if( x < p ){
+          n_rnghit++;
+          break;
+        }
       }
     }
     // determine neutrino direction
@@ -1195,7 +1219,7 @@ void VectGenGenerator::Process(int NumEv){ // For DSBN vector generator
 
 		// interaction point
 		double ver_x, ver_y, ver_z;
-		determinePosition(mInnerFV, ver_x, ver_y, ver_z );
+		determinePosition(mInnerID, ver_x, ver_y, ver_z );
 
 		// Fill into class
 		// MCVERTEX (see $SKOFL_ROOT/inc/vcvrtx.h )                                                                               
@@ -1218,7 +1242,7 @@ void VectGenGenerator::Process(int NumEv){ // For DSBN vector generator
 		fMC->pvc[0][1] = nuEne * nuDir[1];
 		fMC->pvc[0][2] = nuEne * nuDir[2];
 		fMC->iorgvc[0] = 0;  // ID OF ORIGIN PARTICLE  PARENT PARTICLE
-		fMC->ivtivc[0] = 0;  // VERTEX # ( INITIAL )
+		fMC->ivtivc[0] = 1;  // VERTEX # ( INITIAL )
 		fMC->iflgvc[0] = -1; // FINAL STATE FLAG
 		fMC->icrnvc[0] = 0;  // CHERENKOV FLAG
 		fMC->ivtfvc[0] = 1;  // VERTEX # ( FINAL )
@@ -1230,7 +1254,7 @@ void VectGenGenerator::Process(int NumEv){ // For DSBN vector generator
 		fMC->pvc[1][1] = 0.;
 		fMC->pvc[1][2] = 0.;
 		fMC->iorgvc[1] = 0;  // ID OF ORIGIN PARTICLE  PARENT PARTICLE
-		fMC->ivtivc[1] = 0;  // VERTEX # ( INITIAL )
+		fMC->ivtivc[1] = 1;  // VERTEX # ( INITIAL )
 		fMC->iflgvc[1] = -1; // FINAL STATE FLAG
 		fMC->icrnvc[1] = 0;  // CHERENKOV FLAG
 		fMC->ivtfvc[1] = 1;  // VERTEX # ( FINAL )
@@ -1284,7 +1308,43 @@ void VectGenGenerator::Process(int NumEv){ // For DSBN vector generator
     fMC->ivtfvc[3] = 1;  // VERTEX # ( FINAL )
 
     fMC->mcinfo[0] = fRefRunNum;
+		fMC->mcinfo[1] = subrun[iEvt];
+		std::cout <<subrun[iEvt]<<std::endl;
 
 		theOTree->Fill();
 	}
+
+  std::cout << "VectGenGenerator() finished ===============================" << std::endl;
+  const double obs_prob = double(n_rnghit)/double(n_totalthrow);
+  std::cout << "Status : nhits / ntotal = " << n_rnghit << " / " << n_totalthrow << " = " << obs_prob << std::endl;
+  std::cout << "Integrator estimation I := integaral( flux * sigma ) = "
+    << obs_prob * max_flux_xsec * (nuEne_max - nuEne_min) * (costMax - costMin)
+    << " +- " << max_flux_xsec * (nuEne_max - nuEne_min)* (costMax - costMin) * sqrt( obs_prob * (1.0-obs_prob) / double(n_totalthrow)) << std::endl;
+  std::cout << "Relative error = " << sqrt( (1.0-obs_prob) / (obs_prob * double(n_totalthrow))) << std::endl;
+  std::cout << "max_flux_xsec / nuEneMax / nuEneMin / costMax / costMin = " << max_flux_xsec << " / " << nuEne_max << " / " << nuEne_min << " / " << costMax << " / " << costMin << std::endl;
+}
+
+void VectGenGenerator::ReadTimeEventFile(int *nEvent, int subrun[])
+{
+  std::cout <<" Estimate # of event from timevent file "<<std::endl;
+  std::string timeFile; 
+  int iniRun, endRun;
+  if ( fRefRunNum < SK_IV_BEGIN ) {
+    std::cout << "reference run number is not correct"<<std::endl;
+  } 
+  else if ( SK_IV_BEGIN <= fRefRunNum && fRefRunNum < SK_IV_END ) { 
+    timeFile = "/home/sklowe/realtime_sk4_rep/solar_apr19/timevent/timevent.r061525.r077958"; 
+    iniRun = SK_IV_BEGIN; endRun = SK_IV_END;
+  }
+  else if ( SK_V_BEGIN <= fRefRunNum && fRefRunNum < SK_V_END ) { 
+    timeFile = "/home/sklowe/realtime_sk5_rep/solar_nov20/timevent/timevent.r080539.r082915"; 
+    iniRun = SK_V_BEGIN; endRun = SK_V_END;
+  }
+  else if ( SK_VI_BEGIN <= fRefRunNum ) { 
+    timeFile = "/home/sklowe/realtime_sk6_rep/solar_may22/timevent/livesubruns.r085000.r087073"; 
+    iniRun = SK_VI_BEGIN; endRun = 90000;
+  }
+  read_timevent_( &fRefRunNum, nEvent, subrun);
+
+  return;
 }

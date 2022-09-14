@@ -68,7 +68,7 @@ while ($cur_num < $num_simulation)
     echo 'cd ..' >> $ofile
     echo 'source /usr/local/sklib_gcc8/skofl-trunk/env.csh' >> $ofile
     echo 'hostname' >> $ofile
-    echo "./main_snburst "$1" "$2" "$3" "$4" "$odir" "$random >> $ofile
+    echo "./bin/main "$1" "$2" "$3" "$4" "$odir" "$random >> $ofile
 
     chmod 755 $ofile
 

@@ -15,7 +15,7 @@
 
 extern "C" {
 	void sn_sundir_( int *, int *, float *, float *, float *);
-  void read_timevent_( int *, int *);
+  //void read_timevent_( int *, int *);
 }
 
 enum SKGEOM
@@ -25,14 +25,6 @@ enum SKGEOM
     gSK_VI = 6,
 };
 
-enum SKRUN
-{
-    SK_IV_BEGIN = 60000,
-    SK_IV_END = 79999,
-    SK_V_BEGIN  = 80000,
-    SK_V_END  = 84999,
-    SK_VI_BEGIN  = 85000,
-};
 
 
 class VectGenIO : VectGenGenerator
@@ -57,7 +49,6 @@ public:
   void SetUseTimeEvent(bool b) { bIsUseTimeEvent = b; }
   void SetUseFlatFlux(bool b) { bUseFlatFlux = b; }
 
-  int ReadTimeEventFile();
 
 private:
 

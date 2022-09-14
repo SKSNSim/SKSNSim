@@ -37,6 +37,9 @@
 /**
  * @class Generator
  */
+extern "C" {
+  void read_timevent_( int *, int *, int*);
+}
 
 extern "C" {
 	void dir_oxigfunc_( double *, double *, double *, double * );
@@ -46,6 +49,15 @@ enum PositionType{
   mInnerID,  // 1
   mEntireTank  // 2
 } ;
+
+enum SKRUN
+{
+    SK_IV_BEGIN = 60000,
+    SK_IV_END = 79999,
+    SK_V_BEGIN  = 80000,
+    SK_V_END  = 84999,
+    SK_VI_BEGIN  = 85000,
+};
 
 class VectGenGenerator
 {
@@ -63,7 +75,8 @@ public:
   void FillEvent();
   void MakeEvent(double, double, int, int, double);
   void Process();    // For SN generator
-  void Process(int); // For DSBN vector generate
+  void Process(int); // For DSBN vector generator
+  void ReadTimeEventFile(int* numevent, int subrun[]);
 
 protected:
 
