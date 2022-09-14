@@ -351,7 +351,7 @@ void VectGenGenerator::determineKinematics( const int nReact, const double nuEne
 							mc->pvc[mc->nvc][0] = x;
 							mc->pvc[mc->nvc][1] = y;
 							mc->pvc[mc->nvc][2] = z;
-							mc->iorgvc[mc->nvc] = 0;  // ID OF ORIGINAL PARTICLE PARENT PARTICLE
+							mc->iorgvc[mc->nvc] = 1;  // ID OF ORIGINAL PARTICLE PARENT PARTICLE
 							mc->ivtivc[mc->nvc] = 1;  // VERTEX # ( INITIAL )
 							mc->iflgvc[mc->nvc] = 0;  // FINAL STATE FLAG
                             mc->icrnvc[mc->nvc] = 1;  // CHERENKOV FLAG
@@ -376,7 +376,7 @@ void VectGenGenerator::determineKinematics( const int nReact, const double nuEne
 								mc->pvc[mc->nvc][0] = x;
 								mc->pvc[mc->nvc][1] = y;
 								mc->pvc[mc->nvc][2] = z;
-								mc->iorgvc[mc->nvc] = 0;  // ID OF ORIGINAL PARTICLE PARENT PARTICLE
+								mc->iorgvc[mc->nvc] = 1;  // ID OF ORIGINAL PARTICLE PARENT PARTICLE
 								mc->ivtivc[mc->nvc] = 1;  // VERTEX # ( INITIAL )
 								mc->iflgvc[mc->nvc] = 0;  // FINAL STATE FLAG
 								mc->icrnvc[mc->nvc] = 1;  // CHERENKOV FLAG
@@ -394,7 +394,7 @@ void VectGenGenerator::determineKinematics( const int nReact, const double nuEne
 							mc->pvc[mc->nvc][0] = x;
 							mc->pvc[mc->nvc][1] = y;
 							mc->pvc[mc->nvc][2] = z;
-							mc->iorgvc[mc->nvc] = 0;  // ID OF ORIGINAL PARTICLE PARENT PARTICLE
+							mc->iorgvc[mc->nvc] = 1;  // ID OF ORIGINAL PARTICLE PARENT PARTICLE
 							mc->ivtivc[mc->nvc] = 1;  // VERTEX # ( INITIAL )
 							mc->iflgvc[mc->nvc] = 0;  // FINAL STATE FLAG
 							mc->icrnvc[mc->nvc] = 1;  // CHERENKOV FLAG
