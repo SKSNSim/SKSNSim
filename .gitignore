@@ -3,3 +3,8 @@ core.*
 
 obj/
 bin/
+analysis/
+check/
+data/
+submit/
+
