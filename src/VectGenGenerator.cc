@@ -316,6 +316,19 @@ void VectGenGenerator::determineKinematics( const int nReact, const double nuEne
 			mc->ivtfvc[0] = 1;  // VERTEX # ( FINAL )
 			mc->nvc++;
 
+            // Oxygen
+            mc->ipvc[1] = 1000080160;
+            mc->energy[1] = 0.; // ENERGY ( MEV )
+            mc->pvc[1][0] = 0.; // MOMENTUM OF I-TH PARTICLE ( MEV/C )
+            mc->pvc[1][1] = 0.;
+            mc->pvc[1][2] = 0.;
+            mc->iorgvc[1] = 0;  // ID OF ORIGIN PARTICLE PARENT PARTICLE
+            mc->ivtivc[1] = 1;  // VERTEX # ( INITIAL )
+            mc->iflgvc[1] = -1; // FINAL STATE FLAG
+            mc->icrnvc[1] = 0;  // CHERENKOV FLAG
+            mc->ivtfvc[1] = 1;  // VERTEX # ( FINAL )
+            mc->nvc++;
+        
 			// electron or positron
 			//double eEne, eTheta, ePhi, eDir[3];
 			//determineAngleNueO( Reaction, State, Ex_state, channel, nuEne, eEne, eTheta, ePhi); // channel = 8 is sub reaction of NueO
@@ -323,17 +336,17 @@ void VectGenGenerator::determineKinematics( const int nReact, const double nuEne
 			double amom = sqrt(SQ( eEne ) - SQ( Me ));
 			convDirection( eTheta, ePhi, eDir );
 
-			if(Reaction==0)mc->ipvc[1] = 11; // electron
-			if(Reaction==1)mc->ipvc[1] = -11; // positron
-			mc->energy[1] = eEne; // total ENERGY( MEV )
-			mc->pvc[1][0] = amom * eDir[0]; // MOMENTUM OF I-TH PARTICLE ( MEV/C )
-			mc->pvc[1][1] = amom * eDir[1];
-			mc->pvc[1][2] = amom * eDir[2];
-			mc->iorgvc[1] = 1; // ID OF ORIGINE PARTICLE PARENT PARTICLE
-			mc->ivtivc[1] = 1; // VERTEX # ( INITIAL )
-			mc->iflgvc[1] = 0; // FINAL STATE FLAG
-			mc->icrnvc[1] = 1; // CHERENKOV FLAG
-			mc->ivtfvc[1] = 1; // VERTEX # ( FINAL )
+			if(Reaction==0)mc->ipvc[2] = 11; // electron
+			if(Reaction==1)mc->ipvc[2] = -11; // positron
+			mc->energy[2] = eEne; // total ENERGY( MEV )
+			mc->pvc[2][0] = amom * eDir[0]; // MOMENTUM OF I-TH PARTICLE ( MEV/C )
+			mc->pvc[2][1] = amom * eDir[1];
+			mc->pvc[2][2] = amom * eDir[2];
+			mc->iorgvc[2] = 1; // ID OF ORIGINE PARTICLE PARENT PARTICLE
+			mc->ivtivc[2] = 1; // VERTEX # ( INITIAL )
+			mc->iflgvc[2] = 0; // FINAL STATE FLAG
+			mc->icrnvc[2] = 1; // CHERENKOV FLAG
+			mc->ivtfvc[2] = 1; // VERTEX # ( FINAL )
 			mc->nvc++;
 			//if(eEne<0.)std::cout << "e-/e+ momentum " << mc->pvc[1][0] << " " << mc->pvc[1][1] << " " << mc->pvc[1][2] << " " << eEne << " " << Me << " " << amom << " " << eDir[0] << " " << eDir[1] << " " << eDir[2] << std::endl; // nakanisi
 
@@ -347,17 +360,14 @@ void VectGenGenerator::determineKinematics( const int nReact, const double nuEne
 							// Neutron
 							i_nucre++;
 							double x = 9999., y = 9999., z = 9999.;
+                            double amom = sqrt(SQ(0.5+Mn) - SQ(Mn));
 							determineNmomentum(x, y, z);
 							mc->ipvc[mc->nvc] = 2112; // neutron
-							mc->energy[mc->nvc] = 0.5; // ENERGY ( MEV )
-							mc->pvc[mc->nvc][0] = x;
-							mc->pvc[mc->nvc][1] = y;
-							mc->pvc[mc->nvc][2] = z;
-<<<<<<< HEAD
+							mc->energy[mc->nvc] = 0.5+Mn; // ENERGY ( MEV )
+							mc->pvc[mc->nvc][0] = amom*x;
+							mc->pvc[mc->nvc][1] = amom*y;
+							mc->pvc[mc->nvc][2] = amom*z;
 							mc->iorgvc[mc->nvc] = 1;  // ID OF ORIGINAL PARTICLE PARENT PARTICLE
-=======
-							mc->iorgvc[mc->nvc] = 0;  // ID OF ORIGINAL PARTICLE PARENT PARTICLE
->>>>>>> origin
 							mc->ivtivc[mc->nvc] = 1;  // VERTEX # ( INITIAL )
 							mc->iflgvc[mc->nvc] = 0;  // FINAL STATE FLAG
                             mc->icrnvc[mc->nvc] = 1;  // CHERENKOV FLAG
@@ -375,18 +385,15 @@ void VectGenGenerator::determineKinematics( const int nReact, const double nuEne
 								// Neutron
 								i_nucre++;
 								double x = 9999., y = 9999., z = 9999.;
+                                double amom = sqrt(SQ(0.5+Mn) - SQ(Mn));
 								determineNmomentum(x, y, z);
 								//std::cout << "determineNmomentum" << " " << i_nucre << " " << x << " " << y << " " << z << std::endl;
 								mc->ipvc[mc->nvc] = 2112; // neutron
-								mc->energy[mc->nvc] = 0.5; // ENERGY ( MEV )
-								mc->pvc[mc->nvc][0] = x;
-								mc->pvc[mc->nvc][1] = y;
-								mc->pvc[mc->nvc][2] = z;
-<<<<<<< HEAD
+								mc->energy[mc->nvc] = 0.5+Mn; // ENERGY ( MEV )
+								mc->pvc[mc->nvc][0] = amom*x;
+								mc->pvc[mc->nvc][1] = amom*y;
+								mc->pvc[mc->nvc][2] = amom*z;
 								mc->iorgvc[mc->nvc] = 1;  // ID OF ORIGINAL PARTICLE PARENT PARTICLE
-=======
-								mc->iorgvc[mc->nvc] = 0;  // ID OF ORIGINAL PARTICLE PARENT PARTICLE
->>>>>>> origin
 								mc->ivtivc[mc->nvc] = 1;  // VERTEX # ( INITIAL )
 								mc->iflgvc[mc->nvc] = 0;  // FINAL STATE FLAG
 								mc->icrnvc[mc->nvc] = 1;  // CHERENKOV FLAG
@@ -401,14 +408,10 @@ void VectGenGenerator::determineKinematics( const int nReact, const double nuEne
 							determineNmomentum(x, y, z);
 							mc->ipvc[mc->nvc] = 22; // gamma
 							mc->energy[mc->nvc] = 12.674; // ENERGY ( MEV )
-							mc->pvc[mc->nvc][0] = x;
-							mc->pvc[mc->nvc][1] = y;
-							mc->pvc[mc->nvc][2] = z;
-<<<<<<< HEAD
+							mc->pvc[mc->nvc][0] = x*mc->energy[mc->nvc];
+							mc->pvc[mc->nvc][1] = y*mc->energy[mc->nvc];
+							mc->pvc[mc->nvc][2] = z*mc->energy[mc->nvc];
 							mc->iorgvc[mc->nvc] = 1;  // ID OF ORIGINAL PARTICLE PARENT PARTICLE
-=======
-							mc->iorgvc[mc->nvc] = 0;  // ID OF ORIGINAL PARTICLE PARENT PARTICLE
->>>>>>> origin
 							mc->ivtivc[mc->nvc] = 1;  // VERTEX # ( INITIAL )
 							mc->iflgvc[mc->nvc] = 0;  // FINAL STATE FLAG
 							mc->icrnvc[mc->nvc] = 1;  // CHERENKOV FLAG
