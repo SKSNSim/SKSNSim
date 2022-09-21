@@ -13,5 +13,6 @@ constexpr double Gf = 0.04541638E-5; // fermi constant(fm**2), G_F/(hbarc)^3 * (
 constexpr double HBARC = 197.3269804; // (MeV fm)
 
 constexpr double PI = 3.14159265358979833;
+constexpr double ERG2MEV = 1.0e0/1.60217733e-6;
  
 }

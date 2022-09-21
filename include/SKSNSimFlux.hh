@@ -67,20 +67,39 @@ class SKSNSimDSNBFluxCustom : SKSNSimFluxModel {
 
 };
 
+class SKSNSimSNFluxCustom : SKSNSimFluxModel {
+  private:
+    std::vector<double> tmesh;
+    std::vector<std::vector<double> > enue, eneb, enux, nnue, nneb, nnux, lnue, lneb, lnux;
+    const static std::set<FLUXNUTYPE> supportedType;
+  public:
+    SKSNSimSNFluxCustom(){}
+    ~SKSNSimSNFluxCustom(){}
+    void LoadFluxFile(std::string);
+    SKSNSimSNFluxCustom(std::string fname){ LoadFluxFile(fname); }
+    double GetFlux(const double e, const double t, const FLUXNUTYPE type) const;
+    double GetEnergyLimitMax() { return enue.front().last(); }
+    double GetEnergyLimitMin() { return enue.front().front(); }
+    double GetTimeLimitMax() { return tmesh.back(); }
+    double GetTimeLimitMin() { return tmesh.front(); }
+    const std::set<FLUXNUTYPE> &GetSupportedNuTypes() const { return supportedType; }
+};
+const std::set<SKSNSimFluxModel::FLUXNUTYPE> SKSNSimSNFluxCustom::supportedType = {};
+
 class SKSNSimSNFluxNakazato : SKSNSimFluxModel {
   private:
-    const static std::set<FLUXNUTYPE> supportedType;
+    std::unique_ptr<SKSNSimSNFluxCustom> flux ( "/home/sklowe/supernova/data/nakazato/intp1301.data" ); // TODO modify to changeable file name (model)
+
   public:
     SKSNSimSNFluxNakazato(){}
     ~SKSNSimSNFluxNakazato(){}
-    double GetFlux(const double e, const double t, const FLUXNUTYPE type) const { return 0.0; }
-    double GetEnergyLimitMax() { return 100.0; }
-    double GetEnergyLimitMin() { return 10.0; }
-    double GetTimeLimitMax() { return 100.0; }
-    double GetTimeLimitMin() { return 0.0; }
-    const std::set<FLUXNUTYPE> &GetSupportedNuTypes() const { return supportedType; }
+    double GetFlux(const double e, const double t, const FLUXNUTYPE type) const { return flux->GetFlux(e,t,type); }
+    double GetEnergyLimitMax() { return flux->GetEnergyLimitMax(); }
+    double GetEnergyLimitMin() { return flux->GetEnergyLimitMin(); }
+    double GetTimeLimitMax() { return flux->GetTimeLimitMax(); }
+    double GetTimeLimitMin() { return flux->GetTimeLimitMin(); }
+    const std::set<FLUXNUTYPE> &GetSupportedNuTypes() const { return flux->GetSupportedNuTypes(); }
 };
-const std::set<SKSNSimFluxModel::FLUXNUTYPE> SKSNSimSNFluxNakazato::supportedType = { SKSNSimFluxModel::FLUXNUEB, SKSNSimFluxModel::FLUXNUE, SKSNSimFluxModel::FLUXNUX };
 
 class SKSNSimFluxDSNBHoriuchi : SKSNSimFluxModel {
   private:

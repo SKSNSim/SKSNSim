@@ -9,6 +9,7 @@
 
 #include <utility>
 #include <memory>
+#include <set>
 #include <pdg_codes.h>
 #include <TFile.h>
 #include <TTree.h>
@@ -23,36 +24,60 @@ extern "C" {
 
 class SKSNSimCrosssectionModel {
   public:
+    enum XSECNUTYPE { XSECNUE = 0, XSECNUEB, XSECNUX, NXSECNUTYPE};
     virtual ~SKSNSimCrosssectionModel() {}
     virtual double /* cm^2 */                          GetCrosssection(double /* MeV */) = 0; // energy -> xsec
     virtual std::pair<double,double> /* <cm^2, MeV> */ GetDiffCrosssection(double /* MeV */, double /* a.u. */) = 0; // energy -> angle -> (xsec, scattered energy)
+    virtual const std::set<XSECNUTYPE> &GetSupportedNuType () const = 0;
+
 };
 
 class SKSNSimXSecFlat : SKSNSimCrosssectionModel {
   // Flat cross section: always return 1.0
+  private:
+    const static std::set<XSECNUTYPE> supportedType;
   public:
     SKSNSimXSecFlat(){}
     ~SKSNSimXSecFlat(){}
     double GetCrosssection(double e){ return 1.0;}
     std::pair<double,double> GetDiffCrosssection(double e, double r) { return std::make_pair(1.0, e);};
+    const std::set<XSECNUTYPE> &GetSupportedNuType() const {return supportedType;}; 
+};
+
+const std::set<SKSNSimCrosssectionModel::XSECNUTYPE> SKSNSimXSecFlat::supportedType = {
+  SKSNSimCrosssectionModel::XSECNUE,
+  SKSNSimCrosssectionModel::XSECNUEB,
+  SKSNSimCrosssectionModel::XSECNUX
 };
 
 class SKSNSimXSecIBDVB : SKSNSimCrosssectionModel {
   // Cross section model of IBD by Vogel and Beacom
+  private:
+    const static std::set<XSECNUTYPE> supportedType;
   public:
     SKSNSimXSecIBDVB(){}
     ~SKSNSimXSecIBDVB(){}
     double GetCrosssection(double e);
     std::pair<double,double> GetDiffCrosssection(double e, double r);
+    const std::set<XSECNUTYPE> &GetSupportedNuType() const {return supportedType;}; 
+};
+const std::set<SKSNSimCrosssectionModel::XSECNUTYPE> SKSNSimXSecIBDVB::supportedType = {
+  SKSNSimCrosssectionModel::XSECNUEB
 };
 
 class SKSNSimXSecIBDSV : SKSNSimCrosssectionModel {
   // Cross section model of IBD by Strumia-Vissani
+  private:
+    const static std::set<XSECNUTYPE> supportedType;
   public:
     SKSNSimXSecIBDSV(){}
     ~SKSNSimXSecIBDSV(){}
     double GetCrosssection(double);
     std::pair<double,double> GetDiffCrosssection(double, double);
+    const std::set<XSECNUTYPE> &GetSupportedNuType() const {return supportedType;}; 
+};
+const std::set<SKSNSimCrosssectionModel::XSECNUTYPE> SKSNSimXSecIBDSV::supportedType = {
+  SKSNSimCrosssectionModel::XSECNUEB
 };
 
 class SKSNSimXSecNuElastic : SKSNSimCrosssectionModel {
@@ -72,7 +97,7 @@ class SKSNSimXSecNuElastic : SKSNSimCrosssectionModel {
 
     void OpenCsElaFile();
     void CloseCsElaFile();
-                                          //
+    const static std::set<XSECNUTYPE> supportedType;
 
   public:
     enum FLAGETHR { ETHRON, ETHROFF };
@@ -82,6 +107,12 @@ class SKSNSimXSecNuElastic : SKSNSimCrosssectionModel {
     std::pair<double,double> GetDiffCrosssection(double e, double r);
     static double GetNuEneMin() {return nuElaEneMin;}
     static double GetNuEneMax() {return nuElaEneMax;}
+    const std::set<XSECNUTYPE> &GetSupportedNuType() const {return supportedType;}; 
+};
+const std::set<SKSNSimCrosssectionModel::XSECNUTYPE> SKSNSimXSecNuElastic::supportedType = {
+  SKSNSimCrosssectionModel::XSECNUE,
+  SKSNSimCrosssectionModel::XSECNUEB,
+  SKSNSimCrosssectionModel::XSECNUX
 };
 
 class SKSNSimXSecNuOxygen : SKSNSimCrosssectionModel {
@@ -103,6 +134,8 @@ class SKSNSimXSecNuOxygen : SKSNSimCrosssectionModel {
     std::map<INISTATE,std::vector<double>> nuene;
     std::map<INIFINSTATE, std::vector<double>> crs;
 
+    const static std::set<XSECNUTYPE> supportedType;
+
     static int GetNumEx(int ix){
       const static int num_ex[NIXSTATE] = {3, 15, 8, 1, 16};
       return num_ex[ix];
@@ -122,6 +155,11 @@ class SKSNSimXSecNuOxygen : SKSNSimCrosssectionModel {
     ~SKSNSimXSecNuOxygen(){}
     double GetCrosssection(double e, INIFINSTATE inifin = {0,0,0,0});
     std::pair<double,double> GetDiffCrosssection(double, double);
+    const std::set<XSECNUTYPE> &GetSupportedNuType() const {return supportedType;}; 
+};
+const std::set<SKSNSimCrosssectionModel::XSECNUTYPE> SKSNSimXSecNuOxygen::supportedType = {
+  SKSNSimCrosssectionModel::XSECNUE,
+  SKSNSimCrosssectionModel::XSECNUEB
 };
 
 class SKSNSimXSecNuOxygenSub : SKSNSimCrosssectionModel {
@@ -146,6 +184,8 @@ class SKSNSimXSecNuOxygenSub : SKSNSimCrosssectionModel {
     void LoadFile(INISTATE);
     void InitializeTable();
 
+    const static std::set<XSECNUTYPE> supportedType;
+
   public:
     SKSNSimXSecNuOxygenSub(){
       InitializeTable();
@@ -153,6 +193,11 @@ class SKSNSimXSecNuOxygenSub : SKSNSimCrosssectionModel {
     ~SKSNSimXSecNuOxygenSub(){}
     double GetCrosssection(double e, INIFINSTATE inifin = {0,0,0});
     std::pair<double,double> GetDiffCrosssection(double, double);
+    const std::set<XSECNUTYPE> &GetSupportedNuType() const {return supportedType;}; 
+};
+const std::set<SKSNSimCrosssectionModel::XSECNUTYPE> SKSNSimXSecNuOxygenSub::supportedType = {
+  SKSNSimCrosssectionModel::XSECNUE,
+  SKSNSimCrosssectionModel::XSECNUEB
 };
 
 #endif
