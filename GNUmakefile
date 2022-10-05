@@ -51,6 +51,7 @@ OBJS += $(patsubst src/%.F, obj/%.o, $(wildcard src/*.F))
 #INC := $(addprefix -I , $(sort $(dir $(shell find include -name '*.hh'))))
 
 MAINSRCS = $(wildcard *.cc)
+MAINSRCS += $(wildcard *.F)
 MAINOBJS = $(patsubst %.cc, obj/%.o, $(MAINSRCS))
 MAINBINS = $(patsubst %.cc, bin/%, $(MAINSRCS))
 

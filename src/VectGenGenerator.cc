@@ -3,6 +3,8 @@
  *
  * @date 2022-03-09
  * @author Y.Koshio
+ *
+ * @history
  */
 
 #include <math.h>
@@ -191,7 +193,7 @@ void VectGenGenerator::determineKinematics( const int nReact, const double nuEne
 		mc->pvc[0][1] = nuEne * snDir[1];
 		mc->pvc[0][2] = nuEne * snDir[2];
 		mc->iorgvc[0] = 0;  // ID OF ORIGIN PARTICLE  PARENT PARTICLE
-		mc->ivtivc[0] = 0;  // VERTEX # ( INITIAL )
+		mc->ivtivc[0] = 1;  // VERTEX # ( INITIAL )
 		mc->iflgvc[0] = -1; // FINAL STATE FLAG
 		mc->icrnvc[0] = 0;  // CHERENKOV FLAG
 		mc->ivtfvc[0] = 1;  // VERTEX # ( FINAL )
@@ -203,7 +205,7 @@ void VectGenGenerator::determineKinematics( const int nReact, const double nuEne
 		mc->pvc[1][1] = 0.;
 		mc->pvc[1][2] = 0.;
 		mc->iorgvc[1] = 0;  // ID OF ORIGIN PARTICLE  PARENT PARTICLE
-		mc->ivtivc[1] = 0;  // VERTEX # ( INITIAL )
+		mc->ivtivc[1] = 1;  // VERTEX # ( INITIAL )
 		mc->iflgvc[1] = -1; // FINAL STATE FLAG
 		mc->icrnvc[1] = 0;  // CHERENKOV FLAG
 		mc->ivtfvc[1] = 1;  // VERTEX # ( FINAL )
@@ -253,7 +255,7 @@ void VectGenGenerator::determineKinematics( const int nReact, const double nuEne
 		mc->pvc[0][1] = nuEne * snDir[1];
 		mc->pvc[0][2] = nuEne * snDir[2];
 		mc->iorgvc[0] = 0;  // ID OF ORIGIN PARTICLE  PARENT PARTICLE
-		mc->ivtivc[0] = 0;  // VERTEX # ( INITIAL )
+		mc->ivtivc[0] = 1;  // VERTEX # ( INITIAL )
 		mc->iflgvc[0] = -1; // FINAL STATE FLAG
 		mc->icrnvc[0] = 0;  // CHERENKOV FLAG
 		mc->ivtfvc[0] = 1;  // VERTEX # ( FINAL )
@@ -282,7 +284,7 @@ void VectGenGenerator::determineKinematics( const int nReact, const double nuEne
 	}
 	
 	else{
-		//mc->nvc = 10;
+		mc->nvc = 0;
 		//mc->mcinfo[0] = 85005;
 		int Reaction = nReact/10e4 - 1;
 		int State_pre = nReact/10e3;
@@ -309,12 +311,25 @@ void VectGenGenerator::determineKinematics( const int nReact, const double nuEne
 			mc->pvc[0][1] = nuEne * snDir[1];
 			mc->pvc[0][2] = nuEne * snDir[2];
 			mc->iorgvc[0] = 0;  // ID OF ORIGIN PARTICLE PARENT PARTICLE
-			mc->ivtivc[0] = 0;  // VERTEX # ( INITIAL ) 
+			mc->ivtivc[0] = 1;  // VERTEX # ( INITIAL ) 
 			mc->iflgvc[0] = -1; // FINAL STATE FLAG
 			mc->icrnvc[0] = 0;  // CHERENKOV FLAG
 			mc->ivtfvc[0] = 1;  // VERTEX # ( FINAL )
 			mc->nvc++;
 
+            // Oxygen
+            mc->ipvc[1] = 1000080160;
+            mc->energy[1] = 0.; // ENERGY ( MEV )
+            mc->pvc[1][0] = 0.; // MOMENTUM OF I-TH PARTICLE ( MEV/C )
+            mc->pvc[1][1] = 0.;
+            mc->pvc[1][2] = 0.;
+            mc->iorgvc[1] = 0;  // ID OF ORIGIN PARTICLE PARENT PARTICLE
+            mc->ivtivc[1] = 1;  // VERTEX # ( INITIAL )
+            mc->iflgvc[1] = -1; // FINAL STATE FLAG
+            mc->icrnvc[1] = 0;  // CHERENKOV FLAG
+            mc->ivtfvc[1] = 1;  // VERTEX # ( FINAL )
+            mc->nvc++;
+        
 			// electron or positron
 			//double eEne, eTheta, ePhi, eDir[3];
 			//determineAngleNueO( Reaction, State, Ex_state, channel, nuEne, eEne, eTheta, ePhi); // channel = 8 is sub reaction of NueO
@@ -322,23 +337,23 @@ void VectGenGenerator::determineKinematics( const int nReact, const double nuEne
 			double amom = sqrt(SQ( eEne ) - SQ( Me ));
 			convDirection( eTheta, ePhi, eDir );
 
-			if(Reaction==0)mc->ipvc[1] = 11; // electron
-			if(Reaction==1)mc->ipvc[1] = -11; // positron
-			mc->energy[1] = eEne; // total ENERGY( MEV )
-			mc->pvc[1][0] = amom * eDir[0]; // MOMENTUM OF I-TH PARTICLE ( MEV/C )
-			mc->pvc[1][1] = amom * eDir[1];
-			mc->pvc[1][2] = amom * eDir[2];
-			mc->iorgvc[1] = 1; // ID OF ORIGINE PARTICLE PARENT PARTICLE
-			mc->ivtivc[1] = 1; // VERTEX # ( INITIAL )
-			mc->iflgvc[1] = 0; // FINAL STATE FLAG
-			mc->icrnvc[1] = 1; // CHERENKOV FLAG
-			mc->ivtfvc[1] = 1; // VERTEX # ( FINAL )
+			if(Reaction==0)mc->ipvc[2] = 11; // electron
+			if(Reaction==1)mc->ipvc[2] = -11; // positron
+			mc->energy[2] = eEne; // total ENERGY( MEV )
+			mc->pvc[2][0] = amom * eDir[0]; // MOMENTUM OF I-TH PARTICLE ( MEV/C )
+			mc->pvc[2][1] = amom * eDir[1];
+			mc->pvc[2][2] = amom * eDir[2];
+			mc->iorgvc[2] = 1; // ID OF ORIGINE PARTICLE PARENT PARTICLE
+			mc->ivtivc[2] = 1; // VERTEX # ( INITIAL )
+			mc->iflgvc[2] = 0; // FINAL STATE FLAG
+			mc->icrnvc[2] = 1; // CHERENKOV FLAG
+			mc->ivtfvc[2] = 1; // VERTEX # ( FINAL )
 			mc->nvc++;
 			//if(eEne<0.)std::cout << "e-/e+ momentum " << mc->pvc[1][0] << " " << mc->pvc[1][1] << " " << mc->pvc[1][2] << " " << eEne << " " << Me << " " << amom << " " << eDir[0] << " " << eDir[1] << " " << eDir[2] << std::endl; // nakanisi
 
 			double costh = snDir[0] * eDir[0] + snDir[1] * eDir[1] + snDir[2] * eDir[2];
 
-			if(numNtNueO[channel]!=0 || numNtNuebarO[channel]!=0 || numGmNuebarO[channel]!=0){ // TODO where numNtNueO is initialized?
+			if(numNtNueO[channel]!=0 || numNtNuebarO[channel]!=0 || numGmNuebarO[channel]!=0){
 				if(Reaction==0){
 					int i_nucre = 0;
 					if(Ex_state!=29){
@@ -346,16 +361,18 @@ void VectGenGenerator::determineKinematics( const int nReact, const double nuEne
 							// Neutron
 							i_nucre++;
 							double x = 9999., y = 9999., z = 9999.;
+              double amom = sqrt(SQ(0.5+Mn) - SQ(Mn));
 							determineNmomentum(x, y, z);
 							mc->ipvc[mc->nvc] = 2112; // neutron
-							mc->energy[mc->nvc] = 0.5; // ENERGY ( MEV )
-							mc->pvc[mc->nvc][0] = x;
-							mc->pvc[mc->nvc][1] = y;
-							mc->pvc[mc->nvc][2] = z;
-							mc->iorgvc[mc->nvc] = 0;  // ID OF ORIGINAL PARTICLE PARENT PARTICLE
-							mc->ivtivc[mc->nvc] = 0;  // VERTEX # ( INITIAL )
-							mc->iflgvc[mc->nvc] = 1; // FINAL STATE FLAG
-							mc->icrnvc[mc->nvc] = 0;  // VERTEX # ( FINAL )
+							mc->energy[mc->nvc] = 0.5+Mn; // ENERGY ( MEV )
+							mc->pvc[mc->nvc][0] = amom*x;
+							mc->pvc[mc->nvc][1] = amom*y;
+							mc->pvc[mc->nvc][2] = amom*z;
+							mc->iorgvc[mc->nvc] = 1;  // ID OF ORIGINAL PARTICLE PARENT PARTICLE
+							mc->ivtivc[mc->nvc] = 1;  // VERTEX # ( INITIAL )
+							mc->iflgvc[mc->nvc] = 0;  // FINAL STATE FLAG
+              mc->icrnvc[mc->nvc] = 1;  // CHERENKOV FLAG
+							mc->ivtfvc[mc->nvc] = 1;  // VERTEX # ( FINAL )
 							mc->nvc++;
 							//std::cout << "neutron information " << nReact << " " << i_nucre << " " << mc->ipvc[2+i_nucre] << " " << x << " " << y << " " << z << std::endl;
 						}
@@ -369,17 +386,19 @@ void VectGenGenerator::determineKinematics( const int nReact, const double nuEne
 								// Neutron
 								i_nucre++;
 								double x = 9999., y = 9999., z = 9999.;
+                                double amom = sqrt(SQ(0.5+Mn) - SQ(Mn));
 								determineNmomentum(x, y, z);
 								//std::cout << "determineNmomentum" << " " << i_nucre << " " << x << " " << y << " " << z << std::endl;
 								mc->ipvc[mc->nvc] = 2112; // neutron
-								mc->energy[mc->nvc] = 0.5; // ENERGY ( MEV )
-								mc->pvc[mc->nvc][0] = x;
-								mc->pvc[mc->nvc][1] = y;
-								mc->pvc[mc->nvc][2] = z;
-								mc->iorgvc[mc->nvc] = 0;  // ID OF ORIGINAL PARTICLE PARENT PARTICLE
-								mc->ivtivc[mc->nvc] = 0;  // VERTEX # ( INITIAL )
-								mc->iflgvc[mc->nvc] = 1; // FINAL STATE FLAG
-								mc->icrnvc[mc->nvc] = 0;  // VERTEX # ( FINAL )
+								mc->energy[mc->nvc] = 0.5+Mn; // ENERGY ( MEV )
+								mc->pvc[mc->nvc][0] = amom*x;
+								mc->pvc[mc->nvc][1] = amom*y;
+								mc->pvc[mc->nvc][2] = amom*z;
+								mc->iorgvc[mc->nvc] = 1;  // ID OF ORIGINAL PARTICLE PARENT PARTICLE
+								mc->ivtivc[mc->nvc] = 1;  // VERTEX # ( INITIAL )
+								mc->iflgvc[mc->nvc] = 0;  // FINAL STATE FLAG
+								mc->icrnvc[mc->nvc] = 1;  // CHERENKOV FLAG
+                                mc->ivtfvc[mc->nvc] = 1;  // VERTEX # ( FINAL )
 								mc->nvc++;
 							}
 						}
@@ -390,13 +409,14 @@ void VectGenGenerator::determineKinematics( const int nReact, const double nuEne
 							determineNmomentum(x, y, z);
 							mc->ipvc[mc->nvc] = 22; // gamma
 							mc->energy[mc->nvc] = 12.674; // ENERGY ( MEV )
-							mc->pvc[mc->nvc][0] = x;
-							mc->pvc[mc->nvc][1] = y;
-							mc->pvc[mc->nvc][2] = z;
-							mc->iorgvc[mc->nvc] = 0;  // ID OF ORIGINAL PARTICLE PARENT PARTICLE
-							mc->ivtivc[mc->nvc] = 0;  // VERTEX # ( INITIAL )
-							mc->iflgvc[mc->nvc] = 1; // FINAL STATE FLAG
-							mc->icrnvc[mc->nvc] = 0;  // VERTEX # ( FINAL )
+							mc->pvc[mc->nvc][0] = x*mc->energy[mc->nvc];
+							mc->pvc[mc->nvc][1] = y*mc->energy[mc->nvc];
+							mc->pvc[mc->nvc][2] = z*mc->energy[mc->nvc];
+							mc->iorgvc[mc->nvc] = 1;  // ID OF ORIGINAL PARTICLE PARENT PARTICLE
+							mc->ivtivc[mc->nvc] = 1;  // VERTEX # ( INITIAL )
+							mc->iflgvc[mc->nvc] = 0;  // FINAL STATE FLAG
+							mc->icrnvc[mc->nvc] = 1;  // CHERENKOV FLAG
+                            mc->ivtfvc[mc->nvc] = 1;  // VERTEX # ( FINAL )
 							//std::cout << "gamma emission " << i_nucre << " " << mc->ipvc[mc->nvc] << " " << mc->energy[mc->nvc] << " " << x << " " << y << " " << z << std::endl; // nakanisi
 							mc->nvc++;
 						}
@@ -649,10 +669,8 @@ void VectGenGenerator::MakeEvent(double time, double nu_energy, int nReact, int 
 
 	double totcrsIBD[nuEneNBins] = {0.};
 	double dRandTotEvts = generator->Poisson(rate);
-	//if(time<0.005)std::cout << time << " " << nu_energy << " " << nReact << " " << nuType << " " << rate << std::endl; //nakanisi
 
 	if(dRandTotEvts > 0){
-		//std::cout << "MakeEvent " << time << " " << nu_energy << " " << nReact << " " << nuType << " " << rate << " " << dRandTotEvts << std::endl; //nakanisi
 		for(int i=0; i<dRandTotEvts; i++){
 			double ene_s = nu_energy - nuEneBinSize/2., ene_e = nu_energy + nuEneBinSize/2.;
 			double nuEne = getRandomReal( ene_s, ene_e, generator );
@@ -684,7 +702,9 @@ void VectGenGenerator::MakeEvent(double time, double nu_energy, int nReact, int 
 
 void VectGenGenerator::Process(){
 
+#ifdef DEBUG
 	std::cout << "Prcess of sn_burst side" << std::endl;//nakanisi
+#endif
 	/*---- Fill total cross section into array to avoid repeating calculation ----*/
 	const double nuEne_min = nuEneMin;
 	const double nuEne_max = nuEneMax;
@@ -822,103 +842,6 @@ void VectGenGenerator::Process(){
 			}
 		}
 	}
-
-  auto DumpCrs = [totcrsIBD, totcrsNue, totcrsNueb, totcrsNux, totcrsNuxb, Ocrse0, Ocrse1, Ocrse2, Ocrse3, Ocrse4, Ocrsp0, Ocrsp1, Ocrsp2, Ocrsp3, Ocrsp4, OcrseSub, OcrspSub] () {
-    int NDUMP = 20;
-    std::cout << "[IZU CRS] totcrsIBD ";
-    for( int i = 0; i < NDUMP && i < nuEneNBins; i++) std::cout << totcrsIBD[i] << " ";
-    std::cout << std::endl;
-    std::cout << "[IZU CRS] totcrsNue ";
-    for( int i = 0; i < NDUMP && i < nuEneNBins; i++) std::cout << totcrsNue[i] << " ";
-    std::cout << std::endl;
-    std::cout << "[IZU CRS] totcrsNueb ";
-    for( int i = 0; i < NDUMP && i < nuEneNBins; i++) std::cout << totcrsNueb[i] << " ";
-    std::cout << std::endl;
-    std::cout << "[IZU CRS] totcrsNux ";
-    for( int i = 0; i < NDUMP && i < nuEneNBins; i++) std::cout << totcrsNux[i] << " ";
-    std::cout << std::endl;
-    std::cout << "[IZU CRS] totcrsNuxb ";
-    for( int i = 0; i < NDUMP && i < nuEneNBins; i++) std::cout << totcrsNuxb[i] << " ";
-    std::cout << std::endl;
-    for( int j = 0; j < 16; j++){
-      for(int k = 0; k < 7; k++){
-        std::cout << "[IZU CRS] Ocrse0 (" << j << " " << k << ") ";
-        for( int i = 0; i < NDUMP && i < Ocrse0[j][k].size(); i++) std::cout << Ocrse0[j][k][i] << " ";
-        std::cout << std::endl;
-      }
-    }
-    for( int j = 0; j < 16; j++){
-      for(int k = 0; k < 7; k++){
-        std::cout << "[IZU CRS] Ocrse1 (" << j << " " << k << ") ";
-        for( int i = 0; i < NDUMP && i < Ocrse1[j][k].size(); i++) std::cout << Ocrse1[j][k][i] << " ";
-        std::cout << std::endl;
-      }
-    }
-    for( int j = 0; j < 16; j++){
-      for(int k = 0; k < 7; k++){
-        std::cout << "[IZU CRS] Ocrse2 (" << j << " " << k << ") ";
-        for( int i = 0; i < NDUMP && i < Ocrse2[j][k].size(); i++) std::cout << Ocrse2[j][k][i] << " ";
-        std::cout << std::endl;
-      }
-    }
-    for( int j = 0; j < 16; j++){
-      for(int k = 0; k < 7; k++){
-        std::cout << "[IZU CRS] Ocrse3 (" << j << " " << k << ") ";
-        for( int i = 0; i < NDUMP && i < Ocrse3[j][k].size(); i++) std::cout << Ocrse3[j][k][i] << " ";
-        std::cout << std::endl;
-      }
-    }
-    for( int j = 0; j < 16; j++){
-      for(int k = 0; k < 7; k++){
-        std::cout << "[IZU CRS] Ocrse4 (" << j << " " << k << ") ";
-        for( int i = 0; i < NDUMP && i < Ocrse4[j][k].size(); i++) std::cout << Ocrse4[j][k][i] << " ";
-        std::cout << std::endl;
-      }
-    }
-    for( int j = 0; j < 16; j++){
-      for(int k = 0; k < 7; k++){
-        std::cout << "[IZU CRS] Ocrsp1 (" << j << " " << k << ") ";
-        for( int i = 0; i < NDUMP && i < Ocrsp1[j][k].size(); i++) std::cout << Ocrsp1[j][k][i] << " ";
-        std::cout << std::endl;
-      }
-    }
-    for( int j = 0; j < 16; j++){
-      for(int k = 0; k < 7; k++){
-        std::cout << "[IZU CRS] Ocrsp2 (" << j << " " << k << ") ";
-        for( int i = 0; i < NDUMP && i < Ocrsp2[j][k].size(); i++) std::cout << Ocrsp2[j][k][i] << " ";
-        std::cout << std::endl;
-      }
-    }
-    for( int j = 0; j < 16; j++){
-      for(int k = 0; k < 7; k++){
-        std::cout << "[IZU CRS] Ocrsp3 (" << j << " " << k << ") ";
-        for( int i = 0; i < NDUMP && i < Ocrsp3[j][k].size(); i++) std::cout << Ocrsp3[j][k][i] << " ";
-        std::cout << std::endl;
-      }
-    }
-    for( int j = 0; j < 16; j++){
-      for(int k = 0; k < 7; k++){
-        std::cout << "[IZU CRS] Ocrsp4 (" << j << " " << k << ") ";
-        for( int i = 0; i < NDUMP && i < Ocrsp4[j][k].size(); i++) std::cout << Ocrsp4[j][k][i] << " ";
-        std::cout << std::endl;
-      }
-    }
-    for( int j = 0; j < 5; j++){
-      for(int k = 0; k < 32; k++){
-        std::cout << "[IZU CRS] OcrseSub (" << j << " " << k << ") ";
-        for( int i = 0; i < NDUMP && i < OcrseSub[j][k].size(); i++) std::cout << OcrseSub[j][k][i] << " ";
-        std::cout << std::endl;
-      }
-    }
-    for( int j = 0; j < 5; j++){
-      for(int k = 0; k < 32; k++){
-        std::cout << "[IZU CRS] OcrspSub (" << j << " " << k << ") ";
-        for( int i = 0; i < NDUMP && i < OcrspSub[j][k].size(); i++) std::cout << OcrspSub[j][k][i] << " ";
-        std::cout << std::endl;
-      }
-    }
-  };
-  DumpCrs();
 					
 
 	/*---- loop ----*/
@@ -937,6 +860,7 @@ void VectGenGenerator::Process(){
 		for(int i_nu_ene =0; i_nu_ene < nuEneNBins; i_nu_ene++) {
 
 			double nu_energy = nuEne_min + ( double(i_nu_ene) + 0.5 ) * nuEneBinSize;
+			//if(i_time==0)std::cout << i_nu_ene << " " << nu_energy << std::endl; //nakanisi
 
 			double nspcne = nuflux->VectGenSnNspeNue(time, nu_energy); //Nue
 			double nspcneb = nuflux->VectGenSnNspeNueb(time, nu_energy); //Nuebar
@@ -945,7 +869,9 @@ void VectGenGenerator::Process(){
 			/*----- inverse beta decay -----*/
 			
 			rate = Const_p * (oscneb1*nspcneb + oscneb2*nspcnx) * totcrsIBD[i_nu_ene] * nuEneBinSize * tBinSize * RatioTo10kpc;
+			//if(nu_energy>200)std::cout << "IBD rate " << time << " " << nu_energy << " " << rate << std::endl;
 			totNuebarp += rate;
+			//if(time>=0.0225)std::cout << time << " "  << i_nu_ene << " " << nu_energy << " " << "Const_p " << Const_p << " " << "nspcneb " << nspcneb << " " << "nspcnx " << nspcnx << " " << "totcrsIBD "  << totcrsIBD[i_nu_ene] << " " << "rate " << rate << " " << totNuebarp << std::endl; //nakanisi
 			if(flag_event == 1) {
 			  nReact = 0;
 			  nuType = -12;
@@ -1186,7 +1112,7 @@ void VectGenGenerator::Process(){
 			}
 		}
 
-		//std::cout << time << " " << totNuebarp << " " << totNueElastic << std::endl;
+		//std::cout << time << " " << totNuebarp << " " << totNueElastic << std::endl; //nakanisi
 
 	}
 	std::cout << "end loop process" << std::endl; //nakanisi
@@ -1208,8 +1134,10 @@ void VectGenGenerator::Process(){
 	fprintf( stdout, "   nuxbar + e = %e\n", totNuxbarElastic );
 	fprintf( stdout, "   nue + O = %e\n", totNueO+totNueOsub );
 	fprintf( stdout, "   nuebar + O = %e\n", totNuebarO+totNuebarOsub );
-	//fprintf( stdout, "   nue + O sub = %e\n", totNueOsub );
-	//fprintf( stdout, "   nuebar + O sub = %e\n", totNuebarOsub );
+	/*
+	fprintf( stdout, "   nue + O sub = %e\n", totNueOsub );
+	fprintf( stdout, "   nuebar + O sub = %e\n", totNuebarOsub );
+	*/
 	fprintf( stdout, "------------------------------------\n" );
 
 	std::cout << "end calculation of each expected event number" << std::endl; //nakanisi
@@ -1238,17 +1166,19 @@ void VectGenGenerator::Process(){
 
 void VectGenGenerator::Process(int NumEv){ // For DSBN vector generator
 
-	std::cout << "Process of dsnb side" << std::endl; //nakanisi
 	/*-----input file name-----*/
   FluxCalculation &nuflux = *nuflux_dsnb;
+
+  /*---- for calculation of integrated flux -------*/
+  unsigned long long n_totalthrow = 0;
+  unsigned long long n_rnghit = 0;
+  double max_flux_xsec = maxProb;
 
 	/*---- loop ----*/
   int subrun[2000];
   if ( bIsUseTimeEvent ) 
     ReadTimeEventFile(&NumEv, subrun);
-
 	for( int iEvt = 0; iEvt < NumEv; iEvt++ ){
-
 		double nuEne, cost, eEne;
     double nEne;
     if (bUseFlatFlux) {
@@ -1269,7 +1199,11 @@ void VectGenGenerator::Process(int NumEv){ // For DSBN vector generator
 
         double p = nuFlux * sigm;
         double x = getRandomReal( 0., maxProb, generator );
-        if( x < p ) break;
+        n_totalthrow++;
+        if( x < p ){
+          n_rnghit++;
+          break;
+        }
       }
     }
     // determine neutrino direction
@@ -1308,7 +1242,7 @@ void VectGenGenerator::Process(int NumEv){ // For DSBN vector generator
 
 		// IBD interaction
 
-		fMC->nvc = 4;
+		fMC->nvc = 0;
 
 		// Original neutrino
 		fMC->ipvc[0] = -12; // anti-electron neutrino
@@ -1317,7 +1251,7 @@ void VectGenGenerator::Process(int NumEv){ // For DSBN vector generator
 		fMC->pvc[0][1] = nuEne * nuDir[1];
 		fMC->pvc[0][2] = nuEne * nuDir[2];
 		fMC->iorgvc[0] = 0;  // ID OF ORIGIN PARTICLE  PARENT PARTICLE
-		fMC->ivtivc[0] = 0;  // VERTEX # ( INITIAL )
+		fMC->ivtivc[0] = 1;  // VERTEX # ( INITIAL )
 		fMC->iflgvc[0] = -1; // FINAL STATE FLAG
 		fMC->icrnvc[0] = 0;  // CHERENKOV FLAG
 		fMC->ivtfvc[0] = 1;  // VERTEX # ( FINAL )
@@ -1329,7 +1263,7 @@ void VectGenGenerator::Process(int NumEv){ // For DSBN vector generator
 		fMC->pvc[1][1] = 0.;
 		fMC->pvc[1][2] = 0.;
 		fMC->iorgvc[1] = 0;  // ID OF ORIGIN PARTICLE  PARENT PARTICLE
-		fMC->ivtivc[1] = 0;  // VERTEX # ( INITIAL )
+		fMC->ivtivc[1] = 1;  // VERTEX # ( INITIAL )
 		fMC->iflgvc[1] = -1; // FINAL STATE FLAG
 		fMC->icrnvc[1] = 0;  // CHERENKOV FLAG
 		fMC->ivtfvc[1] = 1;  // VERTEX # ( FINAL )
@@ -1383,13 +1317,21 @@ void VectGenGenerator::Process(int NumEv){ // For DSBN vector generator
     fMC->ivtfvc[3] = 1;  // VERTEX # ( FINAL )
 
     fMC->mcinfo[0] = fRefRunNum;
-    fMC->mcinfo[1] = subrun[iEvt];
-    std::cout <<subrun[iEvt]<<std::endl;
+		fMC->mcinfo[1] = subrun[iEvt];
+		std::cout <<subrun[iEvt]<<std::endl;
 
 		theOTree->Fill();
 	}
-}
 
+  std::cout << "VectGenGenerator() finished ===============================" << std::endl;
+  const double obs_prob = double(n_rnghit)/double(n_totalthrow);
+  std::cout << "Status : nhits / ntotal = " << n_rnghit << " / " << n_totalthrow << " = " << obs_prob << std::endl;
+  std::cout << "Integrator estimation I := integaral( flux * sigma ) = "
+    << obs_prob * max_flux_xsec * (nuEne_max - nuEne_min) * (costMax - costMin)
+    << " +- " << max_flux_xsec * (nuEne_max - nuEne_min)* (costMax - costMin) * sqrt( obs_prob * (1.0-obs_prob) / double(n_totalthrow)) << std::endl;
+  std::cout << "Relative error = " << sqrt( (1.0-obs_prob) / (obs_prob * double(n_totalthrow))) << std::endl;
+  std::cout << "max_flux_xsec / nuEneMax / nuEneMin / costMax / costMin = " << max_flux_xsec << " / " << nuEne_max << " / " << nuEne_min << " / " << costMax << " / " << costMin << std::endl;
+}
 
 void VectGenGenerator::ReadTimeEventFile(int *nEvent, int subrun[])
 {

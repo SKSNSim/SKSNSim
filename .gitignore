@@ -4,3 +4,8 @@ main_srn
 
 obj/
 bin/
+analysis/
+check/
+data/
+submit/
+
