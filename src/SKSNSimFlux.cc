@@ -11,10 +11,13 @@
 #include <sstream>
 #include <iterator>
 #include "SKSNSimFlux.hh"
+#include "SKSNSimConstant.hh"
 
 #ifdef RETURNEXCEPATIONS
 #include <stdexcept>
 #endif
+
+using namespace SKSNSimPhysConst;
 
 SKSNSimDSNBFluxCustom::SKSNSimDSNBFluxCustom()
 {
@@ -98,13 +101,13 @@ double SKSNSimDSNBFluxCustom::GetFlux(const double nu_ene_MeV, const double time
 }
 
 
-SKSNSimSNFluxCustom::LoadFluxFile(std::string fname){
-  cout <<"SN model data in SnLoading :  "<<fname << endl;
+void SKSNSimSNFluxCustom::LoadFluxFile(std::string fname){
+  std::cout <<"SN model data in SnLoading :  "<<fname << std::endl;
 
   // file open
-  ifstream ifs(file_name.c_str());
+  std::ifstream ifs(fname.c_str());
   if(!ifs.is_open()){
-    cerr<<"file load failed"<<endl;
+    std::cerr<<"file load failed"<<std::endl;
     exit(-1);
   }
 
@@ -119,28 +122,28 @@ SKSNSimSNFluxCustom::LoadFluxFile(std::string fname){
   ifs.close();
 
   // Read data
-  ifs.open(file_name.c_str());
+  ifs.open(fname.c_str());
   double t0, elow, ehigh;
-  vector<double> a0(Ebin), a1(Ebin), a2(Ebin), a3(Ebin), a4(Ebin), a5(Ebin), a6(Ebin), a7(Ebin), a8(Ebin);
+  std::vector<double> a0(Ebin), a1(Ebin), a2(Ebin), a3(Ebin), a4(Ebin), a5(Ebin), a6(Ebin), a7(Ebin), a8(Ebin);
 
   while(ifs>>t0){
     tmesh.push_back(t0);
     for(int j=0; j<Ebin ;j++){
       ifs>>elow>>ehigh>>a3[j]>>a4[j]>>a5[j]>>a6[j]>>a7[j]>>a8[j];
 
-      if(a3[j] > zero_precision) a0[j] = a6[j]/a3[j]*ERG2MEV;
+      if(a3[j] > ZERO_PRECISION) a0[j] = a6[j]/a3[j]*ERG2MEV;
       else {
         a0[j] = (elow+ehigh)/2.;
         a3[j] = 0;
         a6[j] = 0;
       }
-      if(a4[j] > zero_precision) a1[j] = a7[j]/a4[j]*ERG2MEV;
+      if(a4[j] > ZERO_PRECISION) a1[j] = a7[j]/a4[j]*ERG2MEV;
       else {
         a1[j] = (elow+ehigh)/2.;
         a4[j] = 0.;
         a7[j] = 0.;
       }
-      if(a5[j] > zero_precision) a2[j] = a8[j]/a5[j]*ERG2MEV;
+      if(a5[j] > ZERO_PRECISION) a2[j] = a8[j]/a5[j]*ERG2MEV;
       else {
         a2[j] = (elow+ehigh)/2.;
         a5[j] = 0.;
@@ -171,22 +174,29 @@ double SKSNSimSNFluxCustom::GetFlux(const double e, const double t, const FLUXNU
   double nspc = 0;
   double nspc0 = 0.;
 
+  const std::vector<std::vector<double>> &ebins = 
+    type == FLUXNUTYPE::FLUXNUE? enue: (
+    type == FLUXNUTYPE::FLUXNUEB? eneb: enux);
+  const std::vector<std::vector<double>> &nbins = 
+    type == FLUXNUTYPE::FLUXNUE? nnue: (
+    type == FLUXNUTYPE::FLUXNUEB? nneb: nnux);
+
   if(t < tmesh[0] || t < tmesh[tmesh.size()-1]){
     int i = 0;
     while(tmesh[i] < t) i++;
     i--;
     int j = 1;
-    while(enue[i][j] < e && j<20) j++;
+    while(ebins[i][j] < e && j<20) j++;
 
     //cout << "time   " << time << " " << i << " " << tmesh[i] << " " << tmesh[i+1] << endl;
     //cout << "energy " << energy << " " << j << endl;
 
     double nspclow, nspchigh, elow, ehigh;
 
-    nspclow  = nnue[i][j-1];
-    nspchigh = nnue[i][j];
-    elow  = enue[i][j-1];
-    ehigh = enue[i][j];
+    nspclow  = nbins[i][j-1];
+    nspchigh = nbins[i][j];
+    elow  = ebins[i][j-1];
+    ehigh = ebins[i][j];
     if(ehigh!=0 || elow!=0){
       nspc0 = (nspchigh - nspclow) * (e - elow) / (ehigh - elow) + nspclow;
     }
@@ -195,19 +205,19 @@ double SKSNSimSNFluxCustom::GetFlux(const double e, const double t, const FLUXNU
     }
     //cout << nspc0 << endl;
 
-    nspclow  = nnue[i+1][j-1];
-    nspchigh = nnue[i+1][j];
-    elow  = enue[i+1][j-1];
-    ehigh = enue[i+1][j];
+    nspclow  = nbins[i+1][j-1];
+    nspchigh = nbins[i+1][j];
+    elow  = ebins[i+1][j-1];
+    ehigh = ebins[i+1][j];
     if(ehigh!=0 || elow!=0){
       double nspc1 = (nspchigh - nspclow) * (e - elow) / (ehigh - elow) + nspclow;
       //cout << nspc1 << endl;
 
-      nspc = (nspc1 - nspc0) * (time - tmesh[i]) / (tmesh[i+1] - tmesh[i]) + nspc0;
+      nspc = (nspc1 - nspc0) * (t - tmesh[i]) / (tmesh[i+1] - tmesh[i]) + nspc0;
     }
     else if(ehigh==0 && elow==0){
       double nspc1 = 0.;
-      nspc = (nspc1 - nspc0) * (time - tmesh[i]) / (tmesh[i+1] - tmesh[i]) + nspc0;
+      nspc = (nspc1 - nspc0) * (t - tmesh[i]) / (tmesh[i+1] - tmesh[i]) + nspc0;
     }
     //cout << nspc << endl;
   }

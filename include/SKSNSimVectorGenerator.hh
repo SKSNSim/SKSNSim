@@ -13,6 +13,78 @@
 #include <TRandom3.h>
 #include "SKSNSimFlux.hh"
 #include "SKSNSimCrosssection.hh"
+#include "SKSNSimTools.hh"
+
+template<class T>
+class UtilVector3 {
+  public:
+    T x,y,z;
+    UtilVector3(const T xx, const T yy, const T zz) : x(xx), y(yy), z(zz){}
+    UtilVector3(const T xyz[]) : x(xyz[0]), y(xyz[1]), z(xyz[2]){}
+    UtilVector3(const T theta, const T phi) : x(std::sin(theta) * std::cos(phi)),
+                                              y(std::sin(theta) * std::sin(phi)),
+                                              z(std::cos(theta)){}
+    T operator[](size_t i)const { if(i==0) return x; if(i==1) return y; if(i==2) return z; return 9999.;}
+    T operator*(const UtilVector3 &v) const { return v.x * x + v.y * y + v.z*z; }
+    UtilVector3 operator+(const UtilVector3 v) const { return UtilVector3( v.x + x,  v.y+ y, v.z+z); }
+    UtilVector3 operator-(const UtilVector3 v) const { return -1.0 * v + *this; }
+    T Mag2() const { return *this * *this; }
+    T Mag() const { return std::sqrt(Mag2()); }
+    UtilVector3 Unit() const { return (1./Mag())* *this ; }
+};
+template <class T> UtilVector3<T> operator*(T a, const UtilVector3<T> &v){ return UtilVector3<T>(a*v.x, a*v.y, a*v.z);}
+
+template<class T>
+class UtilMatrix3 {
+  public:
+    T v[3][3];
+    UtilMatrix3(){}
+    ~UtilMatrix3(){}
+    UtilMatrix3(
+        T x00, T x01, T x02,
+        T x10, T x11, T x12,
+        T x20, T x21, T x22
+        ){
+      v[0][0] = x00; v[0][1] = x01; v[0][2] = x02;
+      v[1][0] = x10; v[1][1] = x11; v[1][2] = x12;
+      v[2][0] = x20; v[2][1] = x21; v[2][2] = x22;
+    }
+    UtilMatrix3(
+        UtilVector3<T> v0, UtilVector3<T> v1, UtilVector3<T> v2
+        ){
+      v[0][0] = v0.x; v[0][1] = v1.x; v[0][2] = v2.x;
+      v[1][0] = v0.y; v[1][1] = v1.y; v[1][2] = v2.y;
+      v[2][0] = v0.z; v[2][1] = v1.z; v[2][2] = v2.z;
+    }
+    UtilVector3<T> operator*(const UtilVector3<T> &l) const {
+      T x[3];
+      for(int i = 0; i < 3; i++){
+        x[i] = UtilVector3<T>(v[i][0], v[i][1], v[i][2]) * l;
+      }
+      return UtilVector3<T>(x[0], x[1], x[2]);
+    }
+
+    UtilMatrix3 operator*(const UtilMatrix3 &m) const {
+      auto r = UtilMatrix3();
+      for(int i = 0; i < 3; i++){
+        for(int j = 0; j < 3; j++){
+          r[i][j] = 0;
+          for(int k = 0; k < 3; k++)
+            r[i][j] += this->v[i][k] * m.v[k][j];
+        }
+      }
+      return r;
+    }
+};
+
+enum SKSNSimReactionType { mReactionTypeNuebarIBD = 0,
+  mReactionTypeNueElastic, mReactionTypeNuebarElastic,
+  mReactionTypeNuxElastic, mReactionTypeNuxbarElastic,
+  mReactionTypeNueO, mReactionTypeNuebarO,
+  mReactionTypeNueOsub, mReactionTypeNuebarOsub,
+  mReactionTypeNuPNC, mReactionTypeNubarPNC,
+  mReactionTypeNuNNC, mReactionTypeNubarNNC,
+  mNReactionType };
 
 class SKSNSimSNEventVector {
   // based on MCInfo
@@ -40,6 +112,17 @@ class SKSNSimSNEventVector {
     };
     std::vector<TRACK> m_tracks;
 
+    struct SNINFO {
+      int iEvt;
+      int rType;
+      double rTime;
+      double rVtx[3];
+      int nuType;
+      double nuEne;
+      double nuDir[3];
+    } sninfo;
+
+		///static void determineKinematics( SKSNSimSNEventVector &p);
 
   public:
     SKSNSimSNEventVector() {};
@@ -74,6 +157,26 @@ class SKSNSimSNEventVector {
     int GetTrackIVTFVC(int i) const { if( i>= 0 && i < GetNTrack()) return m_tracks[i].ivtfvc; return 9999; }
     int GetTrackIFLGVC(int i) const { if( i>= 0 && i < GetNTrack()) return m_tracks[i].iflgvc; return 9999; }
     int GetTrackICRNVC(int i) const { if( i>= 0 && i < GetNTrack()) return m_tracks[i].icrnvc; return 9999; }
+
+    void SetSNEvtInfo(int nReact, double tReact, int nuType, double nuEne, double snDir[3], double rVtx[3]){
+      sninfo.rType = nReact;
+      sninfo.rTime = tReact;
+      sninfo.nuType = nuType;
+      sninfo.nuEne = nuEne;
+      sninfo.nuDir[0] = snDir[0];
+      sninfo.nuDir[1] = snDir[1];
+      sninfo.nuDir[2] = snDir[2];
+      sninfo.rVtx[0] = rVtx[0];
+      sninfo.rVtx[1] = rVtx[1];
+      sninfo.rVtx[2] = rVtx[2];
+    };
+    void SetSNEvtInfoIEvt(int i) { sninfo.iEvt = i; }
+    auto GetSNEvtInfoRVtx(int i) { return sninfo.rVtx[i]; }
+    auto GetSNEvtInfoNuEne() { return sninfo.nuEne; }
+    auto GetSNEvtInfoRType() { return sninfo.rType; }
+    UtilVector3<double> GetSNEvtInfoNuDir() { return UtilVector3<double>(sninfo.nuDir); }
+
+    bool operator< (const SKSNSimSNEventVector &a){ return sninfo.rTime < a.sninfo.rTime; }
 };
 
 class SKSNSimVectorGenerator {
@@ -104,6 +207,50 @@ class SKSNSimVectorGenerator {
     SKSNSimSNEventVector GenerateEventIBD();
     std::vector<SKSNSimSNEventVector> GenerateEvents(int);
     std::vector<SKSNSimSNEventVector> GenerateEventsAlongLivetime(int, int);
+    double SetEnergyMin(const double e){ m_generator_energy_min = e; return m_generator_energy_min;}
+    double SetEnergyMax(const double e){ m_generator_energy_max = e; return m_generator_energy_max;}
+    double GetEnergyMin() const {return m_generator_energy_min;}
+    double GetEnergyMax() const {return m_generator_energy_max;}
+    void   SetRandomGenerator(std::shared_ptr<TRandom> rng) { randomgenerator = rng; }
+};
+
+class SKSNSimVectorSNGenerator {
+  private:
+    std::vector<std::unique_ptr<SKSNSimFluxModel>> fluxmodels;
+    std::map<XSECTYPE, std::shared_ptr<SKSNSimCrosssectionModel>> xsecmodels;
+    SKSNSimSNEventVector GenerateSNEvent(){
+      return SKSNSimSNEventVector();
+    }
+
+    double m_generator_energy_min;
+    double m_generator_energy_max;
+
+    double m_max_hit_probability; // maximum of (flux) x (xsec) // should be updated with new flux or xsec models
+
+    std::shared_ptr<TRandom> randomgenerator;
+
+    static double FindMaxProb ( const double, const SKSNSimCrosssectionModel &);
+
+    //double SetMaximumHitProbability();
+    std::vector<SKSNSimSNEventVector> MakeEvent(double time, double nu_energy, int nReact, int nuType, double rate);
+    void FillEvent(std::vector<SKSNSimSNEventVector> &evt_buffer);
+    static void determineKinematics( std::map<XSECTYPE, std::shared_ptr<SKSNSimCrosssectionModel>> xsecmodels, TRandom &rng, SKSNSimSNEventVector &ev, const double snDir[]);
+    static void determineAngleNuebarP( TRandom &rng, const SKSNSimXSecIBDSV & xsec, const double nuEne, double & eEne, double & eTheta, double & ePhi );
+    static void determineAngleElastic( TRandom &rng, const SKSNSimXSecNuElastic & xsec, const int nReact, const double nuEne, double & eEne, double & eTheta, double & ePhi, int &iSkip );
+    static void determineAngleNueO(TRandom &rng, SKSNSimXSecNuOxygen &xsec, const int Reaction, const int State, const int Ex_state, const int channel, const double nuEne, double & eEne, double & eTheta, double & ePhi );
+
+    double sn_dir [3];
+
+    
+  public:
+    SKSNSimVectorSNGenerator();
+    ~SKSNSimVectorSNGenerator(){ SKSNSimTools::DumpDebugMessage(" dtor of SKSNSimVectorSNGenerator");}
+    void AddFluxModel(SKSNSimFluxModel *fm){ fluxmodels.push_back(std::move(std::unique_ptr<SKSNSimFluxModel>(fm))); /* SetMaximumHitProbability(); */ } // after this, the pointer will be managed by SKSNSimVectorGenerator class
+    void AddFluxModel(std::unique_ptr<SKSNSimFluxModel> fm){ fluxmodels.push_back(std::move(fm)); /* SetMaximumHitProbability(); */ } // after this, the pointer will be managed by SKSNSimVectorGenerator class
+    //SKSNSimSNEventVector GenerateEvent();
+    //SKSNSimSNEventVector GenerateEventIBD();
+    std::vector<SKSNSimSNEventVector> GenerateEvents();
+    //std::vector<SKSNSimSNEventVector> GenerateEventsAlongLivetime(int, int);
     double SetEnergyMin(const double e){ m_generator_energy_min = e; return m_generator_energy_min;}
     double SetEnergyMax(const double e){ m_generator_energy_max = e; return m_generator_energy_max;}
     double GetEnergyMin() const {return m_generator_energy_min;}

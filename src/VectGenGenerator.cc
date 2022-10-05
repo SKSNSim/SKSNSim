@@ -14,6 +14,7 @@
 #include "VectGenUtil.hh"
 
 #include "FluxCalculation.hh"
+#include "SKSNSimTools.hh"
 
 
 VectGenGenerator::VectGenGenerator()
@@ -337,7 +338,7 @@ void VectGenGenerator::determineKinematics( const int nReact, const double nuEne
 
 			double costh = snDir[0] * eDir[0] + snDir[1] * eDir[1] + snDir[2] * eDir[2];
 
-			if(numNtNueO[channel]!=0 || numNtNuebarO[channel]!=0 || numGmNuebarO[channel]!=0){
+			if(numNtNueO[channel]!=0 || numNtNuebarO[channel]!=0 || numGmNuebarO[channel]!=0){ // TODO where numNtNueO is initialized?
 				if(Reaction==0){
 					int i_nucre = 0;
 					if(Ex_state!=29){
@@ -685,8 +686,8 @@ void VectGenGenerator::Process(){
 
 	std::cout << "Prcess of sn_burst side" << std::endl;//nakanisi
 	/*---- Fill total cross section into array to avoid repeating calculation ----*/
-	double nuEne_min = nuEneMin;
-	double nuEne_max = nuEneMax;
+	const double nuEne_min = nuEneMin;
+	const double nuEne_max = nuEneMax;
 	double totcrsIBD[nuEneNBins] = {0.};
 	double totcrsNue[nuEneNBins] = {0.}, totcrsNueb[nuEneNBins] = {0.}, totcrsNux[nuEneNBins] = {0.}, totcrsNuxb[nuEneNBins] = {0.};
 	std::vector<double> Ocrse0[16][7];
@@ -709,6 +710,7 @@ void VectGenGenerator::Process(){
 		//if(i_nu_ene % 10 == 0) std::cout << "Neutrino Energy  " << nu_energy << std::endl;
 		/*----- inverse beta decay -----*/
 		if(nu_energy > eEneThr + DeltaM) totcrsIBD[i_nu_ene] = nucrs->CsNuebP_SV(nu_energy);
+    SKSNSimTools::DumpDebugMessage(Form("IBD XSEC %.5g MeV -> %.5g cm2", nu_energy, totcrsIBD[i_nu_ene]));
 
 		/*----- electron elastic -----*/
 
@@ -820,6 +822,103 @@ void VectGenGenerator::Process(){
 			}
 		}
 	}
+
+  auto DumpCrs = [totcrsIBD, totcrsNue, totcrsNueb, totcrsNux, totcrsNuxb, Ocrse0, Ocrse1, Ocrse2, Ocrse3, Ocrse4, Ocrsp0, Ocrsp1, Ocrsp2, Ocrsp3, Ocrsp4, OcrseSub, OcrspSub] () {
+    int NDUMP = 20;
+    std::cout << "[IZU CRS] totcrsIBD ";
+    for( int i = 0; i < NDUMP && i < nuEneNBins; i++) std::cout << totcrsIBD[i] << " ";
+    std::cout << std::endl;
+    std::cout << "[IZU CRS] totcrsNue ";
+    for( int i = 0; i < NDUMP && i < nuEneNBins; i++) std::cout << totcrsNue[i] << " ";
+    std::cout << std::endl;
+    std::cout << "[IZU CRS] totcrsNueb ";
+    for( int i = 0; i < NDUMP && i < nuEneNBins; i++) std::cout << totcrsNueb[i] << " ";
+    std::cout << std::endl;
+    std::cout << "[IZU CRS] totcrsNux ";
+    for( int i = 0; i < NDUMP && i < nuEneNBins; i++) std::cout << totcrsNux[i] << " ";
+    std::cout << std::endl;
+    std::cout << "[IZU CRS] totcrsNuxb ";
+    for( int i = 0; i < NDUMP && i < nuEneNBins; i++) std::cout << totcrsNuxb[i] << " ";
+    std::cout << std::endl;
+    for( int j = 0; j < 16; j++){
+      for(int k = 0; k < 7; k++){
+        std::cout << "[IZU CRS] Ocrse0 (" << j << " " << k << ") ";
+        for( int i = 0; i < NDUMP && i < Ocrse0[j][k].size(); i++) std::cout << Ocrse0[j][k][i] << " ";
+        std::cout << std::endl;
+      }
+    }
+    for( int j = 0; j < 16; j++){
+      for(int k = 0; k < 7; k++){
+        std::cout << "[IZU CRS] Ocrse1 (" << j << " " << k << ") ";
+        for( int i = 0; i < NDUMP && i < Ocrse1[j][k].size(); i++) std::cout << Ocrse1[j][k][i] << " ";
+        std::cout << std::endl;
+      }
+    }
+    for( int j = 0; j < 16; j++){
+      for(int k = 0; k < 7; k++){
+        std::cout << "[IZU CRS] Ocrse2 (" << j << " " << k << ") ";
+        for( int i = 0; i < NDUMP && i < Ocrse2[j][k].size(); i++) std::cout << Ocrse2[j][k][i] << " ";
+        std::cout << std::endl;
+      }
+    }
+    for( int j = 0; j < 16; j++){
+      for(int k = 0; k < 7; k++){
+        std::cout << "[IZU CRS] Ocrse3 (" << j << " " << k << ") ";
+        for( int i = 0; i < NDUMP && i < Ocrse3[j][k].size(); i++) std::cout << Ocrse3[j][k][i] << " ";
+        std::cout << std::endl;
+      }
+    }
+    for( int j = 0; j < 16; j++){
+      for(int k = 0; k < 7; k++){
+        std::cout << "[IZU CRS] Ocrse4 (" << j << " " << k << ") ";
+        for( int i = 0; i < NDUMP && i < Ocrse4[j][k].size(); i++) std::cout << Ocrse4[j][k][i] << " ";
+        std::cout << std::endl;
+      }
+    }
+    for( int j = 0; j < 16; j++){
+      for(int k = 0; k < 7; k++){
+        std::cout << "[IZU CRS] Ocrsp1 (" << j << " " << k << ") ";
+        for( int i = 0; i < NDUMP && i < Ocrsp1[j][k].size(); i++) std::cout << Ocrsp1[j][k][i] << " ";
+        std::cout << std::endl;
+      }
+    }
+    for( int j = 0; j < 16; j++){
+      for(int k = 0; k < 7; k++){
+        std::cout << "[IZU CRS] Ocrsp2 (" << j << " " << k << ") ";
+        for( int i = 0; i < NDUMP && i < Ocrsp2[j][k].size(); i++) std::cout << Ocrsp2[j][k][i] << " ";
+        std::cout << std::endl;
+      }
+    }
+    for( int j = 0; j < 16; j++){
+      for(int k = 0; k < 7; k++){
+        std::cout << "[IZU CRS] Ocrsp3 (" << j << " " << k << ") ";
+        for( int i = 0; i < NDUMP && i < Ocrsp3[j][k].size(); i++) std::cout << Ocrsp3[j][k][i] << " ";
+        std::cout << std::endl;
+      }
+    }
+    for( int j = 0; j < 16; j++){
+      for(int k = 0; k < 7; k++){
+        std::cout << "[IZU CRS] Ocrsp4 (" << j << " " << k << ") ";
+        for( int i = 0; i < NDUMP && i < Ocrsp4[j][k].size(); i++) std::cout << Ocrsp4[j][k][i] << " ";
+        std::cout << std::endl;
+      }
+    }
+    for( int j = 0; j < 5; j++){
+      for(int k = 0; k < 32; k++){
+        std::cout << "[IZU CRS] OcrseSub (" << j << " " << k << ") ";
+        for( int i = 0; i < NDUMP && i < OcrseSub[j][k].size(); i++) std::cout << OcrseSub[j][k][i] << " ";
+        std::cout << std::endl;
+      }
+    }
+    for( int j = 0; j < 5; j++){
+      for(int k = 0; k < 32; k++){
+        std::cout << "[IZU CRS] OcrspSub (" << j << " " << k << ") ";
+        for( int i = 0; i < NDUMP && i < OcrspSub[j][k].size(); i++) std::cout << OcrspSub[j][k][i] << " ";
+        std::cout << std::endl;
+      }
+    }
+  };
+  DumpCrs();
 					
 
 	/*---- loop ----*/
@@ -846,7 +945,6 @@ void VectGenGenerator::Process(){
 			/*----- inverse beta decay -----*/
 			
 			rate = Const_p * (oscneb1*nspcneb + oscneb2*nspcnx) * totcrsIBD[i_nu_ene] * nuEneBinSize * tBinSize * RatioTo10kpc;
-			//std::cout << "rate is: " << time << " " << nu_energy << " " << totcrsIBD[i_nu_ene] << " " << rate << std::endl; //nakanisi
 			totNuebarp += rate;
 			if(flag_event == 1) {
 			  nReact = 0;
@@ -1060,6 +1158,7 @@ void VectGenGenerator::Process(){
 					rate = Const_o * (oscnue1*nspcne + oscnue2*nspcnx) * crsOx * nuEneBinSize * tBinSize * RatioTo10kpc;
 					//std::cout << "sub" << " " << time << " " << nu_energy << " " << crsOx << " " << rate << std::endl; //nakanisi
 					totNueOsub += rate;
+          //if(crsOx != 0.) SKSNSimTools::DumpDebugMessage(Form("NuOxy rate is: time %.2g Enu %.5g Ocrs %.5g Nspcne x oscne1 %.5g Nspcnx x oscne2 %.5g nuEneBinSize %.2g tBinSize %.2g RatioTo10kpc %.2g -> rate %.5g totNueOsub %.5g", time, nu_energy, crsOx, oscnue1*nspcne, oscnue2*nspcnx, nuEneBinSize, tBinSize, RatioTo10kpc, rate, totNueOsub));
 					if(flag_event == 1){
 						nReact = (rcn+1)*10e4 + (ex_energy+1)*10e3 + 3*100 + 9;
 						nuType = 12;

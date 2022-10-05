@@ -18,7 +18,7 @@ double VectGenSnFlux::VectGenSnNspeNue(double time, double energy)
   double nspc = 0;
   double nspc0 = 0.;
 
-  if(time < tmesh[0] || time < tmesh[tmesh.size()-1]){
+  if(time < tmesh[0] || time < tmesh[tmesh.size()-1]){ // TODO is it fine ? time > tmesh[0]?
     int i = 0;
     while(tmesh[i] < time) i++;
     i--;

@@ -22,65 +22,50 @@ extern "C" {
 	double sl_nmb_dif_rad_( double *, double * );
 } // TODO to avoid dependency of fortran library
 
+enum XSECTYPE { mXSECIBD = 0, mXSECELASTIC, mXSECOXYGEN, mXSECOXYGENSUB, mNXSECTYPE};
+
 class SKSNSimCrosssectionModel {
   public:
     enum XSECNUTYPE { XSECNUE = 0, XSECNUEB, XSECNUX, NXSECNUTYPE};
     virtual ~SKSNSimCrosssectionModel() {}
-    virtual double /* cm^2 */                          GetCrosssection(double /* MeV */) = 0; // energy -> xsec
-    virtual std::pair<double,double> /* <cm^2, MeV> */ GetDiffCrosssection(double /* MeV */, double /* a.u. */) = 0; // energy -> angle -> (xsec, scattered energy)
-    virtual const std::set<XSECNUTYPE> &GetSupportedNuType () const = 0;
+    virtual double /* cm^2 */                          GetCrosssection(double /* MeV */) const = 0; // energy -> xsec
+    virtual std::pair<double,double> /* <cm^2, MeV> */ GetDiffCrosssection(double /* MeV */, double /* a.u. */) const = 0; // energy -> angle -> (xsec, scattered energy)
+    //virtual const std::set<XSECNUTYPE> &GetSupportedNuType () const = 0;
 
 };
 
-class SKSNSimXSecFlat : SKSNSimCrosssectionModel {
+class SKSNSimXSecFlat : public SKSNSimCrosssectionModel {
   // Flat cross section: always return 1.0
   private:
-    const static std::set<XSECNUTYPE> supportedType;
   public:
     SKSNSimXSecFlat(){}
     ~SKSNSimXSecFlat(){}
     double GetCrosssection(double e){ return 1.0;}
     std::pair<double,double> GetDiffCrosssection(double e, double r) { return std::make_pair(1.0, e);};
-    const std::set<XSECNUTYPE> &GetSupportedNuType() const {return supportedType;}; 
 };
 
-const std::set<SKSNSimCrosssectionModel::XSECNUTYPE> SKSNSimXSecFlat::supportedType = {
-  SKSNSimCrosssectionModel::XSECNUE,
-  SKSNSimCrosssectionModel::XSECNUEB,
-  SKSNSimCrosssectionModel::XSECNUX
-};
 
-class SKSNSimXSecIBDVB : SKSNSimCrosssectionModel {
+class SKSNSimXSecIBDVB : public SKSNSimCrosssectionModel {
   // Cross section model of IBD by Vogel and Beacom
   private:
-    const static std::set<XSECNUTYPE> supportedType;
   public:
     SKSNSimXSecIBDVB(){}
     ~SKSNSimXSecIBDVB(){}
-    double GetCrosssection(double e);
-    std::pair<double,double> GetDiffCrosssection(double e, double r);
-    const std::set<XSECNUTYPE> &GetSupportedNuType() const {return supportedType;}; 
-};
-const std::set<SKSNSimCrosssectionModel::XSECNUTYPE> SKSNSimXSecIBDVB::supportedType = {
-  SKSNSimCrosssectionModel::XSECNUEB
+    double GetCrosssection(double e) const;
+    std::pair<double,double> GetDiffCrosssection(double e, double r) const;
 };
 
-class SKSNSimXSecIBDSV : SKSNSimCrosssectionModel {
+class SKSNSimXSecIBDSV : public SKSNSimCrosssectionModel {
   // Cross section model of IBD by Strumia-Vissani
   private:
-    const static std::set<XSECNUTYPE> supportedType;
   public:
     SKSNSimXSecIBDSV(){}
     ~SKSNSimXSecIBDSV(){}
-    double GetCrosssection(double);
-    std::pair<double,double> GetDiffCrosssection(double, double);
-    const std::set<XSECNUTYPE> &GetSupportedNuType() const {return supportedType;}; 
-};
-const std::set<SKSNSimCrosssectionModel::XSECNUTYPE> SKSNSimXSecIBDSV::supportedType = {
-  SKSNSimCrosssectionModel::XSECNUEB
+    double GetCrosssection(double) const;
+    std::pair<double,double> GetDiffCrosssection(double, double) const;
 };
 
-class SKSNSimXSecNuElastic : SKSNSimCrosssectionModel {
+class SKSNSimXSecNuElastic : public SKSNSimCrosssectionModel {
   // Cross section model of neutrino elastic scattering
   private:
     constexpr static double nuElaEneMin = 0.0; //MeV, minimum neutrino energy 
@@ -92,30 +77,27 @@ class SKSNSimXSecNuElastic : SKSNSimCrosssectionModel {
 
     const std::string CSELAFILENAME {"/usr/local/sklib_gcc8/skofl-trunk/const/lowe/sn_elastic.root"};
     std::unique_ptr<TFile> fCsElaFile;
-    std::unique_ptr<TTree> fCsElaTree;
+    TTree *fCsElaTree;
     double NuElaEnergy, CsElaNue, CsElaNux, CsElaNeb, CsElaNxb;
 
     void OpenCsElaFile();
     void CloseCsElaFile();
-    const static std::set<XSECNUTYPE> supportedType;
 
   public:
     enum FLAGETHR { ETHRON, ETHROFF };
     SKSNSimXSecNuElastic(){ OpenCsElaFile();}
     ~SKSNSimXSecNuElastic(){CloseCsElaFile();}
-    double GetCrosssection(double e, int pid = -PDG_ELECTRON_NEUTRINO, FLAGETHR flag = ETHRON);
-    std::pair<double,double> GetDiffCrosssection(double e, double r);
+    double GetCrosssection(double e, int pid = -PDG_ELECTRON_NEUTRINO, FLAGETHR flag = ETHRON) const;
+    double GetCrosssection(double e) const { return GetCrosssection(e, -PDG_ELECTRON_NEUTRINO, ETHRON);} ;
+    std::pair<double,double> GetDiffCrosssection(double e, double r) const;
     static double GetNuEneMin() {return nuElaEneMin;}
     static double GetNuEneMax() {return nuElaEneMax;}
-    const std::set<XSECNUTYPE> &GetSupportedNuType() const {return supportedType;}; 
-};
-const std::set<SKSNSimCrosssectionModel::XSECNUTYPE> SKSNSimXSecNuElastic::supportedType = {
-  SKSNSimCrosssectionModel::XSECNUE,
-  SKSNSimCrosssectionModel::XSECNUEB,
-  SKSNSimCrosssectionModel::XSECNUX
+    static double CalcElectronTotEnergy( const double , const double );
+    static double CalcDeEneDCost( const double , const double );
+    static double CalcCosThr( const double , const double );
 };
 
-class SKSNSimXSecNuOxygen : SKSNSimCrosssectionModel {
+class SKSNSimXSecNuOxygen : public SKSNSimCrosssectionModel {
   // Cross section model of neutrino-oxygen -> single lepton
   private:
     typedef std::tuple<int,int> INISTATE; // <nue-or-nuebar,ix>
@@ -134,7 +116,6 @@ class SKSNSimXSecNuOxygen : SKSNSimCrosssectionModel {
     std::map<INISTATE,std::vector<double>> nuene;
     std::map<INIFINSTATE, std::vector<double>> crs;
 
-    const static std::set<XSECNUTYPE> supportedType;
 
     static int GetNumEx(int ix){
       const static int num_ex[NIXSTATE] = {3, 15, 8, 1, 16};
@@ -145,24 +126,24 @@ class SKSNSimXSecNuOxygen : SKSNSimCrosssectionModel {
     static INISTATE GetINISTATE(INIFINSTATE f){ return convToINISTATE(std::get<0>(f), std::get<1>(f));}
     static INIFINSTATE convToINIFINSTATE(INISTATE ini, int ex, int ch) {return std::make_tuple(std::get<0>(ini),std::get<1>(ini),ex,ch);}
 
-    void LoadFile(INISTATE);
+    void LoadFile();
+    void LoadFile(INISTATE ini);
     void InitializeTable();
-
   public:
     SKSNSimXSecNuOxygen(){
       InitializeTable();
+      LoadFile();
     }
     ~SKSNSimXSecNuOxygen(){}
-    double GetCrosssection(double e, INIFINSTATE inifin = {0,0,0,0});
-    std::pair<double,double> GetDiffCrosssection(double, double);
-    const std::set<XSECNUTYPE> &GetSupportedNuType() const {return supportedType;}; 
-};
-const std::set<SKSNSimCrosssectionModel::XSECNUTYPE> SKSNSimXSecNuOxygen::supportedType = {
-  SKSNSimCrosssectionModel::XSECNUE,
-  SKSNSimCrosssectionModel::XSECNUEB
+    double GetCrosssection(double e, INIFINSTATE inifin = {0,0,0,0}) const;
+    double GetCrosssection(double e) const { return GetCrosssection(e, {0,0,0,0});};
+    std::pair<double,double> GetDiffCrosssection(double, double) const;
+
+    double OxigFuncAngleRecCC(int num, int ix, int ex, int ch, double enu, double cos);
+    double OxigFuncRecEneCC(int num, int ix, int ex, int ch, double enu);
 };
 
-class SKSNSimXSecNuOxygenSub : SKSNSimCrosssectionModel {
+class SKSNSimXSecNuOxygenSub : public SKSNSimCrosssectionModel {
   // Cross section model of neutrino-oxygen -> single lepton
   private:
     typedef std::tuple<int,int> INISTATE; // <nue-or-nuebar,ix>
@@ -181,23 +162,21 @@ class SKSNSimXSecNuOxygenSub : SKSNSimCrosssectionModel {
     static INISTATE GetINISTATE(INIFINSTATE f){ return convToINISTATE(std::get<0>(f), std::get<1>(f));}
     static INIFINSTATE convToINIFINSTATE(INISTATE ini, int ch) {return std::make_tuple(std::get<0>(ini),std::get<1>(ini),ch);}
 
+    void LoadFile();
     void LoadFile(INISTATE);
     void InitializeTable();
 
-    const static std::set<XSECNUTYPE> supportedType;
 
   public:
     SKSNSimXSecNuOxygenSub(){
       InitializeTable();
+      LoadFile();
     }
     ~SKSNSimXSecNuOxygenSub(){}
-    double GetCrosssection(double e, INIFINSTATE inifin = {0,0,0});
-    std::pair<double,double> GetDiffCrosssection(double, double);
-    const std::set<XSECNUTYPE> &GetSupportedNuType() const {return supportedType;}; 
-};
-const std::set<SKSNSimCrosssectionModel::XSECNUTYPE> SKSNSimXSecNuOxygenSub::supportedType = {
-  SKSNSimCrosssectionModel::XSECNUE,
-  SKSNSimCrosssectionModel::XSECNUEB
+    double GetCrosssection(double e, INIFINSTATE inifin = {0,0,0}) const;
+    double GetCrosssection(double e) const { return GetCrosssection(e, {0,0,0});};
+    std::pair<double,double> GetDiffCrosssection(double, double) const;
+
 };
 
 #endif
