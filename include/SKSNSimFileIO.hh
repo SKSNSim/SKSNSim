@@ -54,5 +54,6 @@ class SKSNSimFileOutTFile : SKSNSimFileOutput {
     void Close();
 
     void Write(const SKSNSimSNEventVector &);
+    void Write(const std::vector<SKSNSimSNEventVector> &);
 };
 #endif

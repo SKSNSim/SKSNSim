@@ -2,6 +2,8 @@
 #include <memory>
 #include <TRandom3.h>
 #include "SKSNSimTools.hh"
+#include "SKSNSimFileIO.hh"
+#include "SKSNSimUserConfiguration.hh"
 
 int main( int argc, char ** argv )
 {
@@ -40,6 +42,12 @@ int main( int argc, char ** argv )
 	//uint seedIO = 0;
 	//if(argc > 6) seedIO = atoi(argv[6]);
   //
+  //
+  auto config = std::make_unique<SKSNSimUserConfiguration>();
+  config->LoadFromArgs(argc, argv);
+  config->Dump();
+  config->CheckHealth();
+
   std::unique_ptr<TRandom3> rng = std::make_unique<TRandom3>(42);
   std::unique_ptr<SKSNSimFluxModel> flux_nakazato (new SKSNSimSNFluxNakazato());
   
@@ -51,9 +59,13 @@ int main( int argc, char ** argv )
   auto buffer = generator->GenerateEvents();
   SKSNSimTools::DumpDebugMessage(Form("Successed GenerateEvents -> %d events", (int)buffer.size()));
 
-  SKSNSimTools::DumpDebugMessage("Start to delete explictly");
-  generator.reset();
-  SKSNSimTools::DumpDebugMessage("Finished to delete explictly");
+  auto flist = GenerateOutputFileList(*config);
+  for(auto it = flist.begin(); it != flist.end(); it++){
+    auto vectio = std::make_unique<SKSNSimFileOutTFile>();
+    vectio->Open(it->GetFileName());
+    vectio->Write(buffer);
+    vectio->Close();
+  }
 
   return EXIT_SUCCESS;
 }

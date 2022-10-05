@@ -16,7 +16,6 @@
 #include "VectGenUtil.hh"
 
 #include "FluxCalculation.hh"
-#include "SKSNSimTools.hh"
 
 
 VectGenGenerator::VectGenGenerator()
@@ -730,7 +729,6 @@ void VectGenGenerator::Process(){
 		//if(i_nu_ene % 10 == 0) std::cout << "Neutrino Energy  " << nu_energy << std::endl;
 		/*----- inverse beta decay -----*/
 		if(nu_energy > eEneThr + DeltaM) totcrsIBD[i_nu_ene] = nucrs->CsNuebP_SV(nu_energy);
-    SKSNSimTools::DumpDebugMessage(Form("IBD XSEC %.5g MeV -> %.5g cm2", nu_energy, totcrsIBD[i_nu_ene]));
 
 		/*----- electron elastic -----*/
 
@@ -1084,7 +1082,6 @@ void VectGenGenerator::Process(){
 					rate = Const_o * (oscnue1*nspcne + oscnue2*nspcnx) * crsOx * nuEneBinSize * tBinSize * RatioTo10kpc;
 					//std::cout << "sub" << " " << time << " " << nu_energy << " " << crsOx << " " << rate << std::endl; //nakanisi
 					totNueOsub += rate;
-          //if(crsOx != 0.) SKSNSimTools::DumpDebugMessage(Form("NuOxy rate is: time %.2g Enu %.5g Ocrs %.5g Nspcne x oscne1 %.5g Nspcnx x oscne2 %.5g nuEneBinSize %.2g tBinSize %.2g RatioTo10kpc %.2g -> rate %.5g totNueOsub %.5g", time, nu_energy, crsOx, oscnue1*nspcne, oscnue2*nspcnx, nuEneBinSize, tBinSize, RatioTo10kpc, rate, totNueOsub));
 					if(flag_event == 1){
 						nReact = (rcn+1)*10e4 + (ex_energy+1)*10e3 + 3*100 + 9;
 						nuType = 12;

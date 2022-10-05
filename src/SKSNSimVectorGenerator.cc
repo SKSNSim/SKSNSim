@@ -237,7 +237,7 @@ std::vector<SKSNSimSNEventVector> SKSNSimVectorSNGenerator::GenerateEvents(){
     /*----- inverse beta decay -----*/
     constexpr double eEneThr = 5.0;
     if(nu_energy > eEneThr + DeltaM) totcrsIBD[i_nu_ene] = xsecibd.GetCrosssection(nu_energy);
-    SKSNSimTools::DumpDebugMessage(Form("IBD XSEC %.5g MeV -> %.5g cm2", nu_energy, totcrsIBD[i_nu_ene]));
+    //SKSNSimTools::DumpDebugMessage(Form("IBD XSEC %.5g MeV -> %.5g cm2", nu_energy, totcrsIBD[i_nu_ene]));
 
     /*----- electron elastic -----*/
 
@@ -343,103 +343,6 @@ std::vector<SKSNSimSNEventVector> SKSNSimVectorSNGenerator::GenerateEvents(){
       }
     }
   }
-
-  auto DumpCrs = [nuEneNBins, totcrsIBD, totcrsNue, totcrsNueb, totcrsNux, totcrsNuxb, Ocrse0, Ocrse1, Ocrse2, Ocrse3, Ocrse4, Ocrsp0, Ocrsp1, Ocrsp2, Ocrsp3, Ocrsp4, OcrseSub, OcrspSub] () {
-    int NDUMP = 20;
-    std::cout << "[IZU CRS] totcrsIBD ";
-    for( int i = 0; i < NDUMP && i < nuEneNBins; i++) std::cout << totcrsIBD[i] << " ";
-    std::cout << std::endl;
-    std::cout << "[IZU CRS] totcrsNue ";
-    for( int i = 0; i < NDUMP && i < nuEneNBins; i++) std::cout << totcrsNue[i] << " ";
-    std::cout << std::endl;
-    std::cout << "[IZU CRS] totcrsNueb ";
-    for( int i = 0; i < NDUMP && i < nuEneNBins; i++) std::cout << totcrsNueb[i] << " ";
-    std::cout << std::endl;
-    std::cout << "[IZU CRS] totcrsNux ";
-    for( int i = 0; i < NDUMP && i < nuEneNBins; i++) std::cout << totcrsNux[i] << " ";
-    std::cout << std::endl;
-    std::cout << "[IZU CRS] totcrsNuxb ";
-    for( int i = 0; i < NDUMP && i < nuEneNBins; i++) std::cout << totcrsNuxb[i] << " ";
-    std::cout << std::endl;
-    for( int j = 0; j < 16; j++){
-      for(int k = 0; k < 7; k++){
-        std::cout << "[IZU CRS] Ocrse0 (" << j << " " << k << ") ";
-        for( int i = 0; i < NDUMP && i < Ocrse0[j][k].size(); i++) std::cout << Ocrse0[j][k][i] << " ";
-        std::cout << std::endl;
-      }
-    }
-    for( int j = 0; j < 16; j++){
-      for(int k = 0; k < 7; k++){
-        std::cout << "[IZU CRS] Ocrse1 (" << j << " " << k << ") ";
-        for( int i = 0; i < NDUMP && i < Ocrse1[j][k].size(); i++) std::cout << Ocrse1[j][k][i] << " ";
-        std::cout << std::endl;
-      }
-    }
-    for( int j = 0; j < 16; j++){
-      for(int k = 0; k < 7; k++){
-        std::cout << "[IZU CRS] Ocrse2 (" << j << " " << k << ") ";
-        for( int i = 0; i < NDUMP && i < Ocrse2[j][k].size(); i++) std::cout << Ocrse2[j][k][i] << " ";
-        std::cout << std::endl;
-      }
-    }
-    for( int j = 0; j < 16; j++){
-      for(int k = 0; k < 7; k++){
-        std::cout << "[IZU CRS] Ocrse3 (" << j << " " << k << ") ";
-        for( int i = 0; i < NDUMP && i < Ocrse3[j][k].size(); i++) std::cout << Ocrse3[j][k][i] << " ";
-        std::cout << std::endl;
-      }
-    }
-    for( int j = 0; j < 16; j++){
-      for(int k = 0; k < 7; k++){
-        std::cout << "[IZU CRS] Ocrse4 (" << j << " " << k << ") ";
-        for( int i = 0; i < NDUMP && i < Ocrse4[j][k].size(); i++) std::cout << Ocrse4[j][k][i] << " ";
-        std::cout << std::endl;
-      }
-    }
-    for( int j = 0; j < 16; j++){
-      for(int k = 0; k < 7; k++){
-        std::cout << "[IZU CRS] Ocrsp1 (" << j << " " << k << ") ";
-        for( int i = 0; i < NDUMP && i < Ocrsp1[j][k].size(); i++) std::cout << Ocrsp1[j][k][i] << " ";
-        std::cout << std::endl;
-      }
-    }
-    for( int j = 0; j < 16; j++){
-      for(int k = 0; k < 7; k++){
-        std::cout << "[IZU CRS] Ocrsp2 (" << j << " " << k << ") ";
-        for( int i = 0; i < NDUMP && i < Ocrsp2[j][k].size(); i++) std::cout << Ocrsp2[j][k][i] << " ";
-        std::cout << std::endl;
-      }
-    }
-    for( int j = 0; j < 16; j++){
-      for(int k = 0; k < 7; k++){
-        std::cout << "[IZU CRS] Ocrsp3 (" << j << " " << k << ") ";
-        for( int i = 0; i < NDUMP && i < Ocrsp3[j][k].size(); i++) std::cout << Ocrsp3[j][k][i] << " ";
-        std::cout << std::endl;
-      }
-    }
-    for( int j = 0; j < 16; j++){
-      for(int k = 0; k < 7; k++){
-        std::cout << "[IZU CRS] Ocrsp4 (" << j << " " << k << ") ";
-        for( int i = 0; i < NDUMP && i < Ocrsp4[j][k].size(); i++) std::cout << Ocrsp4[j][k][i] << " ";
-        std::cout << std::endl;
-      }
-    }
-    for( int j = 0; j < 5; j++){
-      for(int k = 0; k < 32; k++){
-        std::cout << "[IZU CRS] OcrseSub (" << j << " " << k << ") ";
-        for( int i = 0; i < NDUMP && i < OcrseSub[j][k].size(); i++) std::cout << OcrseSub[j][k][i] << " ";
-        std::cout << std::endl;
-      }
-    }
-    for( int j = 0; j < 5; j++){
-      for(int k = 0; k < 32; k++){
-        std::cout << "[IZU CRS] OcrspSub (" << j << " " << k << ") ";
-        for( int i = 0; i < NDUMP && i < OcrspSub[j][k].size(); i++) std::cout << OcrspSub[j][k][i] << " ";
-        std::cout << std::endl;
-      }
-    }
-  };
-  DumpCrs();
 
   /* tentative constant */
   constexpr double oscneb1 = 1.0;
@@ -940,8 +843,8 @@ void SKSNSimVectorSNGenerator::FillEvent(std::vector<SKSNSimSNEventVector> &evt_
 void SKSNSimVectorSNGenerator::determineKinematics( std::map<XSECTYPE, std::shared_ptr<SKSNSimCrosssectionModel>> xsecmodels, TRandom &rng, SKSNSimSNEventVector &ev, const double snDir[])
 {
   auto SQ = [](double x){return x*x;};
-  double nuEne = ev.GetSNEvtInfoNuEne();
-  auto pvect = nuEne * ev.GetSNEvtInfoNuDir();
+  const double nuEne = ev.GetSNEvtInfoNuEne();
+  const auto pvect = nuEne * ev.GetSNEvtInfoNuDir();
 
   //number of particle emitted on deexcitation with CC reaction
   constexpr int numNtNueO[7] = {0, 1, 0, 2, 0, 0, 0};
@@ -962,20 +865,26 @@ void SKSNSimVectorSNGenerator::determineKinematics( std::map<XSECTYPE, std::shar
   if( nReact == 0 ){ // nuebar + p -> e+ + n
 
     // Original neutrino
-    //mc->mcinfo[0] = 85005;
-    const auto nuDir = UtilVector3<double>( pvect.x, pvect.y, pvect.z);
-    const auto nuMomentum = nuEne * nuDir.Unit();
+    const auto nuMomentum = pvect;
     ev.AddTrack(
         - PDG_ELECTRON_NEUTRINO, nuEne,
         nuMomentum.x, nuMomentum.y, nuMomentum.z,
-        0, 0, 1, -1, 0
+        0 /*iorgvc*/,
+        1 /*ivtivc*/,
+        1 /*ivtfvc*/,
+        -1 /*iflgvc*/,
+        0 /*icrnvc*/
         );
 
     // Original proton
     ev.AddTrack(
         PDG_PROTON, Mp,
         0., 0., 0.,
-        0, 0, 1, -1, 0
+        0 /*iorgvc*/,
+        1 /*ivtivc*/,
+        1 /*ivtfvc*/,
+        -1 /*iflgvc*/,
+        0 /*icrnvc*/
         );
 
     // Positron
@@ -989,7 +898,11 @@ void SKSNSimVectorSNGenerator::determineKinematics( std::map<XSECTYPE, std::shar
     ev.AddTrack(
         - PDG_ELECTRON, eEne,
         positronMomentum.x, positronMomentum.y, positronMomentum.z,
-        1, 1, 1, 0, 1
+        1 /*iorgvc*/,
+        1 /*ivtivc*/,
+        1 /*ivtfvc*/,
+        0 /*iflgvc*/,
+        1 /*icrnvc*/
         );
 
     // Neutron
@@ -998,7 +911,11 @@ void SKSNSimVectorSNGenerator::determineKinematics( std::map<XSECTYPE, std::shar
         PDG_NEUTRON,
         std::sqrt(neutronMomentum.Mag2() + Mn*Mn),
         neutronMomentum.x, neutronMomentum.y, neutronMomentum.z,
-        1, 1, 1, 0, 1
+        1 /*iorgvc*/,
+        1 /*ivtivc*/,
+        1 /*ivtfvc*/,
+        0 /*iflgvc*/,
+        1 /*icrnvc*/
         );
 
   } else if( nReact == 1 || nReact == 2 || nReact == 3 || nReact == 4 ){ //nu + e Elastic
@@ -1013,7 +930,11 @@ void SKSNSimVectorSNGenerator::determineKinematics( std::map<XSECTYPE, std::shar
     ev.AddTrack(
         ipvc_tmp, nuEne,
         mom.x, mom.y, mom.z,
-        0, 0, 1, -1, 0
+        0 /*iorgvc*/,
+        1 /*ivtivc*/,
+        1 /*ivtfvc*/,
+        -1 /*iflgvc*/,
+        0 /*icrnvc*/
         );
 
     // Recoil electron
@@ -1026,7 +947,11 @@ void SKSNSimVectorSNGenerator::determineKinematics( std::map<XSECTYPE, std::shar
     ev.AddTrack(
         PDG_ELECTRON, eEne,
         eleMom.x, eleMom.y, eleMom.z,
-        1, 1, 1, 0, 1
+        1 /*iorgvc*/,
+        1 /*ivtivc*/,
+        1 /*ivtfvc*/,
+        0 /*iflgvc*/,
+        1 /*icrnvc*/
         );
 
     double costh = snDir_vec * eDir; //[0] * eDir[0] + snDir[1] * eDir[1] + snDir[2] * eDir[2];
@@ -1034,12 +959,12 @@ void SKSNSimVectorSNGenerator::determineKinematics( std::map<XSECTYPE, std::shar
 
   } else {
     //mc->mcinfo[0] = 85005;
-    int Reaction = nReact/10e4 - 1;
-    int State_pre = nReact/10e3;
-    int Ex_state_pre = nReact/10;
-    int State = ((nReact - (Reaction+1)*10e4)/10e3) - 1;
-    int Ex_state = ((nReact - State_pre*10e3)/10) - 1;
-    int channel = (nReact - Ex_state_pre*10) - 1;
+    const int Reaction = nReact/10e4 - 1;
+    const int State_pre = nReact/10e3;
+    const int Ex_state_pre = nReact/10;
+    const int State = ((nReact - (Reaction+1)*10e4)/10e3) - 1;
+    const int Ex_state = ((nReact - State_pre*10e3)/10) - 1;
+    const int channel = (nReact - Ex_state_pre*10) - 1;
     //if(Reaction==0 && Ex_state!=29)mc->nvc = 2 + numNtNueO[channel];
     //if(Reaction==1 && Ex_state!=29 && channel!=0)mc->nvc = 2 + numNtNuebarO[channel];
     //if(Reaction==1 && Ex_state!=29 && channel==0)mc->nvc = 2 + numGmNuebarO[channel];
@@ -1059,7 +984,20 @@ void SKSNSimVectorSNGenerator::determineKinematics( std::map<XSECTYPE, std::shar
     ev.AddTrack(
         ipvc_tmp, nuEne,
         nuMom.x, nuMom.y, nuMom.z,
-        0, 0, 1, -1, 0
+        0 /*iorgvc*/,
+        1 /*ivtivc*/,
+        1 /*ivtfvc*/,
+        -1 /*iflgvc*/,
+        0 /*icrnvc*/
+        );
+    ev.AddTrack( // Oxygen
+        1000080160, 0.,
+        0., 0., 0.,
+        0 /*iorgvc*/,
+        1 /*ivtivc*/,
+        1 /*ivtfvc*/,
+        -1 /*iflgvc*/,
+        0 /*icrnvc*/
         );
 
     // electron or positron
@@ -1075,7 +1013,11 @@ void SKSNSimVectorSNGenerator::determineKinematics( std::map<XSECTYPE, std::shar
     ev.AddTrack(
         ipvc_tmp, eEne,
         eleMom.x, eleMom.y, eleMom.z,
-        1, 1, 1, 0, 1
+        1 /*iorgvc*/,
+        1 /*ivtivc*/,
+        1 /*ivtfvc*/,
+        0 /*iflgvc*/,
+        1 /*icrnvc*/
         );
 
     //if(eEne<0.)std::cout << "e-/e+ momentum " << mc->pvc[1][0] << " " << mc->pvc[1][1] << " " << mc->pvc[1][2] << " " << eEne << " " << Me << " " << amom << " " << eDir[0] << " " << eDir[1] << " " << eDir[2] << std::endl; // nakanisi
@@ -1089,7 +1031,6 @@ void SKSNSimVectorSNGenerator::determineKinematics( std::map<XSECTYPE, std::shar
         return UtilVector3<double>(theta, phi);
         }, rng);
 
-    // TODO include for-loop for gamma etc.
     if(numNtNueO[channel]!=0 || numNtNuebarO[channel]!=0 || numGmNuebarO[channel]!=0){
       if(Reaction==0){
         int i_nucre = 0;
@@ -1097,13 +1038,16 @@ void SKSNSimVectorSNGenerator::determineKinematics( std::map<XSECTYPE, std::shar
           for(int i=0;i<numNtNueO[channel];i++){
             // Neutron
             i_nucre++;
-            auto neutronMom = determineNeutMomentum();
+            const auto neutronMom = sqrt(SQ(0.5+Mn) - SQ(Mn)) * determineNeutMomentum();
             ev.AddTrack(
-                PDG_NEUTRON, 0.5,
+                PDG_NEUTRON, 0.5 + Mn,
                 neutronMom.x, neutronMom.y, neutronMom.z,
-                0, 0, 0, 1, 0
+                1 /*iorgvc*/,
+                1 /*ivtivc*/,
+                1 /*ivtfvc*/,
+                0 /*iflgvc*/,
+                1 /*icrnvc*/
                 );
-            // TODO original code does NOT hold ivtfvc, is it fine?
             //std::cout << "neutron information " << nReact << " " << i_nucre << " " << mc->ipvc[2+i_nucre] << " " << x << " " << y << " " << z << std::endl;
           }
         }
@@ -1115,25 +1059,32 @@ void SKSNSimVectorSNGenerator::determineKinematics( std::map<XSECTYPE, std::shar
             for(int i=0;i<numNtNuebarO[channel];i++){
               // Neutron
               i_nucre++;
-              auto neutronMom = determineNeutMomentum();
+              auto neutronMom = sqrt(SQ(0.5+Mn)-SQ(Mn)) * determineNeutMomentum();
               ev.AddTrack(
-                  PDG_NEUTRON, 0.5,
+                  PDG_NEUTRON, 0.5 + Mn,
                   neutronMom.x, neutronMom.y, neutronMom.z,
-                  0, 0, 0, 1, 0
+                  1 /*iorgvc*/,
+                  1 /*ivtivc*/,
+                  1 /*ivtfvc*/,
+                  0 /*iflgvc*/,
+                  1 /*icrnvc*/
                   );
-              // TODO original code does NOT hold ivtfvc, is it fine?
             }
           }
           if(channel==0){
             // Gamma ray
             i_nucre++;
-            auto gammaMom = determineNeutMomentum();
+            constexpr double gammaEne = 12.674;
+            const auto gammaMom = gammaEne * determineNeutMomentum();
             ev.AddTrack(
-                PDG_GAMMA, 12.674,
+                PDG_GAMMA, gammaEne,
                 gammaMom.x, gammaMom.y, gammaMom.z,
-                0, 0, 0, 1, 0
+                1 /*iorgvc*/,
+                1 /*ivtivc*/,
+                1 /*ivtfvc*/,
+                0 /*iflgvc*/,
+                1 /*icrnvc*/
                 );
-            // TODO original code does NOT hold ivtfvc, is it fine?
             //std::cout << "gamma emission " << i_nucre << " " << mc->ipvc[mc->nvc] << " " << mc->energy[mc->nvc] << " " << x << " " << y << " " << z << std::endl; // nakanisi
           }
         }
@@ -1201,7 +1152,7 @@ void SKSNSimVectorSNGenerator::determineAngleElastic( TRandom &rng, const SKSNSi
 	cost = 1. - ZERO_PRECISION;
 	eEnergy = SKSNSimXSecNuElastic::CalcElectronTotEnergy( nuEnergy, cost );
 
-  SKSNSimTools::DumpDebugMessage(Form("nReact %d nuEnergy %.5g eEnergy %.5g cost %.5g", nReact, nuEnergy, eEnergy, cost));
+  //SKSNSimTools::DumpDebugMessage(Form("nReact %d nuEnergy %.5g eEnergy %.5g cost %.5g", nReact, nuEnergy, eEnergy, cost));
 	double maxP = 0.;
 	if( nReact == 1 ) maxP = sl_nue_dif_rad_( & nuEnergy, & eEnergy);
 	if( nReact == 2 ) maxP = sl_neb_dif_rad_( & nuEnergy, & eEnergy);
@@ -1223,13 +1174,11 @@ void SKSNSimVectorSNGenerator::determineAngleElastic( TRandom &rng, const SKSNSi
 	  iSkip = 1;
 	  return;
 	}
-  SKSNSimTools::DumpDebugMessage(Form(" Found maxP determineAngleElastic %.5g", maxP) );
+  //SKSNSimTools::DumpDebugMessage(Form(" Found maxP determineAngleElastic %.5g", maxP) );
 
 	while( 1 ){
 		cost = getRandomReal( costTh, 1., rng);
     eEnergy = SKSNSimXSecNuElastic::CalcElectronTotEnergy( nuEnergy, cost );
-    SKSNSimTools::DumpDebugMessage(Form(" determineAngleElastic randomThrow nuEne %.5g eEne %.5g (Me %.5g) cost %.5g (%.5g)", nuEnergy, eEnergy, 0.51099906, cost, costTh) );
-    SKSNSimTools::DumpDebugMessage(Form(" diff %.g ", eEnergy - 0.51099906));
 
 		if( nReact == 1 ) p = sl_nue_dif_rad_( & nuEnergy, & eEnergy);
 		if( nReact == 2 ) p = sl_neb_dif_rad_( & nuEnergy, & eEnergy);
@@ -1245,7 +1194,7 @@ void SKSNSimVectorSNGenerator::determineAngleElastic( TRandom &rng, const SKSNSi
 			break;
 		}
 	}
-  SKSNSimTools::DumpDebugMessage(" Exit determineAngleElastic " );
+  //SKSNSimTools::DumpDebugMessage(" Exit determineAngleElastic " );
   return;
 }
 
