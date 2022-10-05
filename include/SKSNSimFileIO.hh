@@ -34,12 +34,12 @@ class SKSNSimFileOutput{
     virtual void Close() = 0;
 
     virtual void Write(const SKSNSimSNEventVector &) = 0;
-    virtual void Write(const std::vector<SKSNSimSNEventVector> &vecs) {for(auto it = vecs.begin(); it != vecs.end(); it++) Write(*it);};
+    virtual void Write(const std::vector<SKSNSimSNEventVector> &vecs) = 0;
 };
 
 std::vector<SKSNSimFileSet> GenerateOutputFileList(SKSNSimUserConfiguration &conf);
 
-class SKSNSimFileOutTFile : SKSNSimFileOutput {
+class SKSNSimFileOutTFile : public SKSNSimFileOutput {
   private:
     TFile *m_fileptr;
     MCInfo *m_MC;
@@ -52,10 +52,12 @@ class SKSNSimFileOutTFile : SKSNSimFileOutput {
     SKSNSimFileOutTFile (const std::string fname) { Open(fname); }
     ~SKSNSimFileOutTFile (){ if (m_fileptr != NULL) delete m_fileptr; }
 
-    void Open(const std::string fname, const bool including_snevtinfo = false);
+    void Open(const std::string fname, const bool including_snevtinfo);
+    void Open(const std::string fname) { Open(fname, false);};
     void Close();
 
     void Write(const SKSNSimSNEventVector &);
-    void Write(const std::vector<SKSNSimSNEventVector> &);
+    void Write(const std::vector<SKSNSimSNEventVector> &vecs)
+    {for(auto it = vecs.begin(); it != vecs.end(); it++) Write(*it);};
 };
 #endif
