@@ -8,6 +8,7 @@
 #include <TFile.h>
 #include <TTree.h>
 #include <mcinfo.h>
+#include <snevtinfo.h>
 #include "SKSNSimVectorGenerator.hh"
 #include "SKSNSimUserConfiguration.hh"
 
@@ -42,15 +43,16 @@ class SKSNSimFileOutTFile : SKSNSimFileOutput {
   private:
     TFile *m_fileptr;
     MCInfo *m_MC;
+    SNEvtInfo *m_SN;
     TTree *m_OutTree;
 
 
   public:
-    SKSNSimFileOutTFile (){ m_fileptr = NULL; }
+    SKSNSimFileOutTFile (){ m_fileptr = NULL; m_MC = NULL; m_SN = NULL; }
     SKSNSimFileOutTFile (const std::string fname) { Open(fname); }
     ~SKSNSimFileOutTFile (){ if (m_fileptr != NULL) delete m_fileptr; }
 
-    void Open(const std::string fname);
+    void Open(const std::string fname, const bool including_snevtinfo = false);
     void Close();
 
     void Write(const SKSNSimSNEventVector &);

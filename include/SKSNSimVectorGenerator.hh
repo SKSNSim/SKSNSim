@@ -125,7 +125,7 @@ class SKSNSimSNEventVector {
 		///static void determineKinematics( SKSNSimSNEventVector &p);
 
   public:
-    SKSNSimSNEventVector() {};
+    SKSNSimSNEventVector() {sninfo.iEvt = -1;};
     ~SKSNSimSNEventVector() {};
     int AddVertex(
         double x, double y, double z,
@@ -171,10 +171,14 @@ class SKSNSimSNEventVector {
       sninfo.rVtx[2] = rVtx[2];
     };
     void SetSNEvtInfoIEvt(int i) { sninfo.iEvt = i; }
-    auto GetSNEvtInfoRVtx(int i) { return sninfo.rVtx[i]; }
-    auto GetSNEvtInfoNuEne() { return sninfo.nuEne; }
-    auto GetSNEvtInfoRType() { return sninfo.rType; }
-    UtilVector3<double> GetSNEvtInfoNuDir() { return UtilVector3<double>(sninfo.nuDir); }
+    auto GetSNEvtInfoIEvt() const { return sninfo.iEvt; }
+    auto GetSNEvtInfoRVtx(int i) const { return sninfo.rVtx[i]; }
+    auto GetSNEvtInfoNuEne() const { return sninfo.nuEne; }
+    auto GetSNEvtInfoRType() const { return sninfo.rType; }
+    auto GetSNEvtInfoRTime() const { return sninfo.rTime; }
+    auto GetSNEvtInfoNuType() const { return sninfo.nuType; }
+    UtilVector3<double> GetSNEvtInfoNuDir() const { return UtilVector3<double>(sninfo.nuDir); }
+    auto GetSNEvtInfoNuDir(int i) const { return sninfo.nuDir[i]; }
 
     bool operator< (const SKSNSimSNEventVector &a){ return sninfo.rTime < a.sninfo.rTime; }
 };

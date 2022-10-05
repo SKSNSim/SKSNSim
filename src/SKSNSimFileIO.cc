@@ -17,7 +17,7 @@
  */
 std::vector<std::tuple<int,int,int>> ReadTimeEventFile(TRandom &rndgen, int runBegin, int runEnd, double nev_per_min = 1.0);
 
-void SKSNSimFileOutTFile::Open(const std::string fname) {
+void SKSNSimFileOutTFile::Open(const std::string fname, const bool including_snevtinfo) {
   if(m_fileptr != NULL){
     Close();
     delete m_fileptr;
@@ -35,9 +35,16 @@ void SKSNSimFileOutTFile::Open(const std::string fname) {
 	m_MC->Clear();
 	m_MC->SetName("MC");
 
+  if(including_snevtinfo){
+    m_SN = new SNEvtInfo;
+    m_SN->Clear();
+    m_SN->SetName("SN");
+  }
+
 	/*-----define branch-----*/
 	TList *TopBranch = new TList;
 	TopBranch->Add(m_MC);
+  if(including_snevtinfo) TopBranch->Add(m_SN);
 
 	// define tree
 	m_OutTree = new TTree("data", "SK 5 tree");
@@ -57,6 +64,20 @@ void SKSNSimFileOutTFile::Close(){
 }
 
 void SKSNSimFileOutTFile::Write(const SKSNSimSNEventVector &ev){
+
+  if(ev.GetSNEvtInfoIEvt() != -1 && m_SN != NULL){
+    m_SN->iEvt  = ev.GetSNEvtInfoIEvt();
+    m_SN->rType = ev.GetSNEvtInfoRType();
+    m_SN->nuType = ev.GetSNEvtInfoNuType();
+    m_SN->rTime = ev.GetSNEvtInfoRTime();
+    m_SN->nuEne = ev.GetSNEvtInfoNuEne();
+    m_SN->nuDir[0] = ev.GetSNEvtInfoNuDir(0);
+    m_SN->nuDir[1] = ev.GetSNEvtInfoNuDir(1);
+    m_SN->nuDir[2] = ev.GetSNEvtInfoNuDir(2);
+    m_SN->rVtx[0] = ev.GetSNEvtInfoRVtx(0);
+    m_SN->rVtx[1] = ev.GetSNEvtInfoRVtx(1);
+    m_SN->rVtx[2] = ev.GetSNEvtInfoRVtx(2);
+  }
 
   m_MC->mcinfo[0] = ev.GetRunnum();
   m_MC->mcinfo[1] = ev.GetSubRunnum();
