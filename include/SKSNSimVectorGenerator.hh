@@ -15,6 +15,10 @@
 #include "SKSNSimCrosssection.hh"
 #include "SKSNSimTools.hh"
 
+extern "C" {
+	void sn_sundir_( int *, int *, float *, float *, float *);
+}
+
 template<class T>
 class UtilVector3 {
   public:

@@ -221,6 +221,16 @@ std::vector<SKSNSimSNEventVector> SKSNSimVectorSNGenerator::GenerateEvents(){
 	std::vector<double> OcrseSub[5][32];
 	std::vector<double> OcrspSub[5][32];
 
+	/*-----determine SN direction-----*/
+	int sn_date[3] = {2011, 3, 23};
+  int sn_time[3] = {0, 0, 0,};
+	float sdir[3], ra, dec;
+	sn_sundir_( sn_date, sn_time, sdir, & ra, & dec);
+  sn_dir[0] = sdir[0];
+  sn_dir[1] = sdir[1];
+  sn_dir[2] = sdir[2];
+
+
 
   constexpr int flag_event = 1;
   constexpr SKSNSimXSecNuElastic::FLAGETHR flag_elastic_thr = flag_event!=0? SKSNSimXSecNuElastic::ETHROFF : SKSNSimXSecNuElastic::ETHRON;
@@ -345,10 +355,10 @@ std::vector<SKSNSimSNEventVector> SKSNSimVectorSNGenerator::GenerateEvents(){
   }
 
   /* tentative constant */
-  constexpr double oscneb1 = 1.0;
-  constexpr double oscneb2 = 0.0;
   constexpr double oscnue1 = 1.0;
   constexpr double oscnue2 = 0.0;
+  constexpr double oscneb1 = 1.0;
+  constexpr double oscneb2 = 0.0;
   constexpr double oscnux1 = 2.0;
   constexpr double oscnux2 = 0.0;
   constexpr double oscnxb1 = 2.0;
@@ -861,6 +871,12 @@ void SKSNSimVectorSNGenerator::determineKinematics( std::map<XSECTYPE, std::shar
   SKSNSimXSecNuOxygen    &xsecnuoxygen    = dynamic_cast<SKSNSimXSecNuOxygen&>(   *xsecmodels[mXSECOXYGEN]);
   SKSNSimXSecNuOxygenSub &xsecnuoxygensub = dynamic_cast<SKSNSimXSecNuOxygenSub&>(*xsecmodels[mXSECOXYGENSUB]);
 
+	double sn_theta = acos( snDir[2] );
+	double sn_phi = atan2( snDir[1],  snDir[0] );
+  const UtilMatrix3<double> Rmat( cos(sn_theta)*cos(sn_phi), -sin(sn_phi), sin(sn_theta)*cos(sn_phi),
+                                  cos(sn_theta)*sin(sn_phi),  cos(sn_phi), sin(sn_theta)*sin(sn_phi),
+                                             -sin(sn_theta),           0.,             cos(sn_theta));
+
   auto nReact = ev.GetSNEvtInfoRType();
   if( nReact == 0 ){ // nuebar + p -> e+ + n
 
@@ -891,7 +907,7 @@ void SKSNSimVectorSNGenerator::determineKinematics( std::map<XSECTYPE, std::shar
     double eEne, eTheta, ePhi;
     determineAngleNuebarP( rng, xsecibd, nuEne, eEne, eTheta, ePhi );
     double amom = sqrt(SQ( eEne ) - SQ( Me ));
-    const UtilVector3<double> eDir( eTheta, ePhi); // TODO original convDirection does NOT have Rmat initialization. Is it true?
+    const UtilVector3<double> eDir = Rmat * UtilVector3<double>( eTheta, ePhi);
     //std::cout << nuEne << " " << eEne << " " << eDir[0] << " " << eDir[1] << " " << eDir[2] << std::endl;
 
     const auto positronMomentum = amom * eDir.Unit();
@@ -942,7 +958,7 @@ void SKSNSimVectorSNGenerator::determineKinematics( std::map<XSECTYPE, std::shar
     determineAngleElastic( rng, xsecnuela, nReact, nuEne, eEne, eTheta, ePhi, iSkip);
     double amom = sqrt(SQ( eEne ) - SQ( Me ));
 
-    UtilVector3<double> eDir(eTheta,ePhi); 
+    const UtilVector3<double> eDir = Rmat * UtilVector3<double>(eTheta,ePhi); 
     auto eleMom = amom * eDir;
     ev.AddTrack(
         PDG_ELECTRON, eEne,
@@ -1005,7 +1021,7 @@ void SKSNSimVectorSNGenerator::determineKinematics( std::map<XSECTYPE, std::shar
     //determineAngleNueO( Reaction, State, Ex_state, channel, nuEne, eEne, eTheta, ePhi); // channel = 8 is sub reaction of NueO
     //if(Ex_state==29)std::cout << "determine eEnergy " << Reaction << " " << State << " " << Ex_state << " " << channel << " " << nuEne << " " << eEne << " " << eTheta << " " << ePhi << std::endl; // nakanisi
     double amom = sqrt(SQ( eEne ) - SQ( Me ));
-    UtilVector3<double> eDir(eTheta, ePhi);
+    const UtilVector3<double> eDir = Rmat * UtilVector3<double>(eTheta, ePhi);
 
     if(Reaction==0) ipvc_tmp =  PDG_ELECTRON; // electron
     if(Reaction==1) ipvc_tmp = -PDG_ELECTRON; // positron
