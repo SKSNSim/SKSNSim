@@ -162,7 +162,7 @@ class SKSNSimSNEventVector {
     int GetTrackIFLGVC(int i) const { if( i>= 0 && i < GetNTrack()) return m_tracks[i].iflgvc; return 9999; }
     int GetTrackICRNVC(int i) const { if( i>= 0 && i < GetNTrack()) return m_tracks[i].icrnvc; return 9999; }
 
-    void SetSNEvtInfo(int nReact, double tReact, int nuType, double nuEne, double snDir[3], double rVtx[3]){
+    void SetSNEvtInfo(const int nReact, const double tReact, const int nuType, const double nuEne, const double snDir[3], const double rVtx[3]){
       sninfo.rType = nReact;
       sninfo.rTime = tReact;
       sninfo.nuType = nuType;
@@ -240,9 +240,10 @@ class SKSNSimVectorSNGenerator {
     static double FindMaxProb ( const double, const SKSNSimCrosssectionModel &);
 
     //double SetMaximumHitProbability();
-    std::vector<SKSNSimSNEventVector> MakeEvent(double time, double nu_energy, int nReact, int nuType, double rate);
+    std::vector<SKSNSimSNEventVector> MakeEvent(const double nuEneBinSize, const double tBinSize, const double time, const double nu_energy, const int nReact, const int nuType, const double rate);
     void FillEvent(std::vector<SKSNSimSNEventVector> &evt_buffer);
     static void determineKinematics( std::map<XSECTYPE, std::shared_ptr<SKSNSimCrosssectionModel>> xsecmodels, TRandom &rng, SKSNSimSNEventVector &ev, const double snDir[]);
+    static void determineKinematicsIBD( const SKSNSimXSecIBDSV & xsec, TRandom &rng, SKSNSimSNEventVector &ev, const UtilVector3<double> nuDir);
     static void determineAngleNuebarP( TRandom &rng, const SKSNSimXSecIBDSV & xsec, const double nuEne, double & eEne, double & eTheta, double & ePhi );
     static void determineAngleElastic( TRandom &rng, const SKSNSimXSecNuElastic & xsec, const int nReact, const double nuEne, double & eEne, double & eTheta, double & ePhi, int &iSkip );
     static void determineAngleNueO(TRandom &rng, SKSNSimXSecNuOxygen &xsec, const int Reaction, const int State, const int Ex_state, const int channel, const double nuEne, double & eEne, double & eTheta, double & ePhi );

@@ -94,7 +94,7 @@ SKSNSimSNEventVector SKSNSimVectorGenerator::GenerateEventIBD() {
                                     -sin(theta),        0.,          cos(theta));
 
   // interaction point
-  auto determinePosition = std::bind([](TRandom &rng)
+  auto determinePosition = [](TRandom &rng)
   {
     const double rPositionRange = RINTK;
     const double hPositionRange = ZPINTK;
@@ -107,8 +107,8 @@ SKSNSimSNEventVector SKSNSimVectorGenerator::GenerateEventIBD() {
     const double z = -hPositionRange + rng.Uniform( 2.*hPositionRange);
 
     return UtilVector3<double>(x,y,z);
-  }, *randomgenerator);
-  const auto xyz = determinePosition();
+  };
+  const auto xyz = determinePosition(*randomgenerator);
 
   // Fill into class
   // MCVERTEX (see $SKOFL_ROOT/inc/vcvrtx.h )                                                                               
@@ -407,7 +407,7 @@ std::vector<SKSNSimSNEventVector> SKSNSimVectorSNGenerator::GenerateEvents(){
 			//SKSNSimTools::DumpDebugMessage(Form("IBD rate is: time %.2g Enu %.5g TotCRSIBD %.5g Nspcneb x oscneb1 %.5g Nspcnx x oscneb2 %.5g nuEneBinSize %.2g tBinSize %.2g RatioTo10kpc %.2g -> rate %.5g", time, nu_energy, totcrsIBD[i_nu_ene], oscneb1*nspcneb, oscneb2*nspcnx, nuEneBinSize, tBinSize, RatioTo10kpc, rate));
       totNuebarp += rate;
       if(flag_event == 1) {
-        auto buf = MakeEvent(time, nu_energy, 0 /*nReact*/, - PDG_ELECTRON_NEUTRINO /*nuType*/, rate);
+        auto buf = MakeEvent(nuEneBinSize, tBinSize, time, nu_energy, 0 /*nReact*/, - PDG_ELECTRON_NEUTRINO /*nuType*/, rate);
         evt_buffer.insert(evt_buffer.end(), buf.begin(), buf.end());
       }
 
@@ -417,28 +417,28 @@ std::vector<SKSNSimSNEventVector> SKSNSimVectorSNGenerator::GenerateEvents(){
       rate = Const_e * (oscnue1*nspcne + oscnue2*nspcnx) * totcrsNue[i_nu_ene] * nuEneBinSize * tBinSize * RatioTo10kpc;
       totNueElastic += rate;
       if(flag_event == 1) {
-        auto buf = MakeEvent(time, nu_energy, 1 /*nReact*/, PDG_ELECTRON_NEUTRINO /*nuType*/, rate);
+        auto buf = MakeEvent(nuEneBinSize, tBinSize, time, nu_energy, 1 /*nReact*/, PDG_ELECTRON_NEUTRINO /*nuType*/, rate);
         evt_buffer.insert(evt_buffer.end(), buf.begin(), buf.end());
       }
 
       rate = Const_e * (oscneb1*nspcneb + oscneb2*nspcnx) * totcrsNueb[i_nu_ene] * nuEneBinSize * tBinSize * RatioTo10kpc;
       totNuebarElastic += rate;
       if(flag_event == 1) {
-        auto buf = MakeEvent(time, nu_energy, 2 /*nReact*/, - PDG_ELECTRON_NEUTRINO /*nuType*/, rate);
+        auto buf = MakeEvent(nuEneBinSize, tBinSize, time, nu_energy, 2 /*nReact*/, - PDG_ELECTRON_NEUTRINO /*nuType*/, rate);
         evt_buffer.insert(evt_buffer.end(), buf.begin(), buf.end());
       }
 
       rate = Const_e * (oscnux1*nspcnx + oscnux2*nspcne) * totcrsNux[i_nu_ene] * nuEneBinSize * tBinSize * RatioTo10kpc;
       totNuxElastic += rate;
       if(flag_event == 1) {
-        auto buf = MakeEvent(time, nu_energy, 3 /*nReact*/, PDG_MUON_NEUTRINO /*nuType*/, rate);
+        auto buf = MakeEvent(nuEneBinSize, tBinSize, time, nu_energy, 3 /*nReact*/, PDG_MUON_NEUTRINO /*nuType*/, rate);
         evt_buffer.insert(evt_buffer.end(), buf.begin(), buf.end());
       }
 
       rate = Const_e * (oscnxb1*nspcnx + oscnxb2*nspcneb) * totcrsNuxb[i_nu_ene] * nuEneBinSize * tBinSize * RatioTo10kpc;
       totNuxbarElastic += rate;
       if(flag_event == 1) {
-        auto buf = MakeEvent(time, nu_energy, 4 /*nReact*/, - PDG_MUON_NEUTRINO /*nuType*/, rate);
+        auto buf = MakeEvent(nuEneBinSize, tBinSize, time, nu_energy, 4 /*nReact*/, - PDG_MUON_NEUTRINO /*nuType*/, rate);
         evt_buffer.insert(evt_buffer.end(), buf.begin(), buf.end());
       }
 
@@ -456,7 +456,7 @@ std::vector<SKSNSimSNEventVector> SKSNSimVectorSNGenerator::GenerateEvents(){
                 //sReact = to_string(rcn) + to_string(ex_energy) + to_string(ex_state) + to_string(ch);
                 const int nReact = (rcn+1)*10e4 + (ex_energy+1)*10e3 + (ex_state+1)*10 + (ch+1);
                 //if(ex_state==2 && ch==6)std::cout << "nReact" << " " << nReact << " " << rcn << " " << ex_energy << " " << ex_state << " " << ch << std::endl; //nakanisi
-                auto buf = MakeEvent(time, nu_energy, nReact, PDG_ELECTRON_NEUTRINO /* nuType */, rate);
+                auto buf = MakeEvent(nuEneBinSize, tBinSize, time, nu_energy, nReact, PDG_ELECTRON_NEUTRINO /* nuType */, rate);
                 evt_buffer.insert(evt_buffer.end(), buf.begin(), buf.end());
               }
             }
@@ -471,7 +471,7 @@ std::vector<SKSNSimSNEventVector> SKSNSimVectorSNGenerator::GenerateEvents(){
               totNueO += rate;
               if(flag_event == 1){
                 const int nReact = (rcn+1)*10e4 + (ex_energy+1)*10e3 + (ex_state+1)*10 + (ch+1);
-                auto buf = MakeEvent(time, nu_energy, nReact, PDG_ELECTRON_NEUTRINO /*nuType*/, rate);
+                auto buf = MakeEvent(nuEneBinSize, tBinSize, time, nu_energy, nReact, PDG_ELECTRON_NEUTRINO /*nuType*/, rate);
                 evt_buffer.insert(evt_buffer.end(), buf.begin(), buf.end());
               }
             }
@@ -486,7 +486,7 @@ std::vector<SKSNSimSNEventVector> SKSNSimVectorSNGenerator::GenerateEvents(){
               totNueO += rate;
               if(flag_event == 1){
                 const int nReact = (rcn+1)*10e4 + (ex_energy+1)*10e3 + (ex_state+1)*10 + (ch+1);
-                auto buf = MakeEvent(time, nu_energy, nReact, PDG_ELECTRON_NEUTRINO /*nuType*/, rate);
+                auto buf = MakeEvent(nuEneBinSize, tBinSize, time, nu_energy, nReact, PDG_ELECTRON_NEUTRINO /*nuType*/, rate);
                 evt_buffer.insert(evt_buffer.end(), buf.begin(), buf.end());
               }
             }
@@ -501,7 +501,7 @@ std::vector<SKSNSimSNEventVector> SKSNSimVectorSNGenerator::GenerateEvents(){
               totNueO += rate;
               if(flag_event == 1){
                 const int nReact = (rcn+1)*10e4 + (ex_energy+1)*10e3 + (ex_state+1)*10 + (ch+1);
-                auto buf = MakeEvent(time, nu_energy, nReact, PDG_ELECTRON_NEUTRINO /*nuType*/, rate);
+                auto buf = MakeEvent(nuEneBinSize, tBinSize, time, nu_energy, nReact, PDG_ELECTRON_NEUTRINO /*nuType*/, rate);
                 evt_buffer.insert(evt_buffer.end(), buf.begin(), buf.end());
               }
             }
@@ -516,7 +516,7 @@ std::vector<SKSNSimSNEventVector> SKSNSimVectorSNGenerator::GenerateEvents(){
               totNueO += rate;
               if(flag_event == 1){
                 const int nReact = (rcn+1)*10e4 + (ex_energy+1)*10e3 + (ex_state+1)*10 + (ch+1);
-                auto buf = MakeEvent(time, nu_energy, nReact, PDG_ELECTRON_NEUTRINO /*nuType*/, rate);
+                auto buf = MakeEvent(nuEneBinSize, tBinSize, time, nu_energy, nReact, PDG_ELECTRON_NEUTRINO /*nuType*/, rate);
                 evt_buffer.insert(evt_buffer.end(), buf.begin(), buf.end());
               }
             }
@@ -537,7 +537,7 @@ std::vector<SKSNSimSNEventVector> SKSNSimVectorSNGenerator::GenerateEvents(){
               if(flag_event == 1){
                 const int nReact = (rcn+1)*10e4 + (ex_energy+1)*10e3 + (ex_state+1)*10 + (ch+1);
                 //std::cout << "MakeEvent" << std::endl;
-                auto buf = MakeEvent(time, nu_energy, nReact, - PDG_ELECTRON_NEUTRINO /*nuType*/, rate);
+                auto buf = MakeEvent(nuEneBinSize, tBinSize, time, nu_energy, nReact, - PDG_ELECTRON_NEUTRINO /*nuType*/, rate);
                 evt_buffer.insert(evt_buffer.end(), buf.begin(), buf.end());
                 //std::cout << "end MakeEvent" << std::endl;
               }
@@ -552,7 +552,7 @@ std::vector<SKSNSimSNEventVector> SKSNSimVectorSNGenerator::GenerateEvents(){
               totNuebarO += rate;
               if(flag_event == 1){
                 const int nReact = (rcn+1)*10e4 + (ex_energy+1)*10e3 + (ex_state+1)*10 + (ch+1);
-                auto buf = MakeEvent(time, nu_energy, nReact, - PDG_ELECTRON_NEUTRINO /*nuType*/, rate);
+                auto buf = MakeEvent(nuEneBinSize, tBinSize, time, nu_energy, nReact, - PDG_ELECTRON_NEUTRINO /*nuType*/, rate);
                 evt_buffer.insert(evt_buffer.end(), buf.begin(), buf.end());
               }
             }
@@ -566,7 +566,7 @@ std::vector<SKSNSimSNEventVector> SKSNSimVectorSNGenerator::GenerateEvents(){
               totNuebarO += rate;
               if(flag_event == 1){
                 const int nReact = (rcn+1)*10e4 + (ex_energy+1)*10e3 + (ex_state+1)*10 + (ch+1);
-                auto buf = MakeEvent(time, nu_energy, nReact, - PDG_ELECTRON_NEUTRINO /*nuType*/, rate);
+                auto buf = MakeEvent(nuEneBinSize, tBinSize, time, nu_energy, nReact, - PDG_ELECTRON_NEUTRINO /*nuType*/, rate);
                 evt_buffer.insert(evt_buffer.end(), buf.begin(), buf.end());
               }
             }
@@ -580,7 +580,7 @@ std::vector<SKSNSimSNEventVector> SKSNSimVectorSNGenerator::GenerateEvents(){
               totNuebarO += rate;
               if(flag_event == 1){
                 const int nReact = (rcn+1)*10e4 + (ex_energy+1)*10e3 + (ex_state+1)*10 + (ch+1);
-                auto buf = MakeEvent(time, nu_energy, nReact, - PDG_ELECTRON_NEUTRINO /*nuType*/, rate);
+                auto buf = MakeEvent(nuEneBinSize, tBinSize, time, nu_energy, nReact, - PDG_ELECTRON_NEUTRINO /*nuType*/, rate);
                 evt_buffer.insert(evt_buffer.end(), buf.begin(), buf.end());
               }
             }
@@ -594,7 +594,7 @@ std::vector<SKSNSimSNEventVector> SKSNSimVectorSNGenerator::GenerateEvents(){
               totNuebarO += rate;
               if(flag_event == 1){
                 const int nReact = (rcn+1)*10e4 + (ex_energy+1)*10e3 + (ex_state+1)*10 + (ch+1);
-                auto buf = MakeEvent(time, nu_energy, nReact, - PDG_ELECTRON_NEUTRINO /*nuType*/, rate);
+                auto buf = MakeEvent(nuEneBinSize, tBinSize, time, nu_energy, nReact, - PDG_ELECTRON_NEUTRINO /*nuType*/, rate);
                 evt_buffer.insert(evt_buffer.end(), buf.begin(), buf.end());
               }
             }
@@ -618,7 +618,7 @@ std::vector<SKSNSimSNEventVector> SKSNSimVectorSNGenerator::GenerateEvents(){
             const int nReact = (rcn+1)*10e4 + (ex_energy+1)*10e3 + 3*100 + 9;
             //std::cout << "MakeEvent" << std::endl; //nakanisi
             if(nu_energy > 15.4){
-              auto buf = MakeEvent(time, nu_energy, nReact, PDG_ELECTRON_NEUTRINO /*nuType*/, rate);
+              auto buf = MakeEvent(nuEneBinSize, tBinSize, time, nu_energy, nReact, PDG_ELECTRON_NEUTRINO /*nuType*/, rate);
               evt_buffer.insert(evt_buffer.end(), buf.begin(), buf.end());
             }
             //std::cout << "end MakeEvent" << std::endl; //nakanisi
@@ -637,7 +637,7 @@ std::vector<SKSNSimSNEventVector> SKSNSimVectorSNGenerator::GenerateEvents(){
             const int nReact = (rcn+1)*10e4 + (ex_energy+1)*10e3 +3*100 + 9;
             //if(ch==0 && ex_energy==1)std::cout << "nReact" << " " << nReact << " " << rcn << " " << ex_energy << " " << ch << std::endl; //nakanisi
             if(nu_energy > 11.4) {
-              auto buf = MakeEvent(time, nu_energy, nReact, - PDG_ELECTRON_NEUTRINO /*nuType*/, rate);
+              auto buf = MakeEvent(nuEneBinSize, tBinSize, time, nu_energy, nReact, - PDG_ELECTRON_NEUTRINO /*nuType*/, rate);
               evt_buffer.insert(evt_buffer.end(), buf.begin(), buf.end());
             }
 
@@ -699,7 +699,7 @@ std::vector<SKSNSimSNEventVector> SKSNSimVectorSNGenerator::GenerateEvents(){
 }
 
 
-std::vector<SKSNSimSNEventVector> SKSNSimVectorSNGenerator::MakeEvent(double time, double nu_energy, int nReact, int nuType, double rate){
+std::vector<SKSNSimSNEventVector> SKSNSimVectorSNGenerator::MakeEvent(const double nuEneBinSize, const double tBinSize, const double time, const double nu_energy, const int nReact, const int nuType, const double rate){
   // SKSNSimTools::DumpDebugMessage(Form(" MakeEvent time %.2g nuEne %.2g nReact %d nuType %d rate %.2g", time , nu_energy, nReact, nuType, rate));
   std::vector<SKSNSimSNEventVector> buffer;
 
@@ -707,14 +707,9 @@ std::vector<SKSNSimSNEventVector> SKSNSimVectorSNGenerator::MakeEvent(double tim
   double dRandTotEvts = randomgenerator->Poisson(rate);
   //if(time<0.005)std::cout << time << " " << nu_energy << " " << nReact << " " << nuType << " " << rate << std::endl; //nakanisi
 
-
-  SKSNSimBinnedFluxModel &flux = dynamic_cast<SKSNSimBinnedFluxModel&>(*fluxmodels[0]); // TODO selectable flux
-  const double nuEneBinSize = flux.GetBinWidthEne(0);
-  const double tBinSize = flux.GetBinWidthTime(0);
-
   auto getRandomReal = [](double s, double e , TRandom& rng){ return rng.Uniform(s,e);};
 
-  auto determinePosition = std::bind([](TRandom &rng)
+  auto determinePosition = [](TRandom &rng)
   {
     const double rPositionRange = RINTK;
     const double hPositionRange = ZPINTK;
@@ -727,7 +722,7 @@ std::vector<SKSNSimSNEventVector> SKSNSimVectorSNGenerator::MakeEvent(double tim
     const double z = -hPositionRange + rng.Uniform( 2.*hPositionRange);
 
     return UtilVector3<double>(x,y,z);
-  }, *randomgenerator);
+  };
 
   if(dRandTotEvts > 0){
     //std::cout << "MakeEvent " << time << " " << nu_energy << " " << nReact << " " << nuType << " " << rate << " " << dRandTotEvts << std::endl; //nakanisi
@@ -740,16 +735,13 @@ std::vector<SKSNSimSNEventVector> SKSNSimVectorSNGenerator::MakeEvent(double tim
 
       double ver_x = 9999., ver_y = 9999., ver_z = 9999.;
       //auto xyz = determinePosition(mInnerID, ver_x, ver_y, ver_z );
-      auto xyz = determinePosition();
+      auto xyz = determinePosition(*randomgenerator);
 
       //SNEvtInfo evtInfo;
       //evtInfo.iEvt = dRandTotEvts;
       SKSNSimSNEventVector evtInfo;
 
-      double rvtx [3];
-      rvtx[0] = xyz.x;
-      rvtx[1] = xyz.y;
-      rvtx[2] = xyz.z;
+      const double rvtx [3] = {xyz.x, xyz.y, xyz.z};
       evtInfo.SetSNEvtInfo(nReact, tReact, nuType, nuEne, sn_dir, rvtx);
 
       buffer.push_back( evtInfo );
@@ -879,60 +871,8 @@ void SKSNSimVectorSNGenerator::determineKinematics( std::map<XSECTYPE, std::shar
 
   auto nReact = ev.GetSNEvtInfoRType();
   if( nReact == 0 ){ // nuebar + p -> e+ + n
-
-    // Original neutrino
     const auto nuMomentum = pvect;
-    ev.AddTrack(
-        - PDG_ELECTRON_NEUTRINO, nuEne,
-        nuMomentum.x, nuMomentum.y, nuMomentum.z,
-        0 /*iorgvc*/,
-        1 /*ivtivc*/,
-        1 /*ivtfvc*/,
-        -1 /*iflgvc*/,
-        0 /*icrnvc*/
-        );
-
-    // Original proton
-    ev.AddTrack(
-        PDG_PROTON, Mp,
-        0., 0., 0.,
-        0 /*iorgvc*/,
-        1 /*ivtivc*/,
-        1 /*ivtfvc*/,
-        -1 /*iflgvc*/,
-        0 /*icrnvc*/
-        );
-
-    // Positron
-    double eEne, eTheta, ePhi;
-    determineAngleNuebarP( rng, xsecibd, nuEne, eEne, eTheta, ePhi );
-    double amom = sqrt(SQ( eEne ) - SQ( Me ));
-    const UtilVector3<double> eDir = Rmat * UtilVector3<double>( eTheta, ePhi);
-    //std::cout << nuEne << " " << eEne << " " << eDir[0] << " " << eDir[1] << " " << eDir[2] << std::endl;
-
-    const auto positronMomentum = amom * eDir.Unit();
-    ev.AddTrack(
-        - PDG_ELECTRON, eEne,
-        positronMomentum.x, positronMomentum.y, positronMomentum.z,
-        1 /*iorgvc*/,
-        1 /*ivtivc*/,
-        1 /*ivtfvc*/,
-        0 /*iflgvc*/,
-        1 /*icrnvc*/
-        );
-
-    // Neutron
-    const UtilVector3<double> neutronMomentum = nuMomentum - positronMomentum;
-    ev.AddTrack(
-        PDG_NEUTRON,
-        std::sqrt(neutronMomentum.Mag2() + Mn*Mn),
-        neutronMomentum.x, neutronMomentum.y, neutronMomentum.z,
-        1 /*iorgvc*/,
-        1 /*ivtivc*/,
-        1 /*ivtfvc*/,
-        0 /*iflgvc*/,
-        1 /*icrnvc*/
-        );
+    determineKinematicsIBD( xsecibd, rng, ev, nuMomentum);
 
   } else if( nReact == 1 || nReact == 2 || nReact == 3 || nReact == 4 ){ //nu + e Elastic
                                                                          //mc->mcinfo[0] = 85007;
@@ -1039,13 +979,13 @@ void SKSNSimVectorSNGenerator::determineKinematics( std::map<XSECTYPE, std::shar
     //if(eEne<0.)std::cout << "e-/e+ momentum " << mc->pvc[1][0] << " " << mc->pvc[1][1] << " " << mc->pvc[1][2] << " " << eEne << " " << Me << " " << amom << " " << eDir[0] << " " << eDir[1] << " " << eDir[2] << std::endl; // nakanisi
 
     double costh = snDir[0] * eDir[0] + snDir[1] * eDir[1] + snDir[2] * eDir[2];
-    auto determineNeutMomentum = std::bind([](TRandom &rng)
+    auto determineNeutMomentum = [](TRandom &rng)
         {
         //random reaction of neutron
         double phi = rng.Uniform(0., 2.*M_PI); 
         double theta = rng.Uniform(0., M_PI); // TODO this should be dCosTheta? This is based on original code
-        return UtilVector3<double>(theta, phi);
-        }, rng);
+        return UtilVector3<double>(theta, phi).Unit();
+        };
 
     if(numNtNueO[channel]!=0 || numNtNuebarO[channel]!=0 || numGmNuebarO[channel]!=0){
       if(Reaction==0){
@@ -1054,7 +994,7 @@ void SKSNSimVectorSNGenerator::determineKinematics( std::map<XSECTYPE, std::shar
           for(int i=0;i<numNtNueO[channel];i++){
             // Neutron
             i_nucre++;
-            const auto neutronMom = sqrt(SQ(0.5+Mn) - SQ(Mn)) * determineNeutMomentum();
+            const auto neutronMom = sqrt(SQ(0.5+Mn) - SQ(Mn)) * determineNeutMomentum(rng);
             ev.AddTrack(
                 PDG_NEUTRON, 0.5 + Mn,
                 neutronMom.x, neutronMom.y, neutronMom.z,
@@ -1075,7 +1015,7 @@ void SKSNSimVectorSNGenerator::determineKinematics( std::map<XSECTYPE, std::shar
             for(int i=0;i<numNtNuebarO[channel];i++){
               // Neutron
               i_nucre++;
-              auto neutronMom = sqrt(SQ(0.5+Mn)-SQ(Mn)) * determineNeutMomentum();
+              auto neutronMom = sqrt(SQ(0.5+Mn)-SQ(Mn)) * determineNeutMomentum(rng);
               ev.AddTrack(
                   PDG_NEUTRON, 0.5 + Mn,
                   neutronMom.x, neutronMom.y, neutronMom.z,
@@ -1091,7 +1031,7 @@ void SKSNSimVectorSNGenerator::determineKinematics( std::map<XSECTYPE, std::shar
             // Gamma ray
             i_nucre++;
             constexpr double gammaEne = 12.674;
-            const auto gammaMom = gammaEne * determineNeutMomentum();
+            const auto gammaMom = gammaEne * determineNeutMomentum(rng);
             ev.AddTrack(
                 PDG_GAMMA, gammaEne,
                 gammaMom.x, gammaMom.y, gammaMom.z,
@@ -1108,6 +1048,70 @@ void SKSNSimVectorSNGenerator::determineKinematics( std::map<XSECTYPE, std::shar
     }
   }
   return;
+}
+
+void SKSNSimVectorSNGenerator::determineKinematicsIBD( const SKSNSimXSecIBDSV & xsec, TRandom &rng, SKSNSimSNEventVector &ev, const UtilVector3<double> nuMomentum){
+  const UtilVector3<double> nuDir = nuMomentum.Unit();
+  const double theta = acos( nuDir[2] );
+  const double phi = atan2( nuDir[1],  nuDir[0] );
+  const UtilMatrix3<double> Rmat( cos(theta)*cos(phi), -sin(phi), sin(theta)*cos(phi),
+      cos(theta)*sin(phi),  cos(phi), sin(theta)*sin(phi),
+      -sin(theta),        0.,          cos(theta));
+
+  const double nuEne = nuMomentum.Mag();
+  // Original neutrino
+  ev.AddTrack(
+      - PDG_ELECTRON_NEUTRINO, nuEne,
+      nuMomentum.x, nuMomentum.y, nuMomentum.z,
+      0 /*iorgvc*/,
+      1 /*ivtivc*/,
+      1 /*ivtfvc*/,
+      -1 /*iflgvc*/,
+      0 /*icrnvc*/
+      );
+
+  // Original proton
+  ev.AddTrack(
+      PDG_PROTON, Mp,
+      0., 0., 0.,
+      0 /*iorgvc*/,
+      1 /*ivtivc*/,
+      1 /*ivtfvc*/,
+      -1 /*iflgvc*/,
+      0 /*icrnvc*/
+      );
+
+  // Positron
+  double eEne, eTheta, ePhi;
+  determineAngleNuebarP( rng, xsec, nuEne, eEne, eTheta, ePhi );
+  auto SQ = [](double x){return x*x;};
+  const double amom = sqrt(SQ( eEne ) - SQ( Me ));
+  const UtilVector3<double> eDir = Rmat * UtilVector3<double>( eTheta, ePhi);
+  //std::cout << nuEne << " " << eEne << " " << eDir[0] << " " << eDir[1] << " " << eDir[2] << std::endl;
+
+  const auto positronMomentum = amom * eDir.Unit();
+  ev.AddTrack(
+      - PDG_ELECTRON, eEne,
+      positronMomentum.x, positronMomentum.y, positronMomentum.z,
+      1 /*iorgvc*/,
+      1 /*ivtivc*/,
+      1 /*ivtfvc*/,
+      0 /*iflgvc*/,
+      1 /*icrnvc*/
+      );
+
+  // Neutron
+  const UtilVector3<double> neutronMomentum = nuMomentum - positronMomentum;
+  ev.AddTrack(
+      PDG_NEUTRON,
+      std::sqrt(neutronMomentum.Mag2() + Mn*Mn),
+      neutronMomentum.x, neutronMomentum.y, neutronMomentum.z,
+      1 /*iorgvc*/,
+      1 /*ivtivc*/,
+      1 /*ivtfvc*/,
+      0 /*iflgvc*/,
+      1 /*icrnvc*/
+      );
 }
 
 double SKSNSimVectorSNGenerator::FindMaxProb ( const double ene, const SKSNSimCrosssectionModel &xsec){
