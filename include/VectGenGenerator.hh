@@ -93,6 +93,7 @@ protected:
   std::unique_ptr<FluxCalculation> nuflux_dsnb;
   VectGenOxyCrosssection* ocrs;
   VectGenOxyCrosssectionSub* osub;
+  VectGenOxyCrosssection* ocrs_nc;
   VectGenOxigFunc* reco;
   VectGenOxigFunc* rece;
 
@@ -104,7 +105,39 @@ protected:
   double totNueElastic, totNuebarElastic, totNuxElastic, totNuxbarElastic;
   double totNueO, totNuebarO;
   double totNueOsub, totNuebarOsub;
-  double totNcNup, totNcNun, totNcNubarp, totNcNubarn;
+  double totNcNuep, totNcNuebarp, totNcNuxp, totNcNuxbarp, totNcNuen, totNcNuebarn, totNcNuxn, totNcNuxbarn;
+  double totNcNuep0, totNcNuebarp0, totNcNuxp0, totNcNuxbarp0;
+  double totNcNuep1, totNcNuebarp1, totNcNuxp1, totNcNuxbarp1;
+  double totNcNuep2, totNcNuebarp2, totNcNuxp2, totNcNuxbarp2;
+  double totNcNuep3, totNcNuebarp3, totNcNuxp3, totNcNuxbarp3;
+  double totNcNuep4, totNcNuebarp4, totNcNuxp4, totNcNuxbarp4;
+  double totNcNuep5, totNcNuebarp5, totNcNuxp5, totNcNuxbarp5;
+  double totNcNuep6, totNcNuebarp6, totNcNuxp6, totNcNuxbarp6;
+  double totNcNuep7, totNcNuebarp7, totNcNuxp7, totNcNuxbarp7;
+  double totNcNuen0, totNcNuebarn0, totNcNuxn0, totNcNuxbarn0;
+  double totNcNuen1, totNcNuebarn1, totNcNuxn1, totNcNuxbarn1;
+  double totNcNuen2, totNcNuebarn2, totNcNuxn2, totNcNuxbarn2;
+  double totNcNuen3, totNcNuebarn3, totNcNuxn3, totNcNuxbarn3;
+
+  int totGenNuebarp=0;
+  int totGenNueElastic=0, totGenNuebarElastic=0, totGenNuxElastic=0, totGenNuxbarElastic=0;
+  int totGenNueO=0, totGenNuebarO=0;
+  int totGenNueOsub=0, totGenNuebarOsub=0;
+  //int totGenNcNup=0, totGenNcNun=0, totGenNcNubarp=0, totGenNcNubarn=0;
+  int totGenNcNuep=0, totGenNcNuebarp=0, totGenNcNuxp=0, totGenNcNuxbarp=0, totGenNcNuen=0, totGenNcNuebarn=0, totGenNcNuxn=0, totGenNcNuxbarn=0;
+  int totGenNcNuep0=0, totGenNcNuebarp0=0, totGenNcNuxp0=0, totGenNcNuxbarp0=0;
+  int totGenNcNuep1=0, totGenNcNuebarp1=0, totGenNcNuxp1=0, totGenNcNuxbarp1=0;
+  int totGenNcNuep2=0, totGenNcNuebarp2=0, totGenNcNuxp2=0, totGenNcNuxbarp2=0;
+  int totGenNcNuep3=0, totGenNcNuebarp3=0, totGenNcNuxp3=0, totGenNcNuxbarp3=0;
+  int totGenNcNuep4=0, totGenNcNuebarp4=0, totGenNcNuxp4=0, totGenNcNuxbarp4=0;
+  int totGenNcNuep5=0, totGenNcNuebarp5=0, totGenNcNuxp5=0, totGenNcNuxbarp5=0;
+  int totGenNcNuep6=0, totGenNcNuebarp6=0, totGenNcNuxp6=0, totGenNcNuxbarp6=0;
+  int totGenNcNuep7=0, totGenNcNuebarp7=0, totGenNcNuxp7=0, totGenNcNuxbarp7=0;
+  int totGenNcNuen0=0, totGenNcNuebarn0=0, totGenNcNuxn0=0, totGenNcNuxbarn0=0;
+  int totGenNcNuen1=0, totGenNcNuebarn1=0, totGenNcNuxn1=0, totGenNcNuxbarn1=0;
+  int totGenNcNuen2=0, totGenNcNuebarn2=0, totGenNcNuxn2=0, totGenNcNuxbarn2=0;
+  int totGenNcNuen3=0, totGenNcNuebarn3=0, totGenNcNuxn3=0, totGenNcNuxbarn3=0;
+ 
 
   // parameters
   double nuEne_min, nuEne_max, maxProb;
@@ -115,6 +148,27 @@ protected:
   int numNtNuebarO[7] = {0, 1, 0, 2, 1, 0, 0};
   int numPtNuebarO[7] = {0, 0, 1, 0, 1, 1, 2};
   int numGmNuebarO[7] = {1, 0, 0, 0, 0, 0, 0};
+
+  //energy of gamma on deexcitation with NC reaction
+  double eneGamN[8] = {5.27, 6.33, 7.16, 7.56, 8.32, 8.57, 9.05, 9.76};
+  double eneGamO[4] = {5.18, 6.18, 6.69, 7.28};
+  //flavor of neutrinos
+  int neutrinoType[4] = {12,-12,14,-14};
+
+  std::vector<double> Ocrse0[16][7];
+  std::vector<double> Ocrse1[16][7];
+  std::vector<double> Ocrse2[16][7];
+  std::vector<double> Ocrse3[16][7];
+  std::vector<double> Ocrse4[16][7];
+  std::vector<double> Ocrsp0[16][7];
+  std::vector<double> Ocrsp1[16][7];
+  std::vector<double> Ocrsp2[16][7];
+  std::vector<double> Ocrsp3[16][7];
+  std::vector<double> Ocrsp4[16][7];
+  std::vector<double> OcrseSub[5][32];
+  std::vector<double> OcrspSub[5][32]; 
+  std::vector<double> OcrsNC[2][14];
+  //std::vector<double> OcrsNC[2];
 
   // MC data
   TFile* fOutFile;
