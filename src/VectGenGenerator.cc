@@ -282,7 +282,95 @@ void VectGenGenerator::determineKinematics( const int nReact, const double nuEne
 
 	}
 	
-	else{
+    else if(nReact>1000 && nReact < 10000){
+         mc->nvc = 3;
+        int Reaction = nReact/1000;
+        int Excit_pre = nReact/100;
+        int Excit = ((nReact - (Reaction)*1000)/100) - 1;
+        int ch_pre = nReact/10;
+        int channel = (nReact - ch_pre*10) - 1;
+        int particle = ((nReact - Excit_pre*100)/10) - 1;
+
+        if(Excit == 0)mc->ipvc[0] = 12;
+        else if(Excit == 1)mc->ipvc[0] = -12;
+        else if(Excit == 2)mc->ipvc[0] = 14;
+        else if(Excit == 3)mc->ipvc[0] = -14;
+        mc->energy[0] = nuEne; //ENERGY (MEV )
+        mc->pvc[0][0] = nuEne * snDir[0]; // MOMENTUM OF I-TH PARTICLE ( MEV/C )
+        mc->pvc[0][1] = nuEne * snDir[1];
+        mc->pvc[0][2] = nuEne * snDir[2];
+	    mc->iorgvc[0] = 0;  // ID OF ORIGIN PARTICLE PARENT PARTICLE
+		mc->ivtivc[0] = 1;  // VERTEX # ( INITIAL ) 
+		mc->iflgvc[0] = -1; // FINAL STATE FLAG
+		mc->icrnvc[0] = 0;  // CHERENKOV FLAG
+		mc->ivtfvc[0] = 1;  // VERTEX # ( FINAL )
+
+        double pTheta, pPhi, pDir[3];
+        if(particle == 0){
+            double x = 9999., y = 9999., z = 9999.;
+            double amom = sqrt(SQ(Mp+0.5) - SQ(Mp));
+            determineNmomentum(x, y, z);
+            mc->ipvc[1] = 2212; // proton
+            mc->energy[1] = Mp+0.5;
+            mc->pvc[1][0] = x;
+            mc->pvc[1][1] = y;
+            mc->pvc[1][2] = z;
+            mc->iorgvc[1] = 1; // ID OF ORIGINAL PARTICLE PARENT PARTICLE
+            mc->ivtivc[1] = 1; // VERTEX # ( INITIAL )
+            mc->iflgvc[1] = 0; // FINAL STATE FLAG
+            mc->icrnvc[1] = 1; // CHERENKOV FLAG
+            mc->ivtfvc[1] = 1; // VERTEX # ( FINAL )
+
+	        // Gamma ray
+            x = 9999., y = 9999., z = 9999.;
+			determineNmomentum(x, y, z);
+			mc->ipvc[2] = 22; // gamma
+			mc->energy[2] = eneGamN[channel]; // ENERGY ( MEV )
+			mc->pvc[2][0] = x*mc->energy[2];
+		    mc->pvc[2][1] = y*mc->energy[2];
+			mc->pvc[2][2] = z*mc->energy[2];
+			mc->iorgvc[2] = 1; // ID OF ORIGINAL PARTICLE PARENT PARTICLE
+			mc->ivtivc[2] = 1; // VERTEX # ( INITIAL )
+			mc->iflgvc[2] = 0; // FINAL STATE FLAG
+			mc->icrnvc[2] = 1; // CHERENKOV FLAG
+            mc->ivtfvc[2] = 1; // VERTEX # ( FINAL )
+			std::cout << "NC gamma emission " << mc->ipvc[2] << " " << mc->energy[2] << " " << x << " " << y << " " << z << std::endl; // nakanisi
+        }
+        else if(particle == 1){
+            double x = 9999., y = 9999., z = 9999.;
+            double amom = sqrt(SQ(0.5+Mn) - SQ(Mn));
+            determineNmomentum(x, y, z);
+            mc->ipvc[1] = 2112; //neutron
+            mc->energy[1] = 0.5+Mn;
+            mc->pvc[1][0] = amom*x;
+            mc->pvc[1][1] = amom*y;
+            mc->pvc[1][2] = amom*z;
+            mc->iorgvc[1] = 1; // ID OF ORIGINAL PARTICLE PARENT PARTICLE
+            mc->ivtivc[1] = 1; // VERTEX # ( INITIAL )
+            mc->iflgvc[1] = 0; // FINAL STATE FLAG
+            mc->icrnvc[1] = 1; // CHERENKOV FLAG
+            mc->ivtfvc[1] = 1; // VERTEX # ( FINAL )
+
+	        // Gamma ray
+            x = 9999., y = 9999., z = 9999.;
+			determineNmomentum(x, y, z);
+			mc->ipvc[2] = 22; // gamma
+			mc->energy[2] = eneGamN[channel]; // ENERGY ( MEV )
+			mc->pvc[2][0] = x*mc->energy[2];
+		    mc->pvc[2][1] = y*mc->energy[2];
+			mc->pvc[2][2] = z*mc->energy[2];
+			mc->iorgvc[2] = 1; // ID OF ORIGINAL PARTICLE PARENT PARTICLE
+			mc->ivtivc[2] = 1; // VERTEX # ( INITIAL )
+			mc->iflgvc[2] = 0; // FINAL STATE FLAG
+			mc->icrnvc[2] = 1; // CHERENKOV FLAG
+            mc->ivtfvc[2] = 1; // VERTEX # ( FINAL )
+			//std::cout << "gamma emission " << i_nucre << " " << mc->ipvc[mc->nvc] << " " << mc->energy[mc->nvc] << " " << x << " " << y << " " << z << std::endl; // nakanisi
+			std::cout << "NC gamma emission " << mc->ipvc[2] << " " << mc->energy[2] << " " << x << " " << y << " " << z << std::endl; // nakanisi
+        }
+
+        
+    }
+    else if(nReact >= 10000){
 		mc->nvc = 0;
 		//mc->mcinfo[0] = 85005;
 		int Reaction = nReact/10e4 - 1;
@@ -404,7 +492,7 @@ void VectGenGenerator::determineKinematics( const int nReact, const double nuEne
 						if(channel==0){
 							// Gamma ray
 							i_nucre++;
-							double x = 999., y = 999., z = 999.;
+							double x = 9999., y = 9999., z = 9999.;
 							determineNmomentum(x, y, z);
 							mc->ipvc[mc->nvc] = 22; // gamma
 							mc->energy[mc->nvc] = 12.674; // ENERGY ( MEV )
@@ -538,12 +626,6 @@ void VectGenGenerator::FillEvent()
 	int bufsize = 8*1024*1024;      // may be this is the best 15-OCT-2007 Y.T.
 	theOTree->Branch(TopBranch,bufsize);
 
-	int totGenNuebarp=0;
-	int totGenNueElastic=0, totGenNuebarElastic=0, totGenNuxElastic=0, totGenNuxbarElastic=0;
-	int totGenNueO=0, totGenNuebarO=0;
-	int totGenNueOsub=0, totGenNuebarOsub=0;
-	int totGenNcNup=0, totGenNcNun=0, totGenNcNubarp=0, totGenNcNubarn=0;
-
 	std::cout << "start event loop in FillEvent" << std::endl; //nakanisi
 	for( uint iEvt = 0; iEvt < vEvtInfo.size(); iEvt++ ){
 
@@ -614,26 +696,43 @@ void VectGenGenerator::FillEvent()
 		// Calculate neutrino interaction vector and save into MCVECT
 		determineKinematics( p.rType, p.nuEne, p.nuDir, mc );
 
-		int Reaction = p.rType/10e4 - 1;
-		int State_pre = p.rType/10e3;
-		int Ex_state_pre = p.rType/10;
-		int State = ((p.rType - (Reaction+1)*10e4)/10e3) - 1;
-		int Ex_state = ((p.rType - State_pre*10e3)/10) - 1;
-		int channel = (p.rType - Ex_state_pre*10) - 1;
 		if(iSkip == 0) {
 		  theOTree->Fill();
 
 		  if(p.rType == 0) totGenNuebarp++;
-		  if(p.rType == 1) totGenNueElastic++;
-		  if(p.rType == 2) totGenNuebarElastic++;
-		  if(p.rType == 3) totGenNuxElastic++;
-		  if(p.rType == 4) totGenNuxbarElastic++;
-		  if(p.rType>4){
+		  else if(p.rType == 1) totGenNueElastic++;
+		  else if(p.rType == 2) totGenNuebarElastic++;
+		  else if(p.rType == 3) totGenNuxElastic++;
+		  else if(p.rType == 4) totGenNuxbarElastic++;
+          else if(p.rType>1000 && p.rType<10000){ // nc reaction
+              int Reaction = p.rType/1000;
+              int Excit_pre = p.rType/100;
+              int Excit = ((p.rType - (Reaction)*1000)/100) - 1;
+              int ch_pre = p.rType/10;
+              int channel = (p.rType - ch_pre*10) - 1;
+              int particle = ((p.rType - Excit_pre*100)/10) - 1;
+              //std::cout << "NC reaction " << p.rType << " Reaction " << Reaction << " Excit " << Excit << " particle " << particle << " channel " << channel << std::endl; //nakanisi
+              if(Excit==0 && particle==0)totGenNcNuep++;
+              else if(Excit==1 && particle==0)totGenNcNuebarp++;
+              else if(Excit==2 && particle==0)totGenNcNuxp++;
+              else if(Excit==3 && particle==0)totGenNcNuxbarp++;
+              else if(Excit==0 && particle==1)totGenNcNuen++;
+              else if(Excit==1 && particle==1)totGenNcNuebarn++;
+              else if(Excit==2 && particle==1)totGenNcNuxn++;
+              else if(Excit==3 && particle==1)totGenNcNuxbarn++;
+          }
+		  else if(p.rType>=10000){ // cc reaction
 			  //if(Ex_state==30)std::cout << p.rType << " " << "nReact" << " " << nReact << " " << "Reaction" << " " << Reaction << " " << "State_pre" << " " << State_pre << " " << "State" << " " << State << " " << "Ex_state_pre" << " " << Ex_state_pre << " " << "Ex_state" << " " << Ex_state << " " << "channel" << " " << channel << std::endl; //nakanisi
+              int Reaction = p.rType/10e4 - 1;
+              int State_pre = p.rType/10e3;
+              int Ex_state_pre = p.rType/10;
+              int State = ((p.rType - (Reaction+1)*10e4)/10e3) - 1;
+              int Ex_state = ((p.rType - State_pre*10e3)/10) - 1;
+              int channel = (p.rType - Ex_state_pre*10) - 1;
 			  if(Reaction==0 && Ex_state!=29) totGenNueO++;
-			  if(Reaction==1 && Ex_state!=29) totGenNuebarO++;
-			  if(Reaction==0 && Ex_state==29) totGenNueOsub++;
-			  if(Reaction==1 && Ex_state==29) totGenNuebarOsub++; 
+			  else if(Reaction==1 && Ex_state!=29) totGenNuebarO++;
+			  else if(Reaction==0 && Ex_state==29) totGenNueOsub++;
+			  else if(Reaction==1 && Ex_state==29) totGenNuebarOsub++; 
 		  }
 		}
 	}
@@ -642,7 +741,7 @@ void VectGenGenerator::FillEvent()
 				  + totGenNuebarElastic + totGenNuxElastic + totGenNuxbarElastic
 				  + totGenNueO + totGenNuebarO 
 				  + totGenNueOsub + totGenNuebarOsub
-				  + totGenNcNup + totGenNcNun + totGenNcNubarp + totGenNcNubarn
+                  + totGenNcNuep + totGenNcNuebarp + totGenNcNuxp + totGenNcNuxbarp + totGenNcNuen + totGenNcNuebarn + totGenNcNuxn + totGenNcNuxbarn
 				  );
 
 	fprintf( stdout, "------------------------------------\n" );
@@ -654,6 +753,14 @@ void VectGenGenerator::FillEvent()
 	fprintf( stdout, "   nuxbar + e = %d\n", totGenNuxbarElastic );
 	fprintf( stdout, "   nue + o = %d\n", totGenNueO+totGenNueOsub );
 	fprintf( stdout, "   nuebar + o = %d\n", totGenNuebarO+totGenNuebarOsub );
+    fprintf( stdout, "   nue + o (NC:p+15N) = %d\n", totGenNcNuep );
+    fprintf( stdout, "   nuebar + o (NC:p+15N) = %d\n", totGenNcNuebarp );
+    fprintf( stdout, "   nux + o (NC:p+15N) = %d\n", totGenNcNuxp );
+    fprintf( stdout, "   nuxbar + o (NC:p+15N) = %d\n", totGenNcNuxbarp );
+    fprintf( stdout, "   nue + o (NC:n+15O) = %d\n", totGenNcNuen );
+    fprintf( stdout, "   nuebar + o (NC:n+15O) = %d\n", totGenNcNuebarn );
+    fprintf( stdout, "   nux + o (NC:n+15O) = %d\n", totGenNcNuxn );
+    fprintf( stdout, "   nuxbar + o (NC:n+15O) = %d\n", totGenNcNuxbarn );
 	//fprintf( stdout, "   nue + o sub = %d\n", totGenNueOsub );
 	//fprintf( stdout, "   nuebar + o sub = %d\n", totGenNuebarOsub );
 	fprintf( stdout, "------------------------------------\n" );
@@ -709,23 +816,11 @@ void VectGenGenerator::Process(){
 	const double nuEne_max = nuEneMax;
 	double totcrsIBD[nuEneNBins] = {0.};
 	double totcrsNue[nuEneNBins] = {0.}, totcrsNueb[nuEneNBins] = {0.}, totcrsNux[nuEneNBins] = {0.}, totcrsNuxb[nuEneNBins] = {0.};
-	std::vector<double> Ocrse0[16][7];
-	std::vector<double> Ocrse1[16][7];
-	std::vector<double> Ocrse2[16][7];
-	std::vector<double> Ocrse3[16][7];
-	std::vector<double> Ocrse4[16][7];
-	std::vector<double> Ocrsp0[16][7];
-	std::vector<double> Ocrsp1[16][7];
-	std::vector<double> Ocrsp2[16][7];
-	std::vector<double> Ocrsp3[16][7];
-	std::vector<double> Ocrsp4[16][7];
-	std::vector<double> OcrseSub[5][32];
-	std::vector<double> OcrspSub[5][32];
 
 	std::cout << "calculate cross section and fill to array" << std::endl;
 	for(int i_nu_ene =0; i_nu_ene < nuEneNBins; i_nu_ene++) {
 		double nu_energy = nuEne_min + ( double(i_nu_ene) + 0.5 ) * nuEneBinSize;
-		double crsOx = 0.;
+		double crsOx = 0., crsOx_nc = 0.;
 		//if(i_nu_ene % 10 == 0) std::cout << "Neutrino Energy  " << nu_energy << std::endl;
 		/*----- inverse beta decay -----*/
 		if(nu_energy > eEneThr + DeltaM) totcrsIBD[i_nu_ene] = nucrs->CsNuebP_SV(nu_energy);
@@ -837,6 +932,27 @@ void VectGenGenerator::Process(){
 						OcrspSub[state][ch].push_back(crsOx);
 					}
 				}
+			}
+		}
+		//calculate cross section of nc reaction
+		for(int rcn=0;rcn<2;rcn++){
+			switch(rcn){
+				case 0: //for p + 15N
+					for(int ex_state=0;ex_state<8;ex_state++){
+						crsOx_nc = ocrs_nc -> CsNuOxyNCNue(rcn, ex_state, nu_energy);
+						//crsOx_nc = ocrs_nc -> CsNuOxyNCNue(rcn, nu_energy);
+						//if(crsOx_nc>0)std::cout << "NC crosssection(p + 15N): " << ex_state << " " << nu_energy << " " << crsOx_nc << std::endl; //nakanisi
+						OcrsNC[rcn][ex_state].push_back(crsOx_nc);
+					}
+					break;
+
+				case 1: // for n + 15O
+					for(int ex_state=0;ex_state<4;ex_state++){
+						crsOx_nc = ocrs_nc -> CsNuOxyNCNue(rcn, ex_state, nu_energy);
+						//crsOx_nc = ocrs_nc -> CsNuOxyNCNue(rcn, nu_energy);
+						OcrsNC[rcn][ex_state].push_back(crsOx_nc);
+					}
+					break;
 			}
 		}
 	}
@@ -1107,6 +1223,119 @@ void VectGenGenerator::Process(){
 					}
 				}
 			}
+			// NC reaction
+			for(int rcn=0;rcn<4;rcn++){
+				for(int excit=0;excit<2;excit++){
+					if(excit==0){ //p + 15N reaction
+						for(int ex_energy=0;ex_energy<8;ex_energy++){
+							double crsOx_nc = OcrsNC[0][ex_energy].at(i_nu_ene);
+							//double crsOx_nc = OcrsNC[0].at(i_nu_ene);
+							if(rcn==0){
+                                rate = Const_o * (oscnue1*nspcne + oscnue2*nspcnx) * crsOx_nc * nuEneBinSize * tBinSize * RatioTo10kpc;
+                                totNcNuep += rate;
+                                if(ex_energy==0)totNcNuep0 += rate;
+                                else if(ex_energy==1)totNcNuep1 += rate;
+                                else if(ex_energy==2)totNcNuep2 += rate;
+                                else if(ex_energy==3)totNcNuep3 += rate;
+                                else if(ex_energy==4)totNcNuep4 += rate;
+                                else if(ex_energy==5)totNcNuep5 += rate;
+                                else if(ex_energy==6)totNcNuep6 += rate;
+                                else if(ex_energy==7)totNcNuep7 += rate;
+                            }
+                            else if(rcn==1){
+                                rate = Const_o * (oscneb1*nspcneb + oscneb2*nspcnx) * crsOx_nc * nuEneBinSize * tBinSize * RatioTo10kpc;
+                                totNcNuebarp += rate;
+                                if(ex_energy==0)totNcNuebarp0 += rate;
+                                else if(ex_energy==1)totNcNuebarp1 += rate;
+                                else if(ex_energy==2)totNcNuebarp2 += rate;
+                                else if(ex_energy==3)totNcNuebarp3 += rate;
+                                else if(ex_energy==4)totNcNuebarp4 += rate;
+                                else if(ex_energy==5)totNcNuebarp5 += rate;
+                                else if(ex_energy==6)totNcNuebarp6 += rate;
+                                else if(ex_energy==7)totNcNuebarp7 += rate;
+                                
+                            }
+                            else if(rcn==2){
+                                rate = Const_o * (oscnux1*nspcnx + oscnux2*nspcne) * crsOx_nc * nuEneBinSize * tBinSize * RatioTo10kpc;
+                                totNcNuxp += rate;
+                                if(ex_energy==0)totNcNuxp0 += rate;
+                                else if(ex_energy==1)totNcNuxp1 += rate;
+                                else if(ex_energy==2)totNcNuxp2 += rate;
+                                else if(ex_energy==3)totNcNuxp3 += rate;
+                                else if(ex_energy==4)totNcNuxp4 += rate;
+                                else if(ex_energy==5)totNcNuxp5 += rate;
+                                else if(ex_energy==6)totNcNuxp6 += rate;
+                                else if(ex_energy==7)totNcNuxp7 += rate;
+                            }
+                            else if(rcn==3){
+                                rate = Const_o * (oscnxb1*nspcnx + oscnxb2*nspcneb) * crsOx_nc * nuEneBinSize * tBinSize * RatioTo10kpc;
+                                totNcNuxbarp += rate;
+                                if(ex_energy==0)totNcNuxbarp0 += rate;
+                                else if(ex_energy==1)totNcNuxbarp1 += rate;
+                                else if(ex_energy==2)totNcNuxbarp2 += rate;
+                                else if(ex_energy==3)totNcNuxbarp3 += rate;
+                                else if(ex_energy==4)totNcNuxbarp4 += rate;
+                                else if(ex_energy==5)totNcNuxbarp5 += rate;
+                                else if(ex_energy==6)totNcNuxbarp6 += rate;
+                                else if(ex_energy==7)totNcNuxbarp7 += rate;
+                            }
+							//std::cout << "NC rate: " << time << " " << nu_energy << " " << rcn << " " << excit << " " << crsOx_nc << " " << rate << std::endl; // nakanisi
+							//totNcNup += rate;
+							if(flag_event == 1){
+								nReact = 3000 + (rcn+1)*100 + (excit+1)*10 + (ex_energy+1);
+                                //std::cout << "NC event " << nReact << " " << 3000 << " " << rcn << " " << excit << " " << ex_energy << std::endl;
+								nuType = neutrinoType[rcn];
+								MakeEvent(time, nu_energy, nReact, nuType, rate);
+							}
+						}
+					}
+					if(excit==1){ //n + 15O reaction
+						for(int ex_energy=0;ex_energy<4;ex_energy++){
+							double crsOx_nc = OcrsNC[1][ex_energy].at(i_nu_ene);
+							//double crsOx_nc = OcrsNC[1].at(i_nu_ene);
+							if(rcn==0){
+                                rate = Const_o * (oscnue1*nspcne + oscnue2*nspcnx) * crsOx_nc * nuEneBinSize * tBinSize * RatioTo10kpc;
+                                totNcNuen += rate;
+                                if(ex_energy==0)totNcNuen0 += rate;
+                                else if(ex_energy==1)totNcNuen1 += rate;
+                                else if(ex_energy==2)totNcNuen2 += rate;
+                                else if(ex_energy==3)totNcNuen3 += rate;
+                            }
+                            else if(rcn==1){
+                                rate = Const_o * (oscneb1*nspcneb + oscneb2*nspcnx) * crsOx_nc * nuEneBinSize * tBinSize * RatioTo10kpc;
+                                totNcNuebarn += rate;
+                                if(ex_energy==0)totNcNuebarn0 += rate;
+                                else if(ex_energy==1)totNcNuebarn1 += rate;
+                                else if(ex_energy==2)totNcNuebarn2 += rate;
+                                else if(ex_energy==3)totNcNuebarn3 += rate;
+                            }
+                            else if(rcn==2){
+                                rate = Const_o * (oscnux1*nspcnx + oscnux2*nspcne) * crsOx_nc * nuEneBinSize * tBinSize * RatioTo10kpc;
+                                totNcNuxn += rate;
+                                if(ex_energy==0)totNcNuxn0 += rate;
+                                else if(ex_energy==1)totNcNuxn1 += rate;
+                                else if(ex_energy==2)totNcNuxn2 += rate;
+                                else if(ex_energy==3)totNcNuxn3 += rate;
+                            }
+                            else if(rcn==3){
+                                rate = Const_o * (oscnxb1*nspcnx + oscnxb2*nspcneb) * crsOx_nc * nuEneBinSize * tBinSize * RatioTo10kpc;
+                                totNcNuxbarn += rate;
+                                if(ex_energy==0)totNcNuxbarn0 += rate;
+                                else if(ex_energy==1)totNcNuxbarn1 += rate;
+                                else if(ex_energy==2)totNcNuxbarn2 += rate;
+                                else if(ex_energy==3)totNcNuxbarn3 += rate;
+                            }
+							//totNcNun += rate;
+							if(flag_event == 1){
+								nReact = 3000 + (rcn+1)*100 + (excit+1)*10 + (ex_energy+1);
+                                //std::cout << nReact << " rcn " << rcn << " excit " << excit << " ex_energy " << ex_energy << std::endl;
+								nuType = neutrinoType[rcn];
+								MakeEvent(time, nu_energy, nReact, nuType, rate);
+							}
+						}
+					}
+				}
+			}
 		}
 
 		//std::cout << time << " " << totNuebarp << " " << totNueElastic << std::endl; //nakanisi
@@ -1118,7 +1347,7 @@ void VectGenGenerator::Process(){
 			+ totNuebarElastic + totNuxElastic + totNuxbarElastic
 			+ totNueO + totNuebarO 
 			+ totNueOsub + totNuebarOsub
-			+ totNcNup + totNcNun + totNcNubarp + totNcNubarn
+			+ totNcNuep + totNcNuen + totNcNuebarp + totNcNuebarn + totNcNuxp + totNcNuxn + totNcNuxbarp + totNcNuxbarn
 			);
 
 
@@ -1129,8 +1358,24 @@ void VectGenGenerator::Process(){
 	fprintf( stdout, "   nuebar + e = %e\n", totNuebarElastic );
 	fprintf( stdout, "   nux + e = %e\n", totNuxElastic );
 	fprintf( stdout, "   nuxbar + e = %e\n", totNuxbarElastic );
-	fprintf( stdout, "   nue + O = %e\n", totNueO+totNueOsub );
-	fprintf( stdout, "   nuebar + O = %e\n", totNuebarO+totNuebarOsub );
+	fprintf( stdout, "   nue + O (CC) = %e\n", totNueO+totNueOsub );
+	fprintf( stdout, "   nuebar + O (CC) = %e\n", totNuebarO+totNuebarOsub );
+	fprintf( stdout, "   nue + O (NC: p+15N) = %e\n", totNcNuep );
+    fprintf( stdout, "   (NC: p+15N) %e, %e, %e, %e, %e, %e, %e, %e\n", totNcNuep0, totNcNuep1, totNcNuep2, totNcNuep3, totNcNuep4, totNcNuep5, totNcNuep6, totNcNuep7 );
+	fprintf( stdout, "   nue + O (NC: n+15O) = %e\n", totNcNuen );
+    fprintf( stdout, "   (NC: n+15O) %e, %e, %e, %e\n", totNcNuen0, totNcNuen1, totNcNuen2, totNcNuen3 );
+	fprintf( stdout, "   nuebar + O (NC: p+15N) = %e\n", totNcNuebarp);
+    fprintf( stdout, "   (NC: p+15N) %e, %e, %e, %e, %e, %e, %e, %e\n", totNcNuebarp0, totNcNuebarp1, totNcNuebarp2, totNcNuebarp3, totNcNuebarp4, totNcNuebarp5, totNcNuebarp6, totNcNuebarp7 );
+	fprintf( stdout, "   nuebar + O (NC: n+15O) = %e\n", totNcNuebarn);
+    fprintf( stdout, "   (NC: n+15O) %e, %e, %e, %e\n", totNcNuebarn0, totNcNuebarn1, totNcNuebarn2, totNcNuebarn3 );
+    fprintf( stdout, "   nux + O (NC: p+15N) = %e\n", totNcNuxp);
+    fprintf( stdout, "   (NC: p+15N) %e, %e, %e, %e, %e, %e, %e, %e\n", totNcNuxp0, totNcNuxp1, totNcNuxp2, totNcNuxp3, totNcNuxp4, totNcNuxp5, totNcNuxp6, totNcNuxp7 );
+    fprintf( stdout, "   nux + O (NC: n+15O) = %e\n", totNcNuxn);
+    fprintf( stdout, "   (NC: n+15O) %e, %e, %e, %e\n", totNcNuxn0, totNcNuxn1, totNcNuxn2, totNcNuxn3 );
+    fprintf( stdout, "   nuxbar + O (NC: p+15N) = %e\n", totNcNuxbarp);
+    fprintf( stdout, "   (NC: p+15N) %e, %e, %e, %e, %e, %e, %e, %e\n", totNcNuxbarp0, totNcNuxbarp1, totNcNuxbarp2, totNcNuxbarp3, totNcNuxbarp4, totNcNuxbarp5, totNcNuxbarp6, totNcNuxbarp7 );
+    fprintf( stdout, "   nuxbar + O (NC: n+15O) = %e\n", totNcNuxbarn);
+    fprintf( stdout, "   (NC: n+15O) %e, %e, %e, %e\n", totNcNuxbarn0, totNcNuxbarn1, totNcNuxbarn2, totNcNuxbarn3 );
 	/*
 	fprintf( stdout, "   nue + O sub = %e\n", totNueOsub );
 	fprintf( stdout, "   nuebar + O sub = %e\n", totNuebarOsub );
