@@ -626,6 +626,66 @@ double SKSNSimXSecNuOxygen::OxigFuncRecEneCC(int num, int ix, int ex, int ch, do
   return recEnergy;
 }
 
+void SKSNSimXSecNuOxygenNC::LoadFile(INISTATE ini){
+  const static std::string rctn[NTYPE] = {"N", "O"};
+  if (!isOpened[ini]) {
+    std::cout << "new file open (num, ix, isOpen): " << std::get<0>(ini) << " " << std::get<1>(ini) << " " << isOpened[ini] << std::endl;
+    const std::string target = Form("/disk1/disk02/usr6/nakanisi/SuperNova/time-vect300/oscillation/oxygen/crossNC_ex%s.dat",rctn[std::get<0>(ini)].c_str());
+    std::ifstream ifs(target);
+
+    if(!ifs){
+      std::cerr << "file does not exist" << std::endl;
+      std::cerr << "file name is" << " " << target << std::endl;
+      exit(EXIT_FAILURE);
+    }
+
+    double tmp, tmp_e0;
+    double tmp_ex;
+    double tmp_cs[NCHANNEL];
+    int index = 0;
+    while(ifs>>tmp_e0){
+      nuene[ini].push_back(tmp_e0);
+      for(int j=0;j<GetNumEx(std::get<1>(ini));j++){
+        ifs >>tmp_ex>>tmp_cs[0];
+        index++;
+        exEne[ini].push_back(tmp_ex);
+        for(int k = 0; k < NCHANNEL; k++){
+          INIFINSTATE inifin = convToINIFINSTATE(ini, j, k);
+          crs[inifin].push_back(tmp_cs[k]);
+        }
+      }
+    }
+    fileSize[ini] = index;
+
+    isOpened[ini] = true;
+    ifs.close();
+  }
+}
+
+double SKSNSimXSecNuOxygenNC::GetCrosssection(double e, INIFINSTATE inifin) const {
+  double totcso = 0.;
+
+  const INISTATE ini = GetINISTATE(inifin);
+  auto findBin = [] (double e, const std::vector<double> &enebin){
+    for(size_t i = 1; i < enebin.size(); i++){
+      if(e < enebin.at(i) && e > enebin.at(i-1)) return (int)i;
+    }
+    return -1;
+  };
+  const int e_bin = findBin(e, nuene.at(ini));
+
+  if( e_bin >= 0 && e>exEne.at(ini).at(e_bin)){
+    totcso = ((((crs.at(inifin).at(e_bin)-crs.at(inifin).at(e_bin-1))/(nuene.at(ini).at(e_bin)-nuene.at(ini).at(e_bin-1)))*e + crs.at(inifin).at(e_bin-1) - ((crs.at(inifin).at(e_bin)-crs.at(inifin).at(e_bin-1))/(nuene.at(ini).at(e_bin)-nuene.at(ini).at(e_bin-1)))*nuene.at(ini).at(e_bin-1))) * 1.0e-42;
+  }
+  return totcso;
+}
+
+std::pair<double,double> SKSNSimXSecNuOxygenNC::GetDiffCrosssection(double e, double r) const
+{
+  std::cerr << "Not supported: " << __FILE__ << " GetDiffCrosssection(...) for NuOxygenNC XSec model" << std::endl;
+  return std::make_pair(0.0,0.0);
+}
+
 void SKSNSimXSecNuOxygenSub::LoadFile(){
   for(int i = 0; i < NTYPE; i++){
     for(int j = 0; j < NIXSTATE; j++){
@@ -708,8 +768,8 @@ double SKSNSimXSecNuOxygenSub::GetCrosssection(double enu, INIFINSTATE inifin) c
   const int ch = std::get<2>(inifin);
   double rec_energy = 0.0;
   auto findBin = [ini] (double e, const std::vector<double> &enebin){
-    for(int i = 0; i < enebin.size(); i++){
-      if( i > 0 && e < enebin.at(i) && e > enebin.at(i-1)) return i;
+    for(size_t i = 0; i < enebin.size(); i++){
+      if( i > 0 && e < enebin.at(i) && e > enebin.at(i-1)) return (int)i;
     }
     return -1;
   };
