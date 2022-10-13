@@ -1187,7 +1187,7 @@ void SKSNSimVectorSNGenerator::determineKinematics( std::map<XSECTYPE, std::shar
           );
 
       // Gamma ray
-      const auto gammaMomentum = eneGamN[channel] * generateNormVect(rng); // TODO Is it fine to use eneGamN instead of eneGamO
+      const auto gammaMomentum = eneGamO[channel] * generateNormVect(rng);
       ev.AddTrack(
           PDG_GAMMA, eneGamN[channel],
           gammaMomentum.x, gammaMomentum.y, gammaMomentum.z,
