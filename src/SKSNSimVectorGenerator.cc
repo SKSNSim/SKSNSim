@@ -172,12 +172,32 @@ SKSNSimSNEventVector SKSNSimVectorGenerator::GenerateEventIBD() {
   return ev;
 }
 
-SKSNSimVectorSNGenerator::SKSNSimVectorSNGenerator(): m_generator_energy_min(0.0), m_generator_energy_max(300.0){
+SKSNSimVectorSNGenerator::SKSNSimVectorSNGenerator():
+  m_runnum((int)SKSNSIMENUM::SKPERIODRUN::SKMC ),
+  m_subrunnum(0),
+  m_generator_energy_min(0.0),
+  m_generator_energy_max(300.0),
+  m_nu_energy_nbins(3000),
+  m_generator_time_min (0.0),
+  m_generator_time_max (20.0),
+  m_time_nbins(20000),
+  m_fill_event(true),
+  m_generator_volume( SKSNSIMENUM::TANKVOLUME::kIDFULL ),
+  m_nuosc_type( SKSNSIMENUM::NEUTRINOOSCILLATION::kNONE ),
+  m_distance_kpc(10.)
+{
+  m_sn_date[0] = 2011;
+  m_sn_date[1] = 3;
+  m_sn_date[2] = 23;
+  m_sn_time[0] = 0;
+  m_sn_time[1] = 0;
+  m_sn_time[2] = 0;
+
   xsecmodels[XSECTYPE::mXSECIBD]       = std::make_unique<SKSNSimXSecIBDSV>();
   xsecmodels[XSECTYPE::mXSECELASTIC]   = std::make_unique<SKSNSimXSecNuElastic>();
   xsecmodels[XSECTYPE::mXSECOXYGEN]    = std::make_unique<SKSNSimXSecNuOxygen>();
   xsecmodels[XSECTYPE::mXSECOXYGENSUB] = std::make_unique<SKSNSimXSecNuOxygenSub>();
-  xsecmodels[XSECTYPE::mXSECOXYGENNC] = std::make_unique<SKSNSimXSecNuOxygenNC>();
+  xsecmodels[XSECTYPE::mXSECOXYGENNC]  = std::make_unique<SKSNSimXSecNuOxygenNC>();
 }
 
 std::vector<SKSNSimSNEventVector> SKSNSimVectorSNGenerator::GenerateEvents(){
@@ -197,14 +217,14 @@ std::vector<SKSNSimSNEventVector> SKSNSimVectorSNGenerator::GenerateEvents(){
 
 	std::cout << "Prcess of sn_burst side" << std::endl;//nakanisi
 	/*---- Fill total cross section into array to avoid repeating calculation ----*/
-	const double nuEne_min = GetEnergyMin();
-	const double nuEne_max = GetEnergyMax();
-  const int nuEneNBins = 3000; //flux.GetNBinsEne();
-  const int tNBins = (20.0 - 0.0) / 1.0e-3; //flux.GetNBinsTime();
-  const double nuEneBinSize = 300. / 3000.; //flux.GetBinWidthEne(0);
-  const double tBinSize = 1.0e-3;//flux.GetBinWidthTime(0);
-  constexpr double tStart = 0.;
-  constexpr double tEnd = 100000000000.;
+	const double nuEne_min    = GetEnergyMin();
+	const double nuEne_max    = GetEnergyMax();
+  const int nuEneNBins      = GetEnergyNBins();
+  const double nuEneBinSize = GetEnergyBinWidth();
+  const int tNBins          = GetTimeNBins();
+  const double tBinSize     = GetTimeBinWidth();
+  const double tStart       = GetTimeMin();
+  const double tEnd         = GetTimeMax();
   std::vector<double> totcrsIBD(nuEneNBins, 0.); // nu_energy -> total-xsec
   std::vector<double> totcrsNue(nuEneNBins, 0.); // nu_energy -> total-xsec
   std::vector<double> totcrsNueb(nuEneNBins, 0.); // nu_energy -> total-xsec
@@ -225,18 +245,16 @@ std::vector<SKSNSimSNEventVector> SKSNSimVectorSNGenerator::GenerateEvents(){
   std::vector<double> OcrsNC[2][14]; // [rctn][ex_state] -> nu_energy -> total-xsec
 
 	/*-----determine SN direction-----*/
-	int sn_date[3] = {2011, 3, 23};
-  int sn_time[3] = {0, 0, 0,};
-	float sdir[3], ra, dec;
-	sn_sundir_( sn_date, sn_time, sdir, & ra, & dec);
-  sn_dir[0] = sdir[0];
-  sn_dir[1] = sdir[1];
-  sn_dir[2] = sdir[2];
+  {
+    float sdir[3], ra, dec;
+    sn_sundir_( m_sn_date, m_sn_time, sdir, & ra, & dec);
+    m_sn_dir[0] = sdir[0];
+    m_sn_dir[1] = sdir[1];
+    m_sn_dir[2] = sdir[2];
+  }
 
-
-
-  constexpr int flag_event = 1;
-  constexpr SKSNSimXSecNuElastic::FLAGETHR flag_elastic_thr = flag_event!=0? SKSNSimXSecNuElastic::ETHROFF : SKSNSimXSecNuElastic::ETHRON;
+  const int flag_event = GetFlagFillEvent();
+  const SKSNSimXSecNuElastic::FLAGETHR flag_elastic_thr = flag_event!=0? SKSNSimXSecNuElastic::ETHROFF : SKSNSimXSecNuElastic::ETHRON;
   /*----------------------------------
    * Build up cross section table for each reaction
    *---------------------------------*/
@@ -376,17 +394,19 @@ std::vector<SKSNSimSNEventVector> SKSNSimVectorSNGenerator::GenerateEvents(){
     }
   }
 
-  /* tentative constant */
-  constexpr double oscnue1 = 1.0;
-  constexpr double oscnue2 = 0.0;
-  constexpr double oscneb1 = 1.0;
-  constexpr double oscneb2 = 0.0;
-  constexpr double oscnux1 = 2.0;
-  constexpr double oscnux2 = 0.0;
-  constexpr double oscnxb1 = 2.0;
-  constexpr double oscnxb2 = 0.0;
-  constexpr double RatioTo10kpc = 1.0;
-  //=== tentative constant 
+  const SKSNSIMENUM::NEUTRINOOSCILLATION nuosctype = GetGeneratorNuOscType();
+  const auto &osctuple = SKSNSimPhysConst::NuOscProbCollection.at(nuosctype);
+  const double oscnue1 = std::get<0>(osctuple);
+  const double oscnue2 = std::get<1>(osctuple);
+  const double oscneb1 = std::get<2>(osctuple);
+  const double oscneb2 = std::get<3>(osctuple);
+  const double oscnux1 = std::get<4>(osctuple);
+  const double oscnux2 = std::get<5>(osctuple);
+  const double oscnxb1 = std::get<6>(osctuple);
+  const double oscnxb2 = std::get<7>(osctuple);
+  const double RatioTo10kpc = GetSNDistanceRatioTo10kpc();
+
+  // tempolary buffer 
   double rate = 0.0;
 
   //expected total number of events
@@ -844,7 +864,9 @@ std::vector<SKSNSimSNEventVector> SKSNSimVectorSNGenerator::MakeEvent(const doub
       SKSNSimSNEventVector evtInfo;
 
       const double rvtx [3] = {xyz.x, xyz.y, xyz.z};
-      evtInfo.SetSNEvtInfo(nReact, tReact, nuType, nuEne, sn_dir, rvtx);
+      evtInfo.SetSNEvtInfo(nReact, tReact, nuType, nuEne, m_sn_dir, rvtx);
+      evtInfo.SetRunnum(GetRUNNUM());
+      evtInfo.SetSubRunnum(GetSubRUNNUM());
 
       buffer.push_back( evtInfo );
     }
@@ -904,7 +926,7 @@ void SKSNSimVectorSNGenerator::FillEvent(std::vector<SKSNSimSNEventVector> &evt_
     //std::cout << iEvt << " t=" << p.rTime << " " << p.rType << " " << p.nuType << " E=" << p.nuEne << " x=" << p.rVtx[0] << " y=" << p.rVtx[1] << " z=" << p.rVtx[2] << std::endl;
 
     // Calculate neutrino interaction vector and save into MCVECT
-    determineKinematics( xsecmodels, *randomgenerator, p, sn_dir);
+    determineKinematics( xsecmodels, *randomgenerator, p, m_sn_dir);
 
     const auto rType = p.GetSNEvtInfoRType();
     if(iSkip == 0) {

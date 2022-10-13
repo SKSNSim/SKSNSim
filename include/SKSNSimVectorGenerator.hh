@@ -13,12 +13,17 @@
 #include <TRandom3.h>
 #include "SKSNSimFlux.hh"
 #include "SKSNSimCrosssection.hh"
+#include "SKSNSimEnum.hh"
 #include "SKSNSimTools.hh"
 
 extern "C" {
+  // From SKOFL
 	void sn_sundir_( int *, int *, float *, float *, float *);
 }
 
+//======================
+// Useful tempolary container for Linear Algebra
+// These should be used in only SKSNSimVectorGenerator class internally
 template<class T>
 class UtilVector3 {
   public:
@@ -80,6 +85,7 @@ class UtilMatrix3 {
       return r;
     }
 };
+//====================================
 
 enum SKSNSimReactionType { mReactionTypeNuebarIBD = 0,
   mReactionTypeNueElastic, mReactionTypeNuebarElastic,
@@ -229,11 +235,30 @@ class SKSNSimVectorSNGenerator {
     SKSNSimSNEventVector GenerateSNEvent(){
       return SKSNSimSNEventVector();
     }
+    // Event header
+    int m_runnum;
+    int m_subrunnum;
 
+    // Vector generator
     double m_generator_energy_min;
     double m_generator_energy_max;
+    size_t m_nu_energy_nbins;
+    double m_generator_time_min;
+    double m_generator_time_max;
+    size_t m_time_nbins;
+    bool   m_fill_event;
+    SKSNSIMENUM::TANKVOLUME m_generator_volume;
 
-    double m_max_hit_probability; // maximum of (flux) x (xsec) // should be updated with new flux or xsec models
+    // Phsics assumption
+    SKSNSIMENUM::NEUTRINOOSCILLATION m_nuosc_type;
+
+    // SN direction
+    int m_sn_date[3];
+    int m_sn_time[3];
+    double m_sn_dir[3];
+    double m_distance_kpc;
+
+    // double m_max_hit_probability; // maximum of (flux) x (xsec) // should be updated with new flux or xsec models
 
     std::shared_ptr<TRandom> randomgenerator;
 
@@ -248,23 +273,43 @@ class SKSNSimVectorSNGenerator {
     static void determineAngleElastic( TRandom &rng, const SKSNSimXSecNuElastic & xsec, const int nReact, const double nuEne, double & eEne, double & eTheta, double & ePhi, int &iSkip );
     static void determineAngleNueO(TRandom &rng, SKSNSimXSecNuOxygen &xsec, const int Reaction, const int State, const int Ex_state, const int channel, const double nuEne, double & eEne, double & eTheta, double & ePhi );
 
-    double sn_dir [3];
-
     
   public:
     SKSNSimVectorSNGenerator();
     ~SKSNSimVectorSNGenerator(){ SKSNSimTools::DumpDebugMessage(" dtor of SKSNSimVectorSNGenerator");}
     void AddFluxModel(SKSNSimFluxModel *fm){ fluxmodels.push_back(std::move(std::unique_ptr<SKSNSimFluxModel>(fm))); /* SetMaximumHitProbability(); */ } // after this, the pointer will be managed by SKSNSimVectorGenerator class
     void AddFluxModel(std::unique_ptr<SKSNSimFluxModel> fm){ fluxmodels.push_back(std::move(fm)); /* SetMaximumHitProbability(); */ } // after this, the pointer will be managed by SKSNSimVectorGenerator class
-    //SKSNSimSNEventVector GenerateEvent();
-    //SKSNSimSNEventVector GenerateEventIBD();
     std::vector<SKSNSimSNEventVector> GenerateEvents();
-    //std::vector<SKSNSimSNEventVector> GenerateEventsAlongLivetime(int, int);
     double SetEnergyMin(const double e){ m_generator_energy_min = e; return m_generator_energy_min;}
     double SetEnergyMax(const double e){ m_generator_energy_max = e; return m_generator_energy_max;}
+    size_t SetEnergyNBins(const size_t n) { m_nu_energy_nbins = n; return GetEnergyNBins(); }
     double GetEnergyMin() const {return m_generator_energy_min;}
     double GetEnergyMax() const {return m_generator_energy_max;}
+    size_t GetEnergyNBins() const { return m_nu_energy_nbins; } 
+    double GetEnergyBinWidth() const { return (GetEnergyMax() - GetEnergyMin())/(double)GetEnergyNBins(); } 
+    double SetTimeMin(const double e){ m_generator_time_min = e; return m_generator_time_min;}
+    double SetTimeMax(const double e){ m_generator_time_max = e; return m_generator_time_max;}
+    size_t SetTimeNBins(const size_t n) { m_nu_energy_nbins = n; return GetTimeNBins(); }
+    double GetTimeMin() const {return m_generator_time_min;}
+    double GetTimeMax() const {return m_generator_time_max;}
+    size_t GetTimeNBins() const {return m_time_nbins;}
+    double GetTimeBinWidth() const { return (GetTimeMax() - GetTimeMin())/(double)GetTimeNBins(); }
+    bool   GetFlagFillEvent() const { return m_fill_event; }
+    bool   SetFlagFillEvent(const bool f){ m_fill_event = f; return GetFlagFillEvent(); }
     void   SetRandomGenerator(std::shared_ptr<TRandom> rng) { randomgenerator = rng; }
+    SKSNSIMENUM::TANKVOLUME GetGeneratorVolume() const { return m_generator_volume; }
+    SKSNSIMENUM::TANKVOLUME SetGeneratorVolume(SKSNSIMENUM::TANKVOLUME v) { m_generator_volume = v; return GetGeneratorVolume(); }
+    SKSNSIMENUM::TANKVOLUME SetGeneratorVolume(int v) { m_generator_volume = (SKSNSIMENUM::TANKVOLUME)v; return GetGeneratorVolume(); }
+    double GetSNDistanceKpc() const { return m_distance_kpc;}
+    double GetSNDistanceRatioTo10kpc() const { return GetSNDistanceKpc() / 10.0; }
+    double SetSNDistanceKpc(const double d) { m_distance_kpc = d; return GetSNDistanceKpc();}
+    SKSNSIMENUM::NEUTRINOOSCILLATION GetGeneratorNuOscType () const { return m_nuosc_type; }
+    SKSNSIMENUM::NEUTRINOOSCILLATION SetGeneratorNuOscType(SKSNSIMENUM::NEUTRINOOSCILLATION t) { m_nuosc_type = t; return GetGeneratorNuOscType(); }
+    SKSNSIMENUM::NEUTRINOOSCILLATION SetGeneratorNuOscType(int t) { m_nuosc_type = (SKSNSIMENUM::NEUTRINOOSCILLATION)t; return GetGeneratorNuOscType(); }
+    int GetRUNNUM() const { return m_runnum; }
+    int SetRUNNUM(const int r){ m_runnum = r; return GetRUNNUM(); }
+    int GetSubRUNNUM() const { return m_subrunnum; }
+    int SetSubRUNNUM(const int r){ m_subrunnum = r; return GetSubRUNNUM(); }
 };
 
 #endif
