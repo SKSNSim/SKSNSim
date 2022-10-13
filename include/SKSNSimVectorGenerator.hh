@@ -227,6 +227,8 @@ class SKSNSimVectorGenerator {
     double SetEnergyMax(const double e){ m_generator_energy_max = e; return m_generator_energy_max;}
     double GetEnergyMin() const {return m_generator_energy_min;}
     double GetEnergyMax() const {return m_generator_energy_max;}
+    SKSNSIMENUM::TANKVOLUME GetGeneratorVolume() const {return m_generator_volume;}
+    SKSNSIMENUM::TANKVOLUME SetGeneratorVolume(const SKSNSIMENUM::TANKVOLUME v){ m_generator_volume = v; return GetGeneratorVolume();}
     void   SetRandomGenerator(std::shared_ptr<TRandom> rng) { randomgenerator = rng; }
 };
 
