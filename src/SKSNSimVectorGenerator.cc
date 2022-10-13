@@ -94,10 +94,29 @@ SKSNSimSNEventVector SKSNSimVectorGenerator::GenerateEventIBD() {
                                     -sin(theta),        0.,          cos(theta));
 
   // interaction point
-  auto determinePosition = [](TRandom &rng)
+  auto determinePosition = std::bind([](TRandom &rng, SKSNSIMENUM::TANKVOLUME t)
   {
-    const double rPositionRange = RINTK;
-    const double hPositionRange = ZPINTK;
+    double rPositionRange = RINTK;
+    double hPositionRange = ZPINTK;
+    const double FVCUT = 200.;
+    switch (t)
+    {
+      case SKSNSIMENUM::TANKVOLUME::kIDFV: //Fiducial volume
+        rPositionRange = RINTK - FVCUT;
+        hPositionRange = ZPINTK - FVCUT;
+        break;
+      case SKSNSIMENUM::TANKVOLUME::kIDFULL: //entire ID volume
+        rPositionRange = RINTK;
+        hPositionRange = ZPINTK;
+        break;
+      case SKSNSIMENUM::TANKVOLUME::kTANKFULL: //entire detector volume (including OD)
+        rPositionRange = DITKTK;
+        hPositionRange = ZPTKTK;
+        break;
+      default: //entire ID volume
+        rPositionRange = RINTK;
+        hPositionRange = ZPINTK;
+    }
     //random inside the full tank (32.5kton)
     const double r2 = rng.Uniform(1.) * rPositionRange*rPositionRange ;
     const double r = std::sqrt( r2 );
@@ -107,7 +126,7 @@ SKSNSimSNEventVector SKSNSimVectorGenerator::GenerateEventIBD() {
     const double z = -hPositionRange + rng.Uniform( 2.*hPositionRange);
 
     return UtilVector3<double>(x,y,z);
-  };
+  }, std::placeholders::_1, m_generator_volume);
   const auto xyz = determinePosition(*randomgenerator);
 
   // Fill into class
@@ -831,10 +850,29 @@ std::vector<SKSNSimSNEventVector> SKSNSimVectorSNGenerator::MakeEvent(const doub
 
   auto getRandomReal = [](double s, double e , TRandom& rng){ return rng.Uniform(s,e);};
 
-  auto determinePosition = [](TRandom &rng)
+  auto determinePosition = std::bind([](TRandom &rng, SKSNSIMENUM::TANKVOLUME t)
   {
-    const double rPositionRange = RINTK;
-    const double hPositionRange = ZPINTK;
+    double rPositionRange = RINTK;
+    double hPositionRange = ZPINTK;
+    const double FVCUT = 200.;
+    switch (t)
+    {
+      case SKSNSIMENUM::TANKVOLUME::kIDFV: //Fiducial volume
+        rPositionRange = RINTK - FVCUT;
+        hPositionRange = ZPINTK - FVCUT;
+        break;
+      case SKSNSIMENUM::TANKVOLUME::kIDFULL: //entire ID volume
+        rPositionRange = RINTK;
+        hPositionRange = ZPINTK;
+        break;
+      case SKSNSIMENUM::TANKVOLUME::kTANKFULL: //entire detector volume (including OD)
+        rPositionRange = DITKTK;
+        hPositionRange = ZPTKTK;
+        break;
+      default: //entire ID volume
+        rPositionRange = RINTK;
+        hPositionRange = ZPINTK;
+    }
     //random inside the full tank (32.5kton)
     const double r2 = rng.Uniform(1.) * rPositionRange*rPositionRange ;
     const double r = std::sqrt( r2 );
@@ -844,7 +882,7 @@ std::vector<SKSNSimSNEventVector> SKSNSimVectorSNGenerator::MakeEvent(const doub
     const double z = -hPositionRange + rng.Uniform( 2.*hPositionRange);
 
     return UtilVector3<double>(x,y,z);
-  };
+  }, std::placeholders::_1, m_generator_volume);
 
   if(dRandTotEvts > 0){
     //std::cout << "MakeEvent " << time << " " << nu_energy << " " << nReact << " " << nuType << " " << rate << " " << dRandTotEvts << std::endl; //nakanisi

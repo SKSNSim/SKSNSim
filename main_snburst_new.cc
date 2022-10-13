@@ -44,18 +44,20 @@ int main( int argc, char ** argv )
   //
   //
   auto config = std::make_unique<SKSNSimUserConfiguration>();
-  config->LoadFromArgs(argc, argv);
+  config->LoadFromArgsSN(argc, argv);
   config->Dump();
-  config->CheckHealth();
+
 
   std::unique_ptr<TRandom3> rng = std::make_unique<TRandom3>(42);
-  std::unique_ptr<SKSNSimFluxModel> flux_nakazato (new SKSNSimSNFluxNakazato());
+  std::unique_ptr<SKSNSimSNFluxNakazatoFormat> flux (new SKSNSimSNFluxNakazatoFormat());
+  flux->SetModel(config->GetSNBurstFluxModel());
   
 
 	/*-----Geneartion-----*/
   std::unique_ptr<SKSNSimVectorSNGenerator> generator = std::make_unique<SKSNSimVectorSNGenerator>();
   generator->SetRandomGenerator(std::move(rng));
-  generator->AddFluxModel(std::move(flux_nakazato));
+  generator->AddFluxModel(std::move(flux));
+  config->Apply(*generator);
   auto buffer = generator->GenerateEvents();
   SKSNSimTools::DumpDebugMessage(Form("Successed GenerateEvents -> %d events", (int)buffer.size()));
 

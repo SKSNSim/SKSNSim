@@ -16,7 +16,7 @@
 int main(int argc, char **argv){
 
   auto config = std::make_unique<SKSNSimUserConfiguration>();
-  config->LoadFromArgs(argc, argv);
+  config->LoadFromArgsDSNB(argc, argv);
   config->Dump();
   config->CheckHealth();
 

@@ -206,6 +206,8 @@ class SKSNSimVectorGenerator {
 
     double m_max_hit_probability; // maximum of (flux) x (xsec) // should be updated with new flux or xsec models
 
+    SKSNSIMENUM::TANKVOLUME m_generator_volume;
+
     std::shared_ptr<TRandom> randomgenerator;
 
     static double FindMaxProb ( SKSNSimFluxModel &, SKSNSimCrosssectionModel &);
@@ -213,7 +215,7 @@ class SKSNSimVectorGenerator {
     double SetMaximumHitProbability();
     
   public:
-    SKSNSimVectorGenerator(){}
+    SKSNSimVectorGenerator(): m_generator_volume(SKSNSIMENUM::TANKVOLUME::kIDFULL) {}
     ~SKSNSimVectorGenerator(){}
     void AddFluxModel(SKSNSimFluxModel *fm){ fluxmodels.push_back(std::move(std::unique_ptr<SKSNSimFluxModel>(fm))); SetMaximumHitProbability(); } // after this, the pointer will be managed by SKSNSimVectorGenerator class
     void AddXSecModel(SKSNSimCrosssectionModel *xm){ xsecmodels.push_back(std::move(std::unique_ptr<SKSNSimCrosssectionModel>(xm))); SetMaximumHitProbability(); } // after this, the pointer will be managed by SKSNSimVectorGenerator class

@@ -110,6 +110,34 @@ class SKSNSimSNFluxCustom : public SKSNSimBinnedFluxModel {
 };
 const std::set<SKSNSimFluxModel::FLUXNUTYPE> SKSNSimSNFluxCustom::supportedType = {};
 
+class SKSNSimSNFluxNakazatoFormat : public SKSNSimBinnedFluxModel {
+  private:
+    std::unique_ptr<SKSNSimSNFluxCustom> flux;; // TODO modify to changeable file name (model)
+
+  public:
+    SKSNSimSNFluxNakazatoFormat(){
+      flux = std::make_unique<SKSNSimSNFluxCustom>( "/home/sklowe/supernova/data/nakazato/intp2002.data" );
+    }
+    SKSNSimSNFluxNakazatoFormat(std::string mname){
+      flux = std::make_unique<SKSNSimSNFluxCustom>( "/home/sklowe/supernova/data/" + mname );
+    }
+    ~SKSNSimSNFluxNakazatoFormat(){}
+    void SetModel(std::string mname) {
+      flux.reset(new SKSNSimSNFluxCustom("/home/sklowe/supernova/data/" + mname));
+    }
+    double GetFlux(const double e, const double t, const FLUXNUTYPE type) const { return flux->GetFlux(e,t,type); }
+    double GetEnergyLimitMax() const { return flux->GetEnergyLimitMax(); }
+    double GetEnergyLimitMin() const { return flux->GetEnergyLimitMin(); }
+    double GetTimeLimitMax() const { return flux->GetTimeLimitMax(); }
+    double GetTimeLimitMin() const { return flux->GetTimeLimitMin(); }
+    const std::set<FLUXNUTYPE> &GetSupportedNuTypes() const { return flux->GetSupportedNuTypes(); }
+    int GetNBinsEne()        const { return flux->GetNBinsEne(); }
+    int GetNBinsTime()       const { return flux->GetNBinsTime(); }
+    double GetBinWidthEne(int b)  const { return flux->GetBinWidthEne(b); }
+    double GetBinWidthTime(int b) const { return flux->GetBinWidthTime(b); }
+    
+};
+
 class SKSNSimSNFluxNakazato : public SKSNSimBinnedFluxModel {
   private:
     std::unique_ptr<SKSNSimSNFluxCustom> flux;; // TODO modify to changeable file name (model)
