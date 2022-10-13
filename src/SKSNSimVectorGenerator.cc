@@ -1045,7 +1045,7 @@ void SKSNSimVectorSNGenerator::determineKinematics( std::map<XSECTYPE, std::shar
   {
     //random reaction of neutron
     double phi = rng.Uniform(0., 2.*M_PI); 
-    double theta = rng.Uniform(0., M_PI); // TODO this should be dCosTheta? This is based on original code
+    double theta = acos(rng.Uniform(-1.,1.));
     return UtilVector3<double>(theta, phi).Unit();
   };
 
