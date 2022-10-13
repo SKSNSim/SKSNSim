@@ -1512,26 +1512,25 @@ void SKSNSimVectorSNGenerator::determineAngleNueO(TRandom &rng, SKSNSimXSecNuOxy
   constexpr double costMax =  1.;
   constexpr double costBinSize = (costMax - costMin) / (double) costNBins;
 
+  eEnergy = xsec.OxigFuncRecEneCC(Reaction, State, Ex_state, channel, nuEne);
+
   for(int iCost=0;iCost<costNBins;iCost++){
     cost = costMin + costBinSize * (iCost + 0.5);
     p = xsec.OxigFuncAngleRecCC(Reaction, State, Ex_state, channel, nuEne, cost);
-    //if(Reaction==0 && State==3 && Ex_state==29 && channel==8) std::cout << "AngleRecCC sub" << " " << p << std::endl;
-    eEnergy = xsec.OxigFuncRecEneCC(Reaction, State, Ex_state, channel, nuEne);
-    //if(Reaction==0 && State==3 && Ex_state==29 && channel==8) std::cout << "RecEneCC" << " " << eEnergy << std::endl;
-    //std::cout << "determineAngleNueO" << " " << Reaction << " " << State << " " << Ex_state << " " << channel << " " << nuEne << " " << cost << " " << p << " " << eEnergy << std::endl; //nakanisi
-    if(p>maxP){ maxP = p; } // TODO in this case, maxP is determined by nuEnergy and cos theta both. Is it fine?
-    while(1){
-      cost = rng.Uniform(costMin, costMax);
-      //dir_oxigfunc_( & nuEnergy, & cost, & p, & eEnergy );
-      x = rng.Uniform( 0., maxP);
-      //std::cout << maxP << " " << p << " " << x << std::endl; //nakanisi
-      if(x<p){
-        eTheta = acos( cost );
-        ePhi = rng.Uniform(-M_PI, M_PI);
-        eEne = eEnergy;
-        //std::cout << "break" << " " << Reaction << " " << State << " " << Ex_state << " " << channel << " " << eTheta << " " << ePhi << " " << eEnergy << std::endl; //nakanisi
-        break;
-      }
+
+    if(p>maxP){ maxP = p; }
+  }
+  while(1){
+    cost = rng.Uniform(costMin, costMax);
+    //dir_oxigfunc_( & nuEnergy, & cost, & p, & eEnergy );
+    x = rng.Uniform( 0., maxP);
+    //std::cout << maxP << " " << p << " " << x << std::endl; //nakanisi
+    if(x<p){
+      eTheta = acos( cost );
+      ePhi = rng.Uniform(-M_PI, M_PI);
+      eEne = eEnergy;
+      //std::cout << "break" << " " << Reaction << " " << State << " " << Ex_state << " " << channel << " " << eTheta << " " << ePhi << " " << eEnergy << std::endl; //nakanisi
+      break;
     }
   }
 	return;
