@@ -1198,7 +1198,7 @@ void SKSNSimVectorSNGenerator::determineKinematics( std::map<XSECTYPE, std::shar
           1 /* icrnvc */
           );
                          //std::cout << "gamma emission " << i_nucre << " " << mc->ipvc[mc->nvc] << " " << mc->energy[mc->nvc] << " " << x << " " << y << " " << z << std::endl; // nakanisi
-      std::cout << "NC gamma emission " << PDG_GAMMA << " " << eneGamN[channel] << " " << gammaMomentum.x << " " << gammaMomentum.y << " " << gammaMomentum.z << std::endl; // nakanisi
+      std::cout << "NC gamma emission " << PDG_GAMMA << " " << eneGamO[channel] << " " << gammaMomentum.x << " " << gammaMomentum.y << " " << gammaMomentum.z << std::endl; // nakanisi
     }
   } else if(nReact >= 10000){
     // Oxygen CC
