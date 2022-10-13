@@ -173,10 +173,11 @@ SKSNSimSNEventVector SKSNSimVectorGenerator::GenerateEventIBD() {
 }
 
 SKSNSimVectorSNGenerator::SKSNSimVectorSNGenerator(): m_generator_energy_min(0.0), m_generator_energy_max(300.0){
-  xsecmodels[mXSECIBD]       = std::make_unique<SKSNSimXSecIBDSV>();
-  xsecmodels[mXSECELASTIC]   = std::make_unique<SKSNSimXSecNuElastic>();
-  xsecmodels[mXSECOXYGEN]    = std::make_unique<SKSNSimXSecNuOxygen>();
-  xsecmodels[mXSECOXYGENSUB] = std::make_unique<SKSNSimXSecNuOxygenSub>();
+  xsecmodels[XSECTYPE::mXSECIBD]       = std::make_unique<SKSNSimXSecIBDSV>();
+  xsecmodels[XSECTYPE::mXSECELASTIC]   = std::make_unique<SKSNSimXSecNuElastic>();
+  xsecmodels[XSECTYPE::mXSECOXYGEN]    = std::make_unique<SKSNSimXSecNuOxygen>();
+  xsecmodels[XSECTYPE::mXSECOXYGENSUB] = std::make_unique<SKSNSimXSecNuOxygenSub>();
+  xsecmodels[XSECTYPE::mXSECOXYGENNC] = std::make_unique<SKSNSimXSecNuOxygenNC>();
 }
 
 std::vector<SKSNSimSNEventVector> SKSNSimVectorSNGenerator::GenerateEvents(){
@@ -188,10 +189,11 @@ std::vector<SKSNSimSNEventVector> SKSNSimVectorSNGenerator::GenerateEvents(){
     return evt_buffer;
   }
 
-  SKSNSimXSecIBDSV       &xsecibd         = dynamic_cast<SKSNSimXSecIBDSV&>(      *xsecmodels[mXSECIBD]);
-  SKSNSimXSecNuElastic   &xsecnuela       = dynamic_cast<SKSNSimXSecNuElastic&>(  *xsecmodels[mXSECELASTIC]);
-  SKSNSimXSecNuOxygen    &xsecnuoxygen    = dynamic_cast<SKSNSimXSecNuOxygen&>(   *xsecmodels[mXSECOXYGEN]);
-  SKSNSimXSecNuOxygenSub &xsecnuoxygensub = dynamic_cast<SKSNSimXSecNuOxygenSub&>(*xsecmodels[mXSECOXYGENSUB]);
+  SKSNSimXSecIBDSV       &xsecibd         = dynamic_cast<SKSNSimXSecIBDSV&>(      *xsecmodels[XSECTYPE::mXSECIBD]);
+  SKSNSimXSecNuElastic   &xsecnuela       = dynamic_cast<SKSNSimXSecNuElastic&>(  *xsecmodels[XSECTYPE::mXSECELASTIC]);
+  SKSNSimXSecNuOxygen    &xsecnuoxygen    = dynamic_cast<SKSNSimXSecNuOxygen&>(   *xsecmodels[XSECTYPE::mXSECOXYGEN]);
+  SKSNSimXSecNuOxygenSub &xsecnuoxygensub = dynamic_cast<SKSNSimXSecNuOxygenSub&>(*xsecmodels[XSECTYPE::mXSECOXYGENSUB]);
+  SKSNSimXSecNuOxygenNC  &xsecnuoxygennc  = dynamic_cast<SKSNSimXSecNuOxygenNC&>( *xsecmodels[XSECTYPE::mXSECOXYGENNC]);
 
 	std::cout << "Prcess of sn_burst side" << std::endl;//nakanisi
 	/*---- Fill total cross section into array to avoid repeating calculation ----*/
@@ -203,23 +205,24 @@ std::vector<SKSNSimSNEventVector> SKSNSimVectorSNGenerator::GenerateEvents(){
   const double tBinSize = 1.0e-3;//flux.GetBinWidthTime(0);
   constexpr double tStart = 0.;
   constexpr double tEnd = 100000000000.;
-  std::vector<double> totcrsIBD(nuEneNBins, 0.);
-  std::vector<double> totcrsNue(nuEneNBins, 0.);
-  std::vector<double> totcrsNueb(nuEneNBins, 0.);
-  std::vector<double> totcrsNux(nuEneNBins, 0.);
-  std::vector<double> totcrsNuxb(nuEneNBins, 0.);
-	std::vector<double> Ocrse0[16][7];
-	std::vector<double> Ocrse1[16][7];
-	std::vector<double> Ocrse2[16][7];
-	std::vector<double> Ocrse3[16][7];
-	std::vector<double> Ocrse4[16][7];
-	std::vector<double> Ocrsp0[16][7];
-	std::vector<double> Ocrsp1[16][7];
-	std::vector<double> Ocrsp2[16][7];
-	std::vector<double> Ocrsp3[16][7];
-	std::vector<double> Ocrsp4[16][7];
-	std::vector<double> OcrseSub[5][32];
-	std::vector<double> OcrspSub[5][32];
+  std::vector<double> totcrsIBD(nuEneNBins, 0.); // nu_energy -> total-xsec
+  std::vector<double> totcrsNue(nuEneNBins, 0.); // nu_energy -> total-xsec
+  std::vector<double> totcrsNueb(nuEneNBins, 0.); // nu_energy -> total-xsec
+  std::vector<double> totcrsNux(nuEneNBins, 0.); // nu_energy -> total-xsec
+  std::vector<double> totcrsNuxb(nuEneNBins, 0.); // nu_energy -> total-xsec
+	std::vector<double> Ocrse0[16][7]; // (rctn==0, ix_state==0) [ex_sate][channel] -> nu_energy -> total-xsec
+	std::vector<double> Ocrse1[16][7]; // (rctn==0, ix_state==1) [ex_sate][channel] -> nu_energy -> total-xsec
+	std::vector<double> Ocrse2[16][7]; // (rctn==0, ix_state==2) [ex_sate][channel] -> nu_energy -> total-xsec
+	std::vector<double> Ocrse3[16][7]; // (rctn==0, ix_state==3) [ex_sate][channel] -> nu_energy -> total-xsec
+	std::vector<double> Ocrse4[16][7]; // (rctn==0, ix_state==4) [ex_sate][channel] -> nu_energy -> total-xsec
+	std::vector<double> Ocrsp0[16][7]; // (rctn==1, ix_state==0) [ex_sate][channel] -> nu_energy -> total-xsec
+	std::vector<double> Ocrsp1[16][7]; // (rctn==1, ix_state==1) [ex_sate][channel] -> nu_energy -> total-xsec
+	std::vector<double> Ocrsp2[16][7]; // (rctn==1, ix_state==2) [ex_sate][channel] -> nu_energy -> total-xsec
+	std::vector<double> Ocrsp3[16][7]; // (rctn==1, ix_state==3) [ex_sate][channel] -> nu_energy -> total-xsec
+	std::vector<double> Ocrsp4[16][7]; // (rctn==1, ix_state==4) [ex_sate][channel] -> nu_energy -> total-xsec
+	std::vector<double> OcrseSub[5][32]; // (rctn==0) [ix_sate][channel] -> nu_energy -> total-xsec
+	std::vector<double> OcrspSub[5][32]; // (rctn==1) [ix_sate][channel] -> nu_energy -> total-xsec
+  std::vector<double> OcrsNC[2][14]; // [rctn][ex_state] -> nu_energy -> total-xsec
 
 	/*-----determine SN direction-----*/
 	int sn_date[3] = {2011, 3, 23};
@@ -352,6 +355,25 @@ std::vector<SKSNSimSNEventVector> SKSNSimVectorSNGenerator::GenerateEvents(){
         }
       }
     }
+    //calculate cross section of nc reaction
+    for(int rcn=0;rcn<2;rcn++){
+      switch(rcn){
+        case 0: //for p + 15N
+          for(int ex_state=0;ex_state<xsecnuoxygennc.GetNumEx(rcn);ex_state++){
+            crsOx = xsecnuoxygennc.GetCrosssection(nu_energy, {rcn, ex_state});
+            OcrsNC[rcn][ex_state].push_back(crsOx);
+          }
+          break;
+
+        case 1: // for n + 15O
+          for(int ex_state=0;ex_state<xsecnuoxygennc.GetNumEx(rcn);ex_state++){
+            crsOx = xsecnuoxygennc.GetCrosssection(nu_energy, {rcn, ex_state});
+            //crsOx_nc = ocrs_nc -> CsNuOxyNCNue(rcn, nu_energy);
+            OcrsNC[rcn][ex_state].push_back(crsOx);
+          }
+          break;
+      }
+    }
   }
 
   /* tentative constant */
@@ -366,19 +388,21 @@ std::vector<SKSNSimSNEventVector> SKSNSimVectorSNGenerator::GenerateEvents(){
   constexpr double RatioTo10kpc = 1.0;
   //=== tentative constant 
   double rate = 0.0;
-  double totNuebarp = 0.0;
-  double totNueElastic = 0.0;
-  double totNuebarElastic = 0.0;
-  double totNuxElastic = 0.0;
-  double totNuxbarElastic = 0.0;
-  double totNueO = 0.0;
-  double totNuebarO = 0.0;
-  double totNueOsub = 0.0;
-  double totNuebarOsub = 0.0;
-  double totNcNup = 0.0;
-  double totNcNun = 0.0;
-  double totNcNubarp = 0.0;
-  double totNcNubarn = 0.0;
+
+  //expected total number of events
+  double totNuebarp = 0.;
+  double totNueElastic = 0., totNuebarElastic = 0., totNuxElastic = 0., totNuxbarElastic = 0.;
+  double totNueO = 0., totNuebarO = 0.;
+  double totNueOsub = 0., totNuebarOsub = 0.;
+  double totNcNuep = 0., totNcNuebarp = 0., totNcNuxp = 0., totNcNuxbarp = 0., totNcNuen = 0., totNcNuebarn = 0., totNcNuxn = 0., totNcNuxbarn = 0.;
+  std::vector<double> totNcNuepCh(8,0.);
+  std::vector<double> totNcNuebarpCh(8,0.);
+  std::vector<double> totNcNuxpCh(8,0.);
+  std::vector<double> totNcNuxbarpCh(8,0.);
+  std::vector<double> totNcNuenCh(4,0.);
+  std::vector<double> totNcNuebarnCh(4,0.);
+  std::vector<double> totNcNuxnCh(4,0.);
+  std::vector<double> totNcNuxbarnCh(4,0.);
 
 	/*---- loop ----*/
   std::cout << "start loop in Process" << std::endl; //nakanisi
@@ -644,6 +668,87 @@ std::vector<SKSNSimSNEventVector> SKSNSimVectorSNGenerator::GenerateEvents(){
           }
         }
       }
+
+      // NC reaction
+      auto getNeutrinoType = [](int rcn){
+        const static int neutrinoType[4] = { PDG_ELECTRON_NEUTRINO, - PDG_ELECTRON_NEUTRINO, PDG_MUON_NEUTRINO, - PDG_MUON_NEUTRINO};
+        return neutrinoType[rcn];
+      };
+
+      for(int rcn=0;rcn<4;rcn++){
+        for(int excit=0;excit<2;excit++){
+          if(excit==0){ //p + 15N reaction
+            for(int ex_energy=0;ex_energy<8;ex_energy++){
+              double crsOx_nc = OcrsNC[0][ex_energy].at(i_nu_ene);
+              //double crsOx_nc = OcrsNC[0].at(i_nu_ene);
+              if(rcn==0){
+                rate = Const_o * (oscnue1*nspcne + oscnue2*nspcnx) * crsOx_nc * nuEneBinSize * tBinSize * RatioTo10kpc;
+                totNcNuep += rate;
+                totNcNuepCh[ex_energy] += rate;
+              }
+              else if(rcn==1){
+                rate = Const_o * (oscneb1*nspcneb + oscneb2*nspcnx) * crsOx_nc * nuEneBinSize * tBinSize * RatioTo10kpc;
+                totNcNuebarp += rate;
+                totNcNuebarpCh[ex_energy] += rate;
+              }
+              else if(rcn==2){
+                rate = Const_o * (oscnux1*nspcnx + oscnux2*nspcne) * crsOx_nc * nuEneBinSize * tBinSize * RatioTo10kpc;
+                totNcNuxp += rate;
+                totNcNuxpCh[ex_energy] += rate;
+              }
+              else if(rcn==3){
+                rate = Const_o * (oscnxb1*nspcnx + oscnxb2*nspcneb) * crsOx_nc * nuEneBinSize * tBinSize * RatioTo10kpc;
+                totNcNuxbarp += rate;
+                totNcNuxbarpCh[ex_energy] += rate;
+              }
+              //std::cout << "NC rate: " << time << " " << nu_energy << " " << rcn << " " << excit << " " << crsOx_nc << " " << rate << std::endl; // nakanisi
+              //totNcNup += rate;
+              if(flag_event == 1){
+                const int nReact = 3000 + (rcn+1)*100 + (excit+1)*10 + (ex_energy+1);
+                //std::cout << "NC event " << nReact << " " << 3000 << " " << rcn << " " << excit << " " << ex_energy << std::endl;
+                const int nuType = getNeutrinoType(rcn);
+                auto buf = MakeEvent(nuEneBinSize, tBinSize, time, nu_energy, nReact, nuType, rate);
+
+                evt_buffer.insert(evt_buffer.end(), buf.begin(), buf.end());
+              }
+            }
+          }
+          if(excit==1){ //n + 15O reaction
+            for(int ex_energy=0;ex_energy<4;ex_energy++){
+              double crsOx_nc = OcrsNC[1][ex_energy].at(i_nu_ene);
+              //double crsOx_nc = OcrsNC[1].at(i_nu_ene);
+              if(rcn==0){
+                rate = Const_o * (oscnue1*nspcne + oscnue2*nspcnx) * crsOx_nc * nuEneBinSize * tBinSize * RatioTo10kpc;
+                totNcNuen += rate;
+                totNcNuenCh[ex_energy] += rate;
+              }
+              else if(rcn==1){
+                rate = Const_o * (oscneb1*nspcneb + oscneb2*nspcnx) * crsOx_nc * nuEneBinSize * tBinSize * RatioTo10kpc;
+                totNcNuebarn += rate;
+                totNcNuebarnCh[ex_energy] += rate;
+              }
+              else if(rcn==2){
+                rate = Const_o * (oscnux1*nspcnx + oscnux2*nspcne) * crsOx_nc * nuEneBinSize * tBinSize * RatioTo10kpc;
+                totNcNuxn += rate;
+                totNcNuxnCh[ex_energy] += rate;
+              }
+              else if(rcn==3){
+                rate = Const_o * (oscnxb1*nspcnx + oscnxb2*nspcneb) * crsOx_nc * nuEneBinSize * tBinSize * RatioTo10kpc;
+                totNcNuxbarn += rate;
+                totNcNuxbarnCh[ex_energy] += rate;
+              }
+              //totNcNun += rate;
+              if(flag_event == 1){
+                const int nReact = 3000 + (rcn+1)*100 + (excit+1)*10 + (ex_energy+1);
+                //std::cout << nReact << " rcn " << rcn << " excit " << excit << " ex_energy " << ex_energy << std::endl;
+                const int nuType = getNeutrinoType(rcn);
+                auto buf =  MakeEvent(nuEneBinSize, tBinSize, time, nu_energy, nReact, nuType, rate);
+                evt_buffer.insert(evt_buffer.end(), buf.begin(), buf.end());
+              }
+            }
+          }
+        }
+      }
     }
 
     //std::cout << time << " " << totNuebarp << " " << totNueElastic << std::endl;
@@ -655,7 +760,7 @@ std::vector<SKSNSimSNEventVector> SKSNSimVectorSNGenerator::GenerateEvents(){
       + totNuebarElastic + totNuxElastic + totNuxbarElastic
       + totNueO + totNuebarO 
       + totNueOsub + totNuebarOsub
-      + totNcNup + totNcNun + totNcNubarp + totNcNubarn
+      + totNcNuep + totNcNuen + totNcNuebarp + totNcNuebarn + totNcNuxp + totNcNuxn + totNcNuxbarp + totNcNuxbarn
       );
 
 
@@ -666,30 +771,27 @@ std::vector<SKSNSimSNEventVector> SKSNSimVectorSNGenerator::GenerateEvents(){
   fprintf( stdout, "   nuebar + e = %e\n", totNuebarElastic );
   fprintf( stdout, "   nux + e = %e\n", totNuxElastic );
   fprintf( stdout, "   nuxbar + e = %e\n", totNuxbarElastic );
-  fprintf( stdout, "   nue + O = %e\n", totNueO+totNueOsub );
-  fprintf( stdout, "   nuebar + O = %e\n", totNuebarO+totNuebarOsub );
-  //fprintf( stdout, "   nue + O sub = %e\n", totNueOsub );
-  //fprintf( stdout, "   nuebar + O sub = %e\n", totNuebarOsub );
+  fprintf( stdout, "   nue + O (CC) = %e\n", totNueO+totNueOsub );
+  fprintf( stdout, "   nuebar + O (CC) = %e\n", totNuebarO+totNuebarOsub );
+  fprintf( stdout, "   nue + O (NC: p+15N) = %e\n", totNcNuep );
+  fprintf( stdout, "   (NC: p+15N) %e, %e, %e, %e, %e, %e, %e, %e\n", totNcNuepCh[0], totNcNuepCh[1], totNcNuepCh[2], totNcNuepCh[3], totNcNuepCh[4], totNcNuepCh[5], totNcNuepCh[6], totNcNuepCh[7] );
+  fprintf( stdout, "   nue + O (NC: n+15O) = %e\n", totNcNuen );
+  fprintf( stdout, "   (NC: n+15O) %e, %e, %e, %e\n", totNcNuenCh[0], totNcNuenCh[1], totNcNuenCh[2], totNcNuenCh[3] );
+  fprintf( stdout, "   nuebar + O (NC: p+15N) = %e\n", totNcNuebarp);
+  fprintf( stdout, "   (NC: p+15N) %e, %e, %e, %e, %e, %e, %e, %e\n", totNcNuebarpCh[0], totNcNuebarpCh[1], totNcNuebarpCh[2], totNcNuebarpCh[3], totNcNuebarpCh[4], totNcNuebarpCh[5], totNcNuebarpCh[6], totNcNuebarpCh[7] );
+  fprintf( stdout, "   nuebar + O (NC: n+15O) = %e\n", totNcNuebarn);
+  fprintf( stdout, "   (NC: n+15O) %e, %e, %e, %e\n", totNcNuebarnCh[0], totNcNuebarnCh[1], totNcNuebarnCh[2], totNcNuebarnCh[3] );
+  fprintf( stdout, "   nux + O (NC: p+15N) = %e\n", totNcNuxp);
+  fprintf( stdout, "   (NC: p+15N) %e, %e, %e, %e, %e, %e, %e, %e\n", totNcNuxpCh[0], totNcNuxpCh[1], totNcNuxpCh[2], totNcNuxpCh[3], totNcNuxpCh[4], totNcNuxpCh[5], totNcNuxpCh[6], totNcNuxpCh[7] );
+  fprintf( stdout, "   nux + O (NC: n+15O) = %e\n", totNcNuxn);
+  fprintf( stdout, "   (NC: n+15O) %e, %e, %e, %e\n", totNcNuxnCh[0], totNcNuxnCh[1], totNcNuxnCh[2], totNcNuxnCh[3] );
+  fprintf( stdout, "   nuxbar + O (NC: p+15N) = %e\n", totNcNuxbarp);
+  fprintf( stdout, "   (NC: p+15N) %e, %e, %e, %e, %e, %e, %e, %e\n", totNcNuxbarpCh[0], totNcNuxbarpCh[1], totNcNuxbarpCh[2], totNcNuxbarpCh[3], totNcNuxbarpCh[4], totNcNuxbarpCh[5], totNcNuxbarpCh[6], totNcNuxbarpCh[7] );
+  fprintf( stdout, "   nuxbar + O (NC: n+15O) = %e\n", totNcNuxbarn);
+  fprintf( stdout, "   (NC: n+15O) %e, %e, %e, %e\n", totNcNuxbarnCh[0], totNcNuxbarnCh[1], totNcNuxbarnCh[2], totNcNuxbarnCh[3] );
   fprintf( stdout, "------------------------------------\n" );
 
   std::cout << "end calculation of each expected event number" << std::endl; //nakanisi
-
-#ifdef DEBUG
-  fprintf( stdout, "------------------------------------\n" );
-  fprintf( stdout, "totreaction:\n" );
-  fprintf( stdout, "   nuebar + p = %e\n", totNuebarp );
-  fprintf( stdout, "   nue + e = %e\n", totNueElastic );
-  fprintf( stdout, "   nuebar + e = %e\n", totNuebarElastic );
-  fprintf( stdout, "   nux + e = %e\n", totNuxElastic );
-  fprintf( stdout, "   nuxbar + e = %e\n", totNuxbarElastic );
-  fprintf( stdout, "   nue + O = %e\n", totNueO );
-  fprintf( stdout, "   nuebar + O = %e\n", totNuebarO );
-  fprintf( stdout, "   nu + O = nu + p + N%e\n", totNcNup );
-  fprintf( stdout, "   nu + O = nu + n + O%e\n", totNcNun );
-  fprintf( stdout, "   nubar + O = nubar + p + N%e\n", totNcNubarp );
-  fprintf( stdout, "   nubar + O = nubar + n + O%e\n", totNcNubarn );
-  fprintf( stdout, "------------------------------------\n" );
-#endif 
 
   std::cout << "FillEvent start    ( " << evt_buffer.size()  << " evt)" << std::endl;
   if(flag_event == 1) FillEvent(evt_buffer);
@@ -760,18 +862,26 @@ void SKSNSimVectorSNGenerator::FillEvent(std::vector<SKSNSimSNEventVector> &evt_
   std::cout << "start time sorting before loop of FillEvent" << std::endl;
   std::sort( evt_buffer.begin(), evt_buffer.end());
 
-	int totGenNuebarp=0;
-	int totGenNueElastic=0, totGenNuebarElastic=0, totGenNuxElastic=0, totGenNuxbarElastic=0;
-	int totGenNueO=0, totGenNuebarO=0;
-	int totGenNueOsub=0, totGenNuebarOsub=0;
-	int totGenNcNup=0, totGenNcNun=0, totGenNcNubarp=0, totGenNcNubarn=0;
+  int totGenNuebarp=0;
+  int totGenNueElastic=0, totGenNuebarElastic=0, totGenNuxElastic=0, totGenNuxbarElastic=0;
+  int totGenNueO=0, totGenNuebarO=0;
+  int totGenNueOsub=0, totGenNuebarOsub=0;
+  int totGenNcNuep=0, totGenNcNuebarp=0, totGenNcNuxp=0, totGenNcNuxbarp=0, totGenNcNuen=0, totGenNcNuebarn=0, totGenNcNuxn=0, totGenNcNuxbarn=0;
+  std::vector<int> totGenNcNuepCh(8, 0);
+  std::vector<int> totGenNcNuebarpCh(8,0);
+  std::vector<int> totGenNcNuxpCh(8,0);
+  std::vector<int> totGenNcNuxbarpCh(8,0);
+  std::vector<int> totGenNcNuenCh(4,0);
+  std::vector<int> totGenNcNuebarnCh(4,0);
+  std::vector<int> totGenNcNuxnCh(4,0);
+  std::vector<int> totGenNcNuxbarnCh(4,0);
+
   int iSkip = 0;
 
   std::cout << "start event loop in FillEvent" << std::endl; //nakanisi
   for( uint iEvt = 0; iEvt < evt_buffer.size(); iEvt++ ){
 
     iSkip = 0;
-
 
     SKSNSimSNEventVector & p = evt_buffer[iEvt];
 
@@ -797,34 +907,51 @@ void SKSNSimVectorSNGenerator::FillEvent(std::vector<SKSNSimSNEventVector> &evt_
     determineKinematics( xsecmodels, *randomgenerator, p, sn_dir);
 
     const auto rType = p.GetSNEvtInfoRType();
-    int Reaction  = rType/10e4 - 1;
-    int State_pre = rType/10e3;
-    int Ex_state_pre = rType/10;
-    int State = ((rType - (Reaction+1)*10e4)/10e3) - 1;
-    int Ex_state = ((rType - State_pre*10e3)/10) - 1;
-    int channel = (rType - Ex_state_pre*10) - 1;
     if(iSkip == 0) {
 
       if(rType == 0) totGenNuebarp++;
-      if(rType == 1) totGenNueElastic++;
-      if(rType == 2) totGenNuebarElastic++;
-      if(rType == 3) totGenNuxElastic++;
-      if(rType == 4) totGenNuxbarElastic++;
-      if(rType>4){
-        //if(Ex_state==30)std::cout << p.rType << " " << "nReact" << " " << nReact << " " << "Reaction" << " " << Reaction << " " << "State_pre" << " " << State_pre << " " << "State" << " " << State << " " << "Ex_state_pre" << " " << Ex_state_pre << " " << "Ex_state" << " " << Ex_state << " " << "channel" << " " << channel << std::endl; //nakanisi
+      else if(rType == 1) totGenNueElastic++;
+      else if(rType == 2) totGenNuebarElastic++;
+      else if(rType == 3) totGenNuxElastic++;
+      else if(rType == 4) totGenNuxbarElastic++;
+      else if(rType>1000 && rType<10000){ // nc reaction
+        const int Reaction = rType/1000;
+        const int Excit_pre = rType/100;
+        const int Excit = ((rType - (Reaction)*1000)/100) - 1;
+        const int ch_pre = rType/10;
+        const int channel = (rType - ch_pre*10) - 1;
+        const int particle = ((rType - Excit_pre*100)/10) - 1;
+        //std::cout << "NC reaction " << p.rType << " Reaction " << Reaction << " Excit " << Excit << " particle " << particle << " channel " << channel << std::endl; //nakanisi
+        if(Excit==0 && particle==0)totGenNcNuep++;
+        else if(Excit==1 && particle==0)totGenNcNuebarp++;
+        else if(Excit==2 && particle==0)totGenNcNuxp++;
+        else if(Excit==3 && particle==0)totGenNcNuxbarp++;
+        else if(Excit==0 && particle==1)totGenNcNuen++;
+        else if(Excit==1 && particle==1)totGenNcNuebarn++;
+        else if(Excit==2 && particle==1)totGenNcNuxn++;
+        else if(Excit==3 && particle==1)totGenNcNuxbarn++;
+      }
+      else if(rType>=10000){ // cc reaction
+                               //if(Ex_state==30)std::cout << p.rType << " " << "nReact" << " " << nReact << " " << "Reaction" << " " << Reaction << " " << "State_pre" << " " << State_pre << " " << "State" << " " << State << " " << "Ex_state_pre" << " " << Ex_state_pre << " " << "Ex_state" << " " << Ex_state << " " << "channel" << " " << channel << std::endl; //nakanisi
+        const int Reaction = rType/10e4 - 1;
+        const int State_pre = rType/10e3;
+        const int Ex_state_pre = rType/10;
+        const int State = ((rType - (Reaction+1)*10e4)/10e3) - 1;
+        const int Ex_state = ((rType - State_pre*10e3)/10) - 1;
+        const int channel = (rType - Ex_state_pre*10) - 1;
         if(Reaction==0 && Ex_state!=29) totGenNueO++;
-        if(Reaction==1 && Ex_state!=29) totGenNuebarO++;
-        if(Reaction==0 && Ex_state==29) totGenNueOsub++;
-        if(Reaction==1 && Ex_state==29) totGenNuebarOsub++; 
+        else if(Reaction==1 && Ex_state!=29) totGenNuebarO++;
+        else if(Reaction==0 && Ex_state==29) totGenNueOsub++;
+        else if(Reaction==1 && Ex_state==29) totGenNuebarOsub++; 
       }
     }
   }
 
-  int totalNumOfGenEvts = ( totGenNuebarp + totGenNueElastic
+  const int totalNumOfGenEvts = ( totGenNuebarp + totGenNueElastic
       + totGenNuebarElastic + totGenNuxElastic + totGenNuxbarElastic
       + totGenNueO + totGenNuebarO 
       + totGenNueOsub + totGenNuebarOsub
-      + totGenNcNup + totGenNcNun + totGenNcNubarp + totGenNcNubarn
+      + totGenNcNuep + totGenNcNuebarp + totGenNcNuxp + totGenNcNuxbarp + totGenNcNuen + totGenNcNuebarn + totGenNcNuxn + totGenNcNuxbarn
       );
 
   fprintf( stdout, "------------------------------------\n" );
@@ -836,8 +963,14 @@ void SKSNSimVectorSNGenerator::FillEvent(std::vector<SKSNSimSNEventVector> &evt_
   fprintf( stdout, "   nuxbar + e = %d\n", totGenNuxbarElastic );
   fprintf( stdout, "   nue + o = %d\n", totGenNueO+totGenNueOsub );
   fprintf( stdout, "   nuebar + o = %d\n", totGenNuebarO+totGenNuebarOsub );
-  //fprintf( stdout, "   nue + o sub = %d\n", totGenNueOsub );
-  //fprintf( stdout, "   nuebar + o sub = %d\n", totGenNuebarOsub );
+  fprintf( stdout, "   nue + o (NC:p+15N) = %d\n", totGenNcNuep );
+  fprintf( stdout, "   nuebar + o (NC:p+15N) = %d\n", totGenNcNuebarp );
+  fprintf( stdout, "   nux + o (NC:p+15N) = %d\n", totGenNcNuxp );
+  fprintf( stdout, "   nuxbar + o (NC:p+15N) = %d\n", totGenNcNuxbarp );
+  fprintf( stdout, "   nue + o (NC:n+15O) = %d\n", totGenNcNuen );
+  fprintf( stdout, "   nuebar + o (NC:n+15O) = %d\n", totGenNcNuebarn );
+  fprintf( stdout, "   nux + o (NC:n+15O) = %d\n", totGenNcNuxn );
+  fprintf( stdout, "   nuxbar + o (NC:n+15O) = %d\n", totGenNcNuxbarn );
   fprintf( stdout, "------------------------------------\n" );
 
 }
@@ -847,6 +980,14 @@ void SKSNSimVectorSNGenerator::determineKinematics( std::map<XSECTYPE, std::shar
   auto SQ = [](double x){return x*x;};
   const double nuEne = ev.GetSNEvtInfoNuEne();
   const auto pvect = nuEne * ev.GetSNEvtInfoNuDir();
+
+  auto generateNormVect = [](TRandom &rng)
+  {
+    //random reaction of neutron
+    double phi = rng.Uniform(0., 2.*M_PI); 
+    double theta = rng.Uniform(0., M_PI); // TODO this should be dCosTheta? This is based on original code
+    return UtilVector3<double>(theta, phi).Unit();
+  };
 
   //number of particle emitted on deexcitation with CC reaction
   constexpr int numNtNueO[7] = {0, 1, 0, 2, 0, 0, 0};
@@ -858,10 +999,10 @@ void SKSNSimVectorSNGenerator::determineKinematics( std::map<XSECTYPE, std::shar
   const UtilVector3<double> snDir_vec(snDir);
   int iSkip = 0;
 
-  SKSNSimXSecIBDSV       &xsecibd         = dynamic_cast<SKSNSimXSecIBDSV&>(      *xsecmodels[mXSECIBD]);
-  SKSNSimXSecNuElastic   &xsecnuela       = dynamic_cast<SKSNSimXSecNuElastic&>(  *xsecmodels[mXSECELASTIC]);
-  SKSNSimXSecNuOxygen    &xsecnuoxygen    = dynamic_cast<SKSNSimXSecNuOxygen&>(   *xsecmodels[mXSECOXYGEN]);
-  SKSNSimXSecNuOxygenSub &xsecnuoxygensub = dynamic_cast<SKSNSimXSecNuOxygenSub&>(*xsecmodels[mXSECOXYGENSUB]);
+  SKSNSimXSecIBDSV       &xsecibd         = dynamic_cast<SKSNSimXSecIBDSV&>(      *xsecmodels[XSECTYPE::mXSECIBD]);
+  SKSNSimXSecNuElastic   &xsecnuela       = dynamic_cast<SKSNSimXSecNuElastic&>(  *xsecmodels[XSECTYPE::mXSECELASTIC]);
+  SKSNSimXSecNuOxygen    &xsecnuoxygen    = dynamic_cast<SKSNSimXSecNuOxygen&>(   *xsecmodels[XSECTYPE::mXSECOXYGEN]);
+  SKSNSimXSecNuOxygenSub &xsecnuoxygensub = dynamic_cast<SKSNSimXSecNuOxygenSub&>(*xsecmodels[XSECTYPE::mXSECOXYGENSUB]);
 
 	double sn_theta = acos( snDir[2] );
 	double sn_phi = atan2( snDir[1],  snDir[0] );
@@ -913,7 +1054,94 @@ void SKSNSimVectorSNGenerator::determineKinematics( std::map<XSECTYPE, std::shar
     double costh = snDir_vec * eDir; //[0] * eDir[0] + snDir[1] * eDir[1] + snDir[2] * eDir[2];
     //std::cout << "Elastic " << costh << std::endl;
 
-  } else {
+  } else if(nReact>1000 && nReact < 10000){
+    // Oxygen NC
+
+    //energy of gamma on deexcitation with NC reaction
+    const static double eneGamN[8] = {5.27, 6.33, 7.16, 7.56, 8.32, 8.57, 9.05, 9.76};
+    const static double eneGamO[4] = {5.18, 6.18, 6.69, 7.28};
+
+    const int Reaction = nReact/1000;
+    const int Excit_pre = nReact/100;
+    const int Excit = ((nReact - (Reaction)*1000)/100) - 1;
+    const int ch_pre = nReact/10;
+    const int channel = (nReact - ch_pre*10) - 1;
+    const int particle = ((nReact - Excit_pre*100)/10) - 1;
+
+    const auto nuMomentum = pvect;
+
+    int tmp_ipvc = 0;
+    if(Excit == 0)      tmp_ipvc =   PDG_ELECTRON_NEUTRINO /* 12 */;
+    else if(Excit == 1) tmp_ipvc = - PDG_ELECTRON_NEUTRINO /* -12 */;
+    else if(Excit == 2) tmp_ipvc =   PDG_MUON_NEUTRINO /* 14 */;
+    else if(Excit == 3) tmp_ipvc = - PDG_MUON_NEUTRINO /* -14 */;
+
+    ev.AddTrack(
+        tmp_ipvc, nuEne,
+        nuMomentum.x, nuMomentum.y, nuMomentum.z,
+        0 /* iorgvc */,
+        1 /* ivtivc */,
+        1 /* ivtfvc */,
+        -1 /* iflgvc */,
+        0 /* icrnvc */
+        );
+
+    double pTheta, pPhi, pDir[3];
+    if(particle == 0){
+      double amom = sqrt(SQ(Mp+0.5) - SQ(Mp));
+      const auto protonMomentum = amom * generateNormVect(rng);
+      ev.AddTrack(
+          PDG_PROTON, Mp + 0.5,
+          protonMomentum.x, protonMomentum.y, protonMomentum.z,
+          1 /* iorgvc */,
+          1 /* ivtivc */,
+          1 /* ivtfvc */,
+          0 /* iflgvc */,
+          1 /* icrnvc */
+          );
+
+      // Gamma ray
+      const auto gammaMomentum = eneGamN[channel] * generateNormVect(rng);
+      ev.AddTrack(
+          PDG_GAMMA, eneGamN[channel],
+          gammaMomentum.x, gammaMomentum.y, gammaMomentum.z,
+          1 /* iorgvc */,
+          1 /* ivtivc */,
+          1 /* ivtfvc */,
+          0 /* iflgvc */,
+          1 /* icrnvc */
+          );
+      std::cout << "NC gamma emission " << PDG_GAMMA << " " << eneGamN[channel] << " " << gammaMomentum.x << " " << gammaMomentum.y << " " << gammaMomentum.z << std::endl; // nakanisi
+    }
+    else if(particle == 1){
+      const double amom = sqrt(SQ(0.5+Mn) - SQ(Mn));
+      const auto neutronMomentum = amom * generateNormVect(rng);
+      ev.AddTrack(
+          PDG_NEUTRON, 0.5 + Mn,
+          neutronMomentum.x, neutronMomentum.y, neutronMomentum.z,
+          1 /* iorgvc */,
+          1 /* ivtivc */,
+          1 /* ivtfvc */,
+          0 /* iflgvc */,
+          1 /* icrnvc */
+          );
+
+      // Gamma ray
+      const auto gammaMomentum = eneGamN[channel] * generateNormVect(rng); // TODO Is it fine to use eneGamN instead of eneGamO
+      ev.AddTrack(
+          PDG_GAMMA, eneGamN[channel],
+          gammaMomentum.x, gammaMomentum.y, gammaMomentum.z,
+          1 /* iorgvc */,
+          1 /* ivtivc */,
+          1 /* ivtfvc */,
+          0 /* iflgvc */,
+          1 /* icrnvc */
+          );
+                         //std::cout << "gamma emission " << i_nucre << " " << mc->ipvc[mc->nvc] << " " << mc->energy[mc->nvc] << " " << x << " " << y << " " << z << std::endl; // nakanisi
+      std::cout << "NC gamma emission " << PDG_GAMMA << " " << eneGamN[channel] << " " << gammaMomentum.x << " " << gammaMomentum.y << " " << gammaMomentum.z << std::endl; // nakanisi
+    }
+  } else if(nReact >= 10000){
+    // Oxygen CC
     //mc->mcinfo[0] = 85005;
     const int Reaction = nReact/10e4 - 1;
     const int State_pre = nReact/10e3;
@@ -979,13 +1207,6 @@ void SKSNSimVectorSNGenerator::determineKinematics( std::map<XSECTYPE, std::shar
     //if(eEne<0.)std::cout << "e-/e+ momentum " << mc->pvc[1][0] << " " << mc->pvc[1][1] << " " << mc->pvc[1][2] << " " << eEne << " " << Me << " " << amom << " " << eDir[0] << " " << eDir[1] << " " << eDir[2] << std::endl; // nakanisi
 
     double costh = snDir[0] * eDir[0] + snDir[1] * eDir[1] + snDir[2] * eDir[2];
-    auto determineNeutMomentum = [](TRandom &rng)
-        {
-        //random reaction of neutron
-        double phi = rng.Uniform(0., 2.*M_PI); 
-        double theta = rng.Uniform(0., M_PI); // TODO this should be dCosTheta? This is based on original code
-        return UtilVector3<double>(theta, phi).Unit();
-        };
 
     if(numNtNueO[channel]!=0 || numNtNuebarO[channel]!=0 || numGmNuebarO[channel]!=0){
       if(Reaction==0){
@@ -994,7 +1215,7 @@ void SKSNSimVectorSNGenerator::determineKinematics( std::map<XSECTYPE, std::shar
           for(int i=0;i<numNtNueO[channel];i++){
             // Neutron
             i_nucre++;
-            const auto neutronMom = sqrt(SQ(0.5+Mn) - SQ(Mn)) * determineNeutMomentum(rng);
+            const auto neutronMom = sqrt(SQ(0.5+Mn) - SQ(Mn)) * generateNormVect(rng);
             ev.AddTrack(
                 PDG_NEUTRON, 0.5 + Mn,
                 neutronMom.x, neutronMom.y, neutronMom.z,
@@ -1015,7 +1236,7 @@ void SKSNSimVectorSNGenerator::determineKinematics( std::map<XSECTYPE, std::shar
             for(int i=0;i<numNtNuebarO[channel];i++){
               // Neutron
               i_nucre++;
-              auto neutronMom = sqrt(SQ(0.5+Mn)-SQ(Mn)) * determineNeutMomentum(rng);
+              auto neutronMom = sqrt(SQ(0.5+Mn)-SQ(Mn)) * generateNormVect(rng);
               ev.AddTrack(
                   PDG_NEUTRON, 0.5 + Mn,
                   neutronMom.x, neutronMom.y, neutronMom.z,
@@ -1031,7 +1252,7 @@ void SKSNSimVectorSNGenerator::determineKinematics( std::map<XSECTYPE, std::shar
             // Gamma ray
             i_nucre++;
             constexpr double gammaEne = 12.674;
-            const auto gammaMom = gammaEne * determineNeutMomentum(rng);
+            const auto gammaMom = gammaEne * generateNormVect(rng);
             ev.AddTrack(
                 PDG_GAMMA, gammaEne,
                 gammaMom.x, gammaMom.y, gammaMom.z,

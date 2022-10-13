@@ -22,7 +22,13 @@ extern "C" {
 	double sl_nmb_dif_rad_( double *, double * );
 } // TODO to avoid dependency of fortran library
 
-enum XSECTYPE { mXSECIBD = 0, mXSECELASTIC, mXSECOXYGEN, mXSECOXYGENSUB, mNXSECTYPE};
+enum struct XSECTYPE { mXSECIBD = 0, mXSECELASTIC, mXSECOXYGEN, mXSECOXYGENSUB, mXSECOXYGENNC, mNXSECTYPE};
+enum struct NUREACTTYPE { kNUEBARP = 0,
+  kNUEELASTIC, kNUEBARELASTIC, kNUXELASTIC, kNUXBARELASTIC,
+  kNUEO, kNUEBARO,
+  kNUEPNC, kNUENNC, kNUEBARPNC, kNUEBARNNC, kNUXPNC, kNUXNNC, kNUXBARPNC, kNUXBARNNC,
+  kNNUREACTTYPE};
+
 
 class SKSNSimCrosssectionModel {
   public:
@@ -146,31 +152,22 @@ class SKSNSimXSecNuOxygen : public SKSNSimCrosssectionModel {
 class SKSNSimXSecNuOxygenNC : public SKSNSimCrosssectionModel {
   // Cross section model of neutrino-oxygen -> single lepton via NC
   private:
-    typedef std::tuple<int,int> INISTATE; // <nue-or-nuebar,ix>
-    typedef std::tuple<int,int,int,int> INIFINSTATE; // <nue-or-nuebar,ix,ex,ch>
+    typedef std::tuple<int> INISTATE; // <nue-or-nuebar,ix>
+    typedef std::tuple<int,int> INIFINSTATE; // <nue-or-nuebar,ix,ex,ch>
     constexpr static int NTYPE = 2;
-    constexpr static int NIXSTATE = 2;
-    constexpr static int NEXSTATE = 8; // maximum, depending to IXSTATE
-    constexpr static int NCHANNEL = 1;
-    constexpr static double eEneThr = 5.0;// MeV, electron total energy threshold
+    constexpr static int NEXSTATE = 8; // maximum, depending to IXSTATE, TYPE
+    // constexpr static double eEneThr = 5.0;// MeV, electron total energy threshold
     std::map<INISTATE,bool> isOpened;
-    std::map<INISTATE, std::vector<double>> rec;
-    std::map<INISTATE, std::vector<double>> pro_energy;
     std::map<INISTATE,int> fileSize;
-    std::map<INISTATE,int> exNum;
     std::map<INISTATE,std::vector<double>> exEne;
     std::map<INISTATE,std::vector<double>> nuene;
     std::map<INIFINSTATE, std::vector<double>> crs;
 
 
-    static int GetNumEx(int ix){
-      const static int num_ex[NIXSTATE] = {8, 4};
-      return num_ex[ix];
-    }
-    static INISTATE    convToINISTATE(int type, int ix) {return std::make_tuple(type,ix);}
-    static INIFINSTATE convToINIFINSTATE(int type, int ix, int ex, int ch) {return std::make_tuple(type,ix,ex,ch);}
-    static INISTATE GetINISTATE(INIFINSTATE f){ return convToINISTATE(std::get<0>(f), std::get<1>(f));}
-    static INIFINSTATE convToINIFINSTATE(INISTATE ini, int ex, int ch) {return std::make_tuple(std::get<0>(ini),std::get<1>(ini),ex,ch);}
+    static INISTATE    convToINISTATE(int type) {return std::make_tuple(type);}
+    static INIFINSTATE convToINIFINSTATE(int type, int ex) {return std::make_tuple(type,ex);}
+    static INISTATE GetINISTATE(INIFINSTATE f){ return convToINISTATE(std::get<0>(f));}
+    static INIFINSTATE convToINIFINSTATE(INISTATE ini, int ex) {return std::make_tuple(std::get<0>(ini),ex);}
 
     void LoadFile();
     void LoadFile(INISTATE ini);
@@ -181,12 +178,14 @@ class SKSNSimXSecNuOxygenNC : public SKSNSimCrosssectionModel {
       LoadFile();
     }
     ~SKSNSimXSecNuOxygenNC(){}
-    double GetCrosssection(double e, INIFINSTATE inifin = {0,0,0,0}) const;
-    double GetCrosssection(double e) const { return GetCrosssection(e, {0,0,0,0});};
+    double GetCrosssection(double e, INIFINSTATE inifin = {0,0}) const;
+    double GetCrosssection(double e) const { return GetCrosssection(e, {0,0});};
     std::pair<double,double> GetDiffCrosssection(double, double) const;
+    static int GetNumEx(int type){
+      const static int num_ex[NTYPE] = {8, 4};
+      return num_ex[type];
+    }
 
-    double OxigFuncAngleRecCC(int num, int ix, int ex, int ch, double enu, double cos);
-    double OxigFuncRecEneCC(int num, int ix, int ex, int ch, double enu);
 };
 
 class SKSNSimXSecNuOxygenSub : public SKSNSimCrosssectionModel {
