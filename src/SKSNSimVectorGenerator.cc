@@ -1189,7 +1189,7 @@ void SKSNSimVectorSNGenerator::determineKinematics( std::map<XSECTYPE, std::shar
       // Gamma ray
       const auto gammaMomentum = eneGamO[channel] * generateNormVect(rng);
       ev.AddTrack(
-          PDG_GAMMA, eneGamN[channel],
+          PDG_GAMMA, eneGamO[channel],
           gammaMomentum.x, gammaMomentum.y, gammaMomentum.z,
           1 /* iorgvc */,
           1 /* ivtivc */,
