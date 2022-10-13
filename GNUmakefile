@@ -19,7 +19,7 @@ endif
 include $(SKOFL_ROOT)/config.gmk
 
 CXX=g++
-CXXFLAGS += -g3 -DNO_EXTERN_COMMON_POINTERS -DDEBUG
+CXXFLAGS += -DNO_EXTERN_COMMON_POINTERS #-DDEBUG
 FC=gfortran
 FCFLAGS += -w -fPIC -lstdc++
 
