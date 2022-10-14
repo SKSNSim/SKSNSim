@@ -65,11 +65,10 @@ SKSNSimSNEventVector SKSNSimVectorGenerator::GenerateEventIBD() {
 
     const double nuFlux = flux.GetFlux(nuEne, 0.0, SKSNSimFluxModel::FLUXNUEB);
 
-    double sigm;
     cost = rng.Uniform( -1., 1.);
-    auto xsecpair = xsec.GetDiffCrosssection(nuEne, cost);
+    const auto xsecpair = xsec.GetDiffCrosssection(nuEne, cost);
     eEne = xsecpair.second;
-    sigm = xsecpair.first;
+    const double sigm = xsecpair.first;
 
     double p = nuFlux * sigm;
     double x = rng.Uniform( 0., m_max_hit_probability);
@@ -79,16 +78,21 @@ SKSNSimSNEventVector SKSNSimVectorGenerator::GenerateEventIBD() {
   std::cout << "In GenerateEventIBD: eEne = " << eEne << std::endl;
 #endif
 
-  // determine neutrino direction
-  //double nuDir[3];
-  double theta = rng.Uniform(M_PI);
+  // determine neutrino direction (isotoropic direction)
+  /*                    /e+
+  //                   /
+  //                  / \ cost
+  // ------nu->------p  -  -  -  -  -  -  -
+  //   (theta,phi)    \
+  //                   \
+  //                    \n
+  */
+  double theta = acos(rng.Uniform(-1., 1.));
   double phi = rng.Uniform(2. * M_PI);
-  UtilVector3<double> nuDir ( std::sin(theta)*std::cos(phi),
-                                        sin(theta)*sin(phi),
-                                                 cos(theta));
+  UtilVector3<double> nuDir ( theta, phi);
 
 
-  // Rotation matrix of neutrino direction
+  // Rotation matrix of neutrino direction // TODO Is it fine?
   UtilMatrix3<double> Rmat( cos(theta)*cos(phi), -sin(phi), sin(theta)*cos(phi),
                             cos(theta)*sin(phi),  cos(phi), sin(theta)*sin(phi),
                                     -sin(theta),        0.,          cos(theta));
@@ -140,14 +144,14 @@ SKSNSimSNEventVector SKSNSimVectorGenerator::GenerateEventIBD() {
   // Original neutrino
   const auto nuMomentum = nuEne * nuDir.Unit();
   const auto nuebarid = ev.AddTrack(
-      -12, nuEne,
+      -PDG_ELECTRON_NEUTRINO, nuEne,
       nuMomentum.x, nuMomentum.y, nuMomentum.z,
       0, 0, 1, -1, 0
       );
 
   // Original proton
   const auto protonid = ev.AddTrack(
-      2212, Mp,
+      PDG_PROTON, Mp,
       0., 0., 0.,
       0, 0, 1, -1, 0
       );
@@ -159,10 +163,7 @@ SKSNSimSNEventVector SKSNSimVectorGenerator::GenerateEventIBD() {
 
   // conversion the positron direction along the neutrino direction
 
-  UtilVector3<double> origVec(
-      sin( eTheta ) * cos( ePhi ),
-      sin( eTheta ) * sin( ePhi ),
-      cos( eTheta ));
+  const UtilVector3<double> origVec( eTheta, ePhi);
 
   const UtilVector3<double> eDir = Rmat * origVec;
 
@@ -171,7 +172,7 @@ SKSNSimSNEventVector SKSNSimVectorGenerator::GenerateEventIBD() {
   // Positron
   const auto positronMomentum = amom * eDir.Unit();
   const auto positronid = ev.AddTrack(
-      -11, eEne,
+      -PDG_ELECTRON, eEne,
       positronMomentum.x, positronMomentum.y, positronMomentum.z,
       1, 1, 1, 0, 1
       );
@@ -179,14 +180,14 @@ SKSNSimSNEventVector SKSNSimVectorGenerator::GenerateEventIBD() {
   // Neutron
   const UtilVector3<double> neutronMomentum = nuMomentum - positronMomentum;
   const auto neutronid = ev.AddTrack(
-      2112,
+      PDG_NEUTRON,
       std::sqrt(neutronMomentum.Mag2() + Mn*Mn),
       neutronMomentum.x, neutronMomentum.y, neutronMomentum.z,
       1, 1, 1, 0, 1
       );
 
-  ev.SetRunnum(999999); // TODO modify
-  ev.SetSubRunnum(0);  // TODO
+  ev.SetRunnum(m_runnum);
+  ev.SetSubRunnum(m_subrunnum);
 
   return ev;
 }

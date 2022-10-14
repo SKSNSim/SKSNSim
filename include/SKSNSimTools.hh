@@ -3,6 +3,10 @@
 
 #include <TString.h>
 #include <iostream>
+#include <vector>
+#include <string>
+#include <map>
+#include "SKSNSimEnum.hh"
 
 namespace SKSNSimTools{
   auto DumpDebugMessage = [] (TString str) {
@@ -10,5 +14,13 @@ namespace SKSNSimTools{
     std::cout << "[IZU:DEBUG] " << str << std::endl;
 #endif
   };
+}
+
+namespace SKSNSimLiveTime {
+  
+  std::vector<std::tuple<int /* runnum */,double /* livetime_day */>> LoadLiveTime(SKSNSIMENUM::SKPERIOD);
+  std::vector<std::tuple<int /* runnum */,double /* livetime_day */>> LoadLiveTime(int /* run-begin */,int /* run-end */);
+  std::vector<std::tuple<int /* runnum */,double /* livetime_day */>> LoadLiveTime(std::string);
+
 }
 #endif

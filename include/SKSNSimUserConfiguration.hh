@@ -18,7 +18,11 @@
 #include "SKSNSimEnum.hh"
 #include "SKSNSimVectorGenerator.hh"
 
+
 class SKSNSimUserConfiguration{
+  public:
+    enum struct MODERUNTIME { kEVNUM = 0, kRUNTIMERUNNUM, kRUNTIMEPERIOD, kNMODERUNTIME };
+
   private:
 
     /* Event range related */
@@ -42,6 +46,7 @@ class SKSNSimUserConfiguration{
     double m_factor_runtime; 
     int m_runtime_runbegin;
     int m_runtime_runend;
+    int m_runtime_period;
 
     /* RUN number (exclusive to DSNB runtime normalization) */
     int m_runnum;
@@ -82,14 +87,14 @@ class SKSNSimUserConfiguration{
       m_eventgen_volume = GetDefaultEventVolume();
 
       m_num_events = GetDefaultNumEvents();
-      m_runtime_normalization = GetDefaultRuttimeNormalization();
-      m_factor_runtime = GetDefaultRuttimeNormFactor();
+      m_runtime_normalization = GetDefaultRuntimeNormalization();
+      m_factor_runtime = GetDefaultRuntimeNormFactor();
       m_runtime_runbegin = GetDefaultRuntimeBegin();
       m_runtime_runend = GetDefaultRuntimeEnd();
+      m_runtime_period = GetDefaultRuntimePeriod();
 
       m_runnum = GetDefaultRunnum();
       m_subrunnum = GetDefaultSubRunnum();
-
 
       m_sndistance_kpc = GetDefaultSNDistanceKPC();
       m_snburst_fluxmodel = GetDefaultSNBurstFluxModel();
@@ -100,7 +105,7 @@ class SKSNSimUserConfiguration{
     }
 
     SKSNSimUserConfiguration(){
-      m_randomgenerator = std::make_shared<TRandom3>();// new TRandom3());
+      m_randomgenerator = std::make_shared<TRandom3>( GetDefaultRandomSeed() );// new TRandom3());
       SetDefaultConfiguation();
     }
     ~SKSNSimUserConfiguration(){}
@@ -128,8 +133,9 @@ class SKSNSimUserConfiguration{
     const static unsigned GetDefaultRandomSeed () { return 42;}
     const static int GetDefaultRuntimeBegin () { return (int) SKSNSIMENUM::SKPERIODRUN::SKVIBEGIN;}
     const static int GetDefaultRuntimeEnd () { return (int) SKSNSIMENUM::SKPERIODRUN::SKVIEND;}
-    const static bool GetDefaultRuttimeNormalization() { return false; }
-    const static double GetDefaultRuttimeNormFactor() { return 1.0; }
+    const static int GetDefaultRuntimePeriod() { return -1; /* using RuntimeBegin/End */}
+    const static bool GetDefaultRuntimeNormalization() { return false; }
+    const static double GetDefaultRuntimeNormFactor() { return 1.0; }
     const static std::string GetDefaultSNBurstFluxModel () { return "nakazato/intp2002.data";}
     const static int GetDefaultRunnum () { return (int) SKSNSIMENUM::SKPERIODRUN::SKMC; }
     const static int GetDefaultSubRunnum () { return 0; }
@@ -156,6 +162,7 @@ class SKSNSimUserConfiguration{
     SKSNSimUserConfiguration &SetRandomSeed(unsigned s) { m_random_seed = s; m_randomgenerator->SetSeed(m_random_seed); return *this;}
     SKSNSimUserConfiguration &SetRuntimeRunBegin(int r) { m_runtime_runbegin = r; return *this;}
     SKSNSimUserConfiguration &SetRuntimeRunEnd(int r) { m_runtime_runend = r; return *this;}
+    SKSNSimUserConfiguration &SetRuntimePeriod(int p) { m_runtime_period = p; return *this;}
     SKSNSimUserConfiguration &SetSNDistanceKpc(double d) { m_sndistance_kpc = d; return *this;}
     SKSNSimUserConfiguration &SetSNBurstFluxModel(std::string f) { m_snburst_fluxmodel = f; return *this;}
     SKSNSimUserConfiguration &SetVectorGeneration(bool f) { m_eventvector_generation = f; return *this;}
@@ -183,6 +190,7 @@ class SKSNSimUserConfiguration{
     double GetRuntimeFactor() const { return m_factor_runtime;}
     int GetRuntimeRunBegin() const {return m_runtime_runbegin; }
     int GetRuntimeRunEnd() const {return m_runtime_runend; }
+    int GetRuntimePeriod() const { return m_runtime_period; }
 
     /* RUN number (exclusive to DSNB runtime normalization) */
     int GetRunnum() const { return m_runnum;}
@@ -201,7 +209,11 @@ class SKSNSimUserConfiguration{
     bool CheckHealth () const;
     void Dump() const;
 
+
+    MODERUNTIME CheckMODERuntime() const;
+
     void Apply( SKSNSimVectorSNGenerator &gen ) const ;
+    void Apply( SKSNSimVectorGenerator   &gen ) const ;
 };
 
 
