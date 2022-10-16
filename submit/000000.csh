@@ -1,5 +1,5 @@
 #!/bin/csh -f 
-#cd /disk1/disk02/usr6/nakanisi/SuperNova/VectGen-oxy/submit
+cd /disk1/disk02/usr6/nakanisi/NC_final/
 #cd ..
 source /usr/local/sklib_gcc8/skofl-trunk/env.csh
 hostname

@@ -88,11 +88,13 @@ VectGenIO::VectGenIO(std::string ModelName, int nuosc, double distIO, int flagIO
 	totNuebarp=0.;
 	totNueElastic=0., totNuebarElastic=0., totNuxElastic=0., totNuxbarElastic=0.;
 	totNueO=0., totNuebarO=0.;
-	totNcNup=0., totNcNun=0., totNcNubarp=0., totNcNubarn=0.;
+	totNcNuep=0., totNcNuen=0., totNcNuebarp=0., totNcNuebarn=0., totNcNuxp=0., totNcNuxn=0., totNcNuxbarp=0., totNcNuxbarn=0.;
 
 	//Class call of neutrino flux table
 	std::stringstream ssname1;
 	ssname1 << "/home/sklowe/supernova/data/" << ModelName;
+	//ssname1 << "/home/kasiwagi/SNwatch/NakazatoFormat_tables/"  << ModelName;
+	//ssname1 << "/disk02/usr6/nakanisi/sn/SN_Data/" << ModelName;
 	std::string FileIn = ssname1.str();
 	nuflux = new VectGenSnNakazato(FileIn.c_str());
 	//nuflux = new SnWilson();
@@ -104,6 +106,9 @@ VectGenIO::VectGenIO(std::string ModelName, int nuosc, double distIO, int flagIO
 	//Class call of cross-section calculation
 	ocrs = new VectGenOxyCrosssection();
 	osub = new VectGenOxyCrosssectionSub();
+
+	//Class call of cross-section calculation for NC
+	ocrs_nc = new VectGenOxyCrosssection();
 
 
 	// set text file name

@@ -18,7 +18,7 @@
 using namespace std;
 
 VectGenOxyCrosssection::VectGenOxyCrosssection()
-:isOpened{false}
+:isOpened{false},isOpened2{false}
 {}
 
 VectGenOxyCrosssection::~VectGenOxyCrosssection()
@@ -27,6 +27,10 @@ VectGenOxyCrosssection::~VectGenOxyCrosssection()
     for (int ix=0; ix<5; ix++) {
       ifs[num][ix].close();
     }
+  }
+
+  for (int num=0; num<2; num++) {
+    ifs_nc[num].close();
   }
 }
 double VectGenOxyCrosssection::CsNuOxy43CC(int num, int ix, int ex, int ch, double enu)
@@ -129,3 +133,67 @@ double VectGenOxyCrosssection::CsNuOxy43CC(int num, int ix, int ex, int ch, doub
 	//if(ix==0 && ex==0 && ch==0)std::cout << num << " " << ix << " " << ex << " " << ch << " " << enu << " " << totcso << std::endl;
 	return totcso;
 }
+double VectGenOxyCrosssection::CsNuOxyNCNue(int num, int ix, double enu)
+{
+
+	/*
+	  Total cross section of nu_e + O --> 15N + p + gamma, nu_e_bar + O --> 15O + n + gamma interaction
+	*/
+
+	double totcso = 0.;
+
+	string rctn[2] = {"N", "O"};
+
+	if (!isOpened2[num]) {
+		std::cout << "new file open (num, ix, isOpen2): " << num << " " << isOpened2[num] << std::endl; //nakanisi
+		//ifs_nc[num].open(Form("/disk1/disk02/usr6/nakanisi/SuperNova/time-vect300/oscillation/oxygen/total_nc_cross_nu_%s2.dat",rctn[num].c_str()));
+		ifs_nc[num].open(Form("/disk1/disk02/usr6/nakanisi/SuperNova/time-vect300/oscillation/oxygen/crossNC_ex%s.dat",rctn[num].c_str()));
+
+		if(!ifs_nc[num]){
+			cerr << "file does not exist" << endl;
+			cerr << "file name is" << " " << Form("/disk1/disk02/usr6/nakanisi/SuperNova/time-vect300/oscillation/oxygen/crossNC_ex%s.dat",rctn[num].c_str()) << endl;
+			exit(-1);
+		}
+
+		while(ifs_nc[num]>>tmp_nc_e0){
+			nuene_nc[num].push_back(tmp_nc_e0);
+			//std::cout << "neutrino energy: " << tmp_nc_e0 << std::endl;
+			for(int j=0;j<num_ex_nc[num];j++){
+				ifs_nc[num]>>tmp_nc_ex>>tmp_nc_cs0;
+				//std::cout << num << " " << ix << " " << j << " " << index_nc[num] << " " << tmp_nc_ex << " " << tmp_nc_cs0 << std::endl;
+				index_nc[num]++;
+				exEne_nc[num][j].push_back(tmp_nc_ex);
+				if(num==0)crs0_nc[j].push_back(tmp_nc_cs0);
+				else if(num==1)crs1_nc[j].push_back(tmp_nc_cs0);
+				//crs1_nc[num].push_back(tmp_cs1);
+			}
+		}
+		isOpened2[num] = true;
+	}
+
+	//std::cout << "index_nc " << num << " " << ix << " " << index_nc[num] << std::endl;
+	for(int i=0;i<20;i++){
+		//if(enu>6.)std::cout << i << " " << num << " " << ix << " " << enu << " " << exEne_nc[num][ix].at(i) << std::endl;
+		if(i>0 && enu<nuene_nc[num].at(i) && enu>nuene_nc[num].at(i-1) && enu>exEne_nc[num][ix].at(i)){
+			if(num==0){
+				totcso = ((((crs0_nc[ix].at(i)-crs0_nc[ix].at(i-1))/(nuene_nc[num].at(i)-nuene_nc[num].at(i-1)))*enu + crs0_nc[ix].at(i-1) - ((crs0_nc[ix].at(i)-crs0_nc[ix].at(i-1))/(nuene_nc[num].at(i)-nuene_nc[num].at(i-1)))*nuene_nc[num].at(i-1))) * 1.0e-42;
+				//std::cout << "i " << i << " num " << num  << " ix " << ix << " enu " << enu << " exEne " << exEne_nc[num][ix].at(i) << " nuene " << nuene_nc[num].at(i) << " crs0 " << crs0_nc[ix].at(i) << " " << crs0_nc[ix].at(i-1) << " " << totcso << std::endl;
+			}
+			else if(num==1){
+				totcso = ((((crs1_nc[ix].at(i)-crs1_nc[ix].at(i-1))/(nuene_nc[num].at(i)-nuene_nc[num].at(i-1)))*enu + crs1_nc[ix].at(i-1) - ((crs1_nc[ix].at(i)-crs1_nc[ix].at(i-1))/(nuene_nc[num].at(i)-nuene_nc[num].at(i-1)))*nuene_nc[num].at(i-1))) * 1.0e-42;
+				//std::cout << "i " << i << " num " << num  << " ix " << ix << " enu " << enu << " exEne " << exEne_nc[num][ix].at(i) << " nuene " << nuene_nc[num].at(i) << " crs1 " << crs1_nc[ix].at(i) << std::endl;
+			}
+			break;
+		}
+		else{
+			//std::cout << "num " << num  << " ix " << ix << " enu " << enu << " nuene " << std::endl;
+			totcso = 0.;
+			//break;
+		}
+	}
+
+	return totcso;
+}
+
+
+
