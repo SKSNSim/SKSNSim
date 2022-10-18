@@ -58,6 +58,8 @@ class SKSNSimUserConfiguration{
     /* Physics related */
     SKSNSIMENUM::NEUTRINOOSCILLATION m_nuosc_type;
     std::string m_snburst_fluxmodel;
+    std::string m_dsnb_fluxmodel;
+    bool m_dsnb_flatflux;
 
     /* Random Generator related */
     unsigned m_random_seed;
@@ -98,6 +100,8 @@ class SKSNSimUserConfiguration{
 
       m_sndistance_kpc = GetDefaultSNDistanceKPC();
       m_snburst_fluxmodel = GetDefaultSNBurstFluxModel();
+      m_dsnb_fluxmodel = GetDefaultDSNBFluxModel();
+      m_dsnb_flatflux = GetDefaultDSNBFlatFlux();
 
       m_nuosc_type = GetDefaultNeutrinoOscType();
 
@@ -135,8 +139,10 @@ class SKSNSimUserConfiguration{
     const static int GetDefaultRuntimeEnd () { return (int) SKSNSIMENUM::SKPERIODRUN::SKVIEND;}
     const static int GetDefaultRuntimePeriod() { return -1; /* using RuntimeBegin/End */}
     const static bool GetDefaultRuntimeNormalization() { return false; }
-    const static double GetDefaultRuntimeNormFactor() { return 1.0; }
+    const static double GetDefaultRuntimeNormFactor() { return 24.0; }
     const static std::string GetDefaultSNBurstFluxModel () { return "nakazato/intp2002.data";}
+    const static std::string GetDefaultDSNBFluxModel () { return "Horiuchi09-8MeV";}
+    const static bool GetDefaultDSNBFlatFlux () { return false;}
     const static int GetDefaultRunnum () { return (int) SKSNSIMENUM::SKPERIODRUN::SKMC; }
     const static int GetDefaultSubRunnum () { return 0; }
 
@@ -165,6 +171,8 @@ class SKSNSimUserConfiguration{
     SKSNSimUserConfiguration &SetRuntimePeriod(int p) { m_runtime_period = p; return *this;}
     SKSNSimUserConfiguration &SetSNDistanceKpc(double d) { m_sndistance_kpc = d; return *this;}
     SKSNSimUserConfiguration &SetSNBurstFluxModel(std::string f) { m_snburst_fluxmodel = f; return *this;}
+    SKSNSimUserConfiguration &SetDSNBFluxModel(std::string f) { m_dsnb_fluxmodel = f; return *this;}
+    SKSNSimUserConfiguration &SetDSNBFlatFlux(bool f) { m_dsnb_flatflux = f; return *this;}
     SKSNSimUserConfiguration &SetVectorGeneration(bool f) { m_eventvector_generation = f; return *this;}
     SKSNSimUserConfiguration &SetNeutrinoOscType( SKSNSIMENUM::NEUTRINOOSCILLATION t) { m_nuosc_type = t; return *this; }
     SKSNSimUserConfiguration &SetNeutrinoOscType( int t) { m_nuosc_type = (SKSNSIMENUM::NEUTRINOOSCILLATION)t; return *this; }
@@ -199,6 +207,8 @@ class SKSNSimUserConfiguration{
     /* SN related */
     double GetSNDistanceKpc() const { return m_sndistance_kpc; }
     std::string GetSNBurstFluxModel() const { return m_snburst_fluxmodel; }
+    std::string GetDSNBFluxModel() const { return m_dsnb_fluxmodel; }
+    bool GetDSNBFlatFlux() const { return m_dsnb_flatflux; }
 
     /* Physics related */
     SKSNSIMENUM::NEUTRINOOSCILLATION GetNuOscType() const { return m_nuosc_type; }

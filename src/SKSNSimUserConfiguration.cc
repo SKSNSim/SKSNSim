@@ -98,6 +98,7 @@ void ShowHelpDSNB(const char *argv0){
     << " [--runtime_period {5/6}]"
     << " [--neventsperfile {int}]"
     << " [--outprefix {pref}]"
+    << " [--flatflux]"
     << " [-h,--help]"
     << " [-s,--seed {unsigned}]"
     << " [outputdirectory]"
@@ -108,6 +109,7 @@ void ShowHelpDSNB(const char *argv0){
     << " -c,--customflux {flux_filename}: this option enforce to use specified flux file which should be formatted with \"energy(MeV) flux\". In default meaning without this option, it generates events according to the Horiuchi-09 8MeV model." << std::endl
     << " --energy_min {energy_MeV}: lower energy limit to be generated in MeV ( default = " << SKSNSimUserConfiguration::GetDefaultFluxEnergyMin() << " MeV )" << std::endl
     << " --energy_max {energy_MeV}: uppwer energy limit to be generated in MeV ( default = " << SKSNSimUserConfiguration::GetDefaultFluxEnergyMax() << " MeV )" << std::endl
+    << " --flatflux: generate flat positron energy in range between --energy_min and --energy_max. " <<  std::endl
     << " --runtimefactor {float}: number of events per day for runtime normalization ( default = " << SKSNSimUserConfiguration::GetDefaultRuntimeNormFactor() << " evt/day )" << std::endl
     << " -n,--nevents {int}: number of events to be generated (exclusive with --runtime and --runtimefactor) ( default = " << SKSNSimUserConfiguration::GetDefaultNumEvents() << " )" << std::endl
     << " -o,--outdir {directory}: output directory. The generator fill events in the filename: {outdir}/{outprefix}_000000.root... ( default = " << SKSNSimUserConfiguration::GetDefaultOutputDirectory() << " )"  << std::endl
@@ -195,14 +197,15 @@ void SKSNSimUserConfiguration::LoadFromArgsDSNB(int argc, char *argv[]){
       {"runtimefactor", required_argument, 0,   0},
       {"nevents",       required_argument, 0, 'n'},
       {"outdir",        required_argument, 0, 'o'},
-      {"runtime",             no_argument, 0,   0},
+      {"runtime",             no_argument, 0,   0}, // 6
       {"runtime_begin", required_argument, 0,   0},
       {"runtime_end",   required_argument, 0,   0},
       {"runtime_period",required_argument, 0,   0},
       {"neventsperfile",required_argument, 0,   0},
-      {"outprefix",     required_argument, 0,   0},
+      {"outprefix",     required_argument, 0,   0}, // 11 
       {"help",                no_argument, 0, 'h'},
       {"seed",          required_argument, 0, 's'},
+      {"flatflux",            no_argument, 0,   0},
       {0,                               0, 0,   0}
     };
 
@@ -211,7 +214,9 @@ void SKSNSimUserConfiguration::LoadFromArgsDSNB(int argc, char *argv[]){
 
     if( c == -1 ) break;
 
+
     switch (c) {
+      case 'c': SetDSNBFluxModel(optarg); break;
       case 'h':
         ShowHelpDSNB(argv[0]);
         exit(EXIT_SUCCESS);
@@ -221,17 +226,16 @@ void SKSNSimUserConfiguration::LoadFromArgsDSNB(int argc, char *argv[]){
       case 's': SetRandomSeed(std::stoul(optarg)); break;
       case 0:
         switch (option_index) {
-          case 0: SetFluxEnergyMin(std::atof(optarg)); break;
-          case 1: SetFluxEnergyMax(std::atof(optarg)); break;
-          case 2: SetFluxTimeMin(std::atof(optarg)); break;
-          case 3: SetFluxTimeMax(std::atof(optarg)); break;
-          case 4: SetRuntimeFactor(std::atof(optarg)); break;
-          case 5: SetNumEvents(std::atoi(optarg)); break;
-          case 6: SetOutputDirectory(std::string(optarg)); break;
-          case 7: SetNormRuntime(true); break;
-          case 8: SetOutputPrefix(std::string(optarg)); break;
-          case 9: SetRandomSeed(std::stoul(optarg)); break;
+          case 1: SetFluxEnergyMin(std::atof(optarg)); break;
+          case 2: SetFluxEnergyMax(std::atof(optarg)); break;
+          case 3: SetRuntimeFactor(std::atof(optarg)); break;
+          case 6: SetNormRuntime(true); break;
+          case 7: SetRuntimeRunBegin(std::atoi(optarg)); break;
+          case 8: SetRuntimeRunEnd(std::atoi(optarg)); break;
+          case 9: SetRuntimePeriod(std::atoi(optarg)); break;
           case 10: SetNumEventsPerFile(std::atoi(optarg)); break;
+          case 11: SetOutputPrefix(optarg); break;
+          case 14: SetDSNBFlatFlux(true); break;
           default:
             ShowHelpDSNB(argv[0]);
             exit(EXIT_FAILURE);
@@ -368,6 +372,7 @@ void SKSNSimUserConfiguration::Dump() const {
   std::cout << "SubRunnum = " << GetSubRunnum() << std::endl;
   std::cout << "SNDistance ( kpc ) = " << GetSNDistanceKpc() << std::endl;
   std::cout << "SNBurstFluxModel = " << GetSNBurstFluxModel() << std::endl;
+  std::cout << "DSNBFluxModel = " << GetDSNBFluxModel() << std::endl;
   std::cout << "NuOscType = " << (int)GetNuOscType() << std::endl;
   std::cout << "RandomSeed = " << GetRandomSeed() << std::endl;
   std::cout << "====> Fine?  " << CheckHealth() << std::endl;
