@@ -6,6 +6,8 @@
 
 #include <string>
 #include <memory>
+#include <sstream>
+#include <iomanip>
 #include "SKSNSimVectorGenerator.hh"
 #include "SKSNSimFileIO.hh"
 #include "SKSNSimFlux.hh"
@@ -31,24 +33,13 @@ int main(int argc, char **argv){
   vectgen->AddFluxModel((SKSNSimFluxModel*)fluxhoriuch.release());
   vectgen->AddXSecModel((SKSNSimCrosssectionModel*)xsec.release());
 
-  if( config->CheckMODERuntime() == SKSNSimUserConfiguration::MODERUNTIME::kEVNUM ){
-    auto flist = GenerateOutputFileList(*config);
-    for(auto it = flist.begin(); it != flist.end(); it++){
-      auto vectio = std::make_unique<SKSNSimFileOutTFile>();
-      vectio->Open(it->GetFileName());
-      size_t pos = std::distance(flist.begin(), it);
-      for(int i = 0; i < it->GetNumEvents(); i++)
-        vectio->Write(vectgen->GenerateEventIBD());
-      vectio->Close();
-    }
-  } else {
-    std::vector<std::tuple<int,double>> livetimes;
-    if( config->CheckMODERuntime() == SKSNSimUserConfiguration::MODERUNTIME::kRUNTIMERUNNUM ){
-      livetimes = SKSNSimLiveTime::LoadLiveTime( config->GetRuntimeRunBegin(), config->GetRuntimeRunEnd());
-    } else if( config->CheckMODERuntime() == SKSNSimUserConfiguration::MODERUNTIME::kRUNTIMEPERIOD ){
-      livetimes = SKSNSimLiveTime::LoadLiveTime( (SKSNSIMENUM::SKPERIOD) config->GetRuntimePeriod());
-    }
-
+  auto flist = GenerateOutputFileList(*config);
+  for(auto it = flist.begin(); it != flist.end(); it++){
+    auto vectio = std::make_unique<SKSNSimFileOutTFile>(it->GetFileName());
+    vectgen->SetRUNNUM( it->GetRun() );
+    vectgen->SetSubRUNNUM( it->GetSubrun() );
+    vectio->Write(vectgen->GenerateEvents(it->GetNumEvents()));
+    vectio->Close();
   }
 
   return EXIT_SUCCESS;
