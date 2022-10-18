@@ -5,12 +5,15 @@
 #include <set>
 #include <cstdio>
 #include <fstream>
+#include <sstream>
+#include <iomanip>
 #include <TFile.h>
 #include <TFileCacheWrite.h>
 #include <TTree.h>
 #include <mcinfo.h>
 #include "SKSNSimFileIO.hh"
 #include "skrun.h"
+#include "SKSNSimTools.hh"
 
 /*
  * PROTOTYPE DECLARARATION for internal use
@@ -112,13 +115,10 @@ void SKSNSimFileOutTFile::Write(const SKSNSimSNEventVector &ev){
 }
 
 std::vector<SKSNSimFileSet> GenerateOutputFileListNoRuntime(const SKSNSimUserConfiguration &conf){
-  constexpr int MCRUN = 999999;
   std::vector<SKSNSimFileSet> flist;
   if( conf.GetNormRuntime() ) return flist;
   int nfile = conf.GetNumEvents() / conf.GetNumEventsPerFile();
   int nfile_rem = conf.GetNumEvents() % conf.GetNumEventsPerFile();
-
-
 
   auto genFileName = [](const SKSNSimUserConfiguration &c, int i){
     char buf[1000];
@@ -128,18 +128,43 @@ std::vector<SKSNSimFileSet> GenerateOutputFileListNoRuntime(const SKSNSimUserCon
 
   for(int i = 0; i < nfile; i++){
     auto fn = genFileName(conf, i);
-    flist.push_back(SKSNSimFileSet(fn, MCRUN, -1, conf.GetNumEventsPerFile()));
+    flist.push_back(SKSNSimFileSet(fn, conf.GetRunnum(), conf.GetSubRunnum(), conf.GetNumEventsPerFile()));
   }
   if( nfile_rem != 0){
     auto fn = genFileName(conf, nfile);
-    flist.push_back(SKSNSimFileSet(fn, MCRUN, -1, nfile_rem));
+    flist.push_back(SKSNSimFileSet(fn, conf.GetRunnum(), conf.GetSubRunnum(), nfile_rem));
   }
   return flist;
 }
+
 std::vector<SKSNSimFileSet> GenerateOutputFileListRuntime(SKSNSimUserConfiguration &conf){
   std::vector<SKSNSimFileSet> buffer;
   if( !conf.GetNormRuntime() ) return buffer;
 
+  std::vector<std::tuple<int,double>> livetimes;
+  if( conf.CheckMODERuntime() == SKSNSimUserConfiguration::MODERUNTIME::kRUNTIMERUNNUM ){
+    livetimes = SKSNSimLiveTime::LoadLiveTime( conf.GetRuntimeRunBegin(), conf.GetRuntimeRunEnd());
+  } else if( conf.CheckMODERuntime() == SKSNSimUserConfiguration::MODERUNTIME::kRUNTIMEPERIOD ){
+    livetimes = SKSNSimLiveTime::LoadLiveTime( (SKSNSIMENUM::SKPERIOD) conf.GetRuntimePeriod());
+  }
+  std::vector<std::tuple<int,int>> nev_livetimes = SKSNSimLiveTime::ConvertExpectedEvt(*conf.GetRandomGenerator(), livetimes, conf.GetRuntimeFactor());
+
+  for(auto it = nev_livetimes.begin(); it != nev_livetimes.end(); it++){
+    auto vectio = std::make_unique<SKSNSimFileOutTFile>();
+    const int run = std::get<0>(*it);
+    std::stringstream ss;
+    ss << conf.GetOutputDirectory() << "/" << conf.GetOutputPrefix() << "." << std::setfill('0') << std::setw(6) << run << ".root";
+    const std::string fname(ss.str());
+
+    std::cout << "fname " << fname << " nev " << std::get<1>(*it) <<std::endl;
+
+    int subrun = 0;
+    int nev = std::get<1>(*it);
+    buffer.push_back(SKSNSimFileSet(fname, run,subrun, nev));
+  }
+
+
+  /* Old TimeEvent loader 
   const int runBegin = conf.GetRuntimeRunBegin();
   const int runEnd   = conf.GetRuntimeRunEnd();
 
@@ -157,9 +182,10 @@ std::vector<SKSNSimFileSet> GenerateOutputFileListRuntime(SKSNSimUserConfigurati
     auto fn = genFileName(conf, run, subrun);
     buffer.push_back(SKSNSimFileSet(fn, run,subrun, nev));
   }
-  
+  */
   return buffer;
 }
+
 std::vector<SKSNSimFileSet> GenerateOutputFileList(SKSNSimUserConfiguration &conf){
   std::vector<SKSNSimFileSet> flist;
   if( conf.GetNormRuntime() )
