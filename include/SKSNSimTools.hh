@@ -2,6 +2,7 @@
 #define __SKSNSIMTOOLS_H_INCLUDED__
 
 #include <TString.h>
+#include <TRandom.h>
 #include <iostream>
 #include <vector>
 #include <string>
@@ -14,13 +15,19 @@ namespace SKSNSimTools{
     std::cout << "[IZU:DEBUG] " << str << std::endl;
 #endif
   };
+
+  SKSNSIMENUM::SKPERIOD FindSKPeriod(int /* run */);
 }
 
 namespace SKSNSimLiveTime {
+  typedef std::tuple<int /* runnum */, double /*livetime_day */> RECORDLIVETIME;
   
-  std::vector<std::tuple<int /* runnum */,double /* livetime_day */>> LoadLiveTime(SKSNSIMENUM::SKPERIOD);
-  std::vector<std::tuple<int /* runnum */,double /* livetime_day */>> LoadLiveTime(int /* run-begin */,int /* run-end */);
-  std::vector<std::tuple<int /* runnum */,double /* livetime_day */>> LoadLiveTime(std::string);
+  std::vector<RECORDLIVETIME> LoadLiveTime(SKSNSIMENUM::SKPERIOD);
+  std::vector<RECORDLIVETIME> LoadLiveTime(int /* run-begin */,int /* run-end */);
+  std::vector<RECORDLIVETIME> LoadLiveTime(std::string);
+
+  std::tuple<int /*runnum*/, int /*num_ev*/> ConvertExpectedEvt(TRandom &, RECORDLIVETIME, double /* num_ev_per_24h */);
+  std::vector<std::tuple<int /*runnum*/, int /*num_ev*/>> ConvertExpectedEvt(TRandom &, std::vector<RECORDLIVETIME>, double /* num_ev_per_24h */);
 
 }
 #endif
