@@ -218,6 +218,7 @@ class SKSNSimVectorGenerator {
     int m_runtime_period;
     int m_runnum;
     int m_subrunnum;
+    bool m_flat_pos_energy;
     SKSNSIMENUM::TANKVOLUME m_generator_volume;
     std::shared_ptr<TRandom> randomgenerator;
     //===================== end configuration
@@ -232,19 +233,21 @@ class SKSNSimVectorGenerator {
     SKSNSimVectorGenerator():
       m_runnum((int)SKSNSIMENUM::SKPERIODRUN::SKMC),
       m_subrunnum(0),
+      m_flat_pos_energy ( false ),
       m_generator_volume(SKSNSIMENUM::TANKVOLUME::kIDFULL)
     {}
     ~SKSNSimVectorGenerator(){}
     void AddFluxModel(SKSNSimFluxModel *fm){ fluxmodels.push_back(std::move(std::unique_ptr<SKSNSimFluxModel>(fm))); SetMaximumHitProbability(); } // after this, the pointer will be managed by SKSNSimVectorGenerator class
     void AddXSecModel(SKSNSimCrosssectionModel *xm){ xsecmodels.push_back(std::move(std::unique_ptr<SKSNSimCrosssectionModel>(xm))); SetMaximumHitProbability(); } // after this, the pointer will be managed by SKSNSimVectorGenerator class
     SKSNSimSNEventVector GenerateEventIBD();
-    SKSNSimSNEventVector GenerateEvent() { return GenerateEventIBD(); }; // Tentatively, supporting only IBD channel
+    SKSNSimSNEventVector GenerateEventIBDFlat();
+    SKSNSimSNEventVector GenerateEvent() { return m_flat_pos_energy? GenerateEventIBDFlat(): GenerateEventIBD(); }; // Tentatively, supporting only IBD channel
     std::vector<SKSNSimSNEventVector> GenerateEvents(int n) {
       std::vector<SKSNSimSNEventVector> buf(n);
       for(auto it = buf.begin(); it != buf.end(); it++) *it = GenerateEvent();
       return buf;
     } ;
-    std::vector<SKSNSimSNEventVector> GenerateEventsAlongLivetime(int, int, double);
+    // std::vector<SKSNSimSNEventVector> GenerateEventsAlongLivetime(int, int, double);
 
     // Configuration
     double SetEnergyMin(const double e){ m_generator_energy_min = e; return m_generator_energy_min;}

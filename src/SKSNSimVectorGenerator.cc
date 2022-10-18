@@ -192,6 +192,138 @@ SKSNSimSNEventVector SKSNSimVectorGenerator::GenerateEventIBD() {
   return ev;
 }
 
+SKSNSimSNEventVector SKSNSimVectorGenerator::GenerateEventIBDFlat() {
+  // Generate IBD events so that generated positron's energy distribution is flat in range from GetEnergyMin() to GetEnergyMax().
+  // determine neutrino direction (isotoropic direction)
+  /*                    /e+  eEne
+  //                   /
+  //                  / \ cost
+  // ------nu->------p  -  -  -  -  -  -  -
+  //   (theta,phi)    \
+  //     nuEne         \
+  //                    \n
+  */
+  SKSNSimSNEventVector ev;
+
+  TRandom &rng = *randomgenerator;
+  if(xsecmodels.size() == 0) return ev;
+  SKSNSimCrosssectionModel &xsec = *xsecmodels[0]; // TODO modify for user to select models
+
+  auto SQ = [](double a){ return a*a;};
+
+  const double eEne = rng.Uniform( GetEnergyMin(), GetEnergyMax());
+  const double cost = rng.Uniform( -1., 1. );
+  const double nuEne = SKSNSimCrosssection::CalcIBDEnuFromEpos( eEne, cost );
+
+#ifdef DEBUG
+  std::cout << "In GenerateEventIBD: eEne = " << eEne << std::endl;
+#endif
+
+  double theta = acos(rng.Uniform(-1., 1.));
+  double phi = rng.Uniform(2. * M_PI);
+  UtilVector3<double> nuDir ( theta, phi);
+
+
+  // Rotation matrix of neutrino direction // TODO Is it fine?
+  UtilMatrix3<double> Rmat( cos(theta)*cos(phi), -sin(phi), sin(theta)*cos(phi),
+                            cos(theta)*sin(phi),  cos(phi), sin(theta)*sin(phi),
+                                    -sin(theta),        0.,          cos(theta));
+
+  // interaction point
+  auto determinePosition = std::bind([](TRandom &rng, SKSNSIMENUM::TANKVOLUME t)
+  {
+    double rPositionRange = RINTK;
+    double hPositionRange = ZPINTK;
+    const double FVCUT = 200.;
+    switch (t)
+    {
+      case SKSNSIMENUM::TANKVOLUME::kIDFV: //Fiducial volume
+        rPositionRange = RINTK - FVCUT;
+        hPositionRange = ZPINTK - FVCUT;
+        break;
+      case SKSNSIMENUM::TANKVOLUME::kIDFULL: //entire ID volume
+        rPositionRange = RINTK;
+        hPositionRange = ZPINTK;
+        break;
+      case SKSNSIMENUM::TANKVOLUME::kTANKFULL: //entire detector volume (including OD)
+        rPositionRange = DITKTK;
+        hPositionRange = ZPTKTK;
+        break;
+      default: //entire ID volume
+        rPositionRange = RINTK;
+        hPositionRange = ZPINTK;
+    }
+    //random inside the full tank (32.5kton)
+    const double r2 = rng.Uniform(1.) * rPositionRange*rPositionRange ;
+    const double r = std::sqrt( r2 );
+    const double phi = rng.Uniform( 2. * M_PI);
+    const double x = r * std::cos( phi );
+    const double y = r * std::sin( phi );
+    const double z = -hPositionRange + rng.Uniform( 2.*hPositionRange);
+
+    return UtilVector3<double>(x,y,z);
+  }, std::placeholders::_1, m_generator_volume);
+  const auto xyz = determinePosition(*randomgenerator);
+
+  // Fill into class
+  // MCVERTEX (see $SKOFL_ROOT/inc/vcvrtx.h )                                                                               
+  ev.AddVertex(xyz.x, xyz.y, xyz.z,
+      1, 0, 0.);
+
+
+  // IBD interaction
+
+  // Original neutrino
+  const auto nuMomentum = nuEne * nuDir.Unit();
+  const auto nuebarid = ev.AddTrack(
+      -PDG_ELECTRON_NEUTRINO, nuEne,
+      nuMomentum.x, nuMomentum.y, nuMomentum.z,
+      0, 0, 1, -1, 0
+      );
+
+  // Original proton
+  const auto protonid = ev.AddTrack(
+      PDG_PROTON, Mp,
+      0., 0., 0.,
+      0, 0, 1, -1, 0
+      );
+
+  // Positron
+  double amom = sqrt(SQ( eEne ) - SQ( Me ));
+  double eTheta = acos( cost );
+  double ePhi = rng.Uniform( -M_PI,  M_PI);
+
+  // conversion the positron direction along the neutrino direction
+
+  const UtilVector3<double> origVec( eTheta, ePhi);
+
+  const UtilVector3<double> eDir = Rmat * origVec;
+
+  //------------------------------------------------------------------------
+
+  // Positron
+  const auto positronMomentum = amom * eDir.Unit();
+  const auto positronid = ev.AddTrack(
+      -PDG_ELECTRON, eEne,
+      positronMomentum.x, positronMomentum.y, positronMomentum.z,
+      1, 1, 1, 0, 1
+      );
+
+  // Neutron
+  const UtilVector3<double> neutronMomentum = nuMomentum - positronMomentum;
+  const auto neutronid = ev.AddTrack(
+      PDG_NEUTRON,
+      std::sqrt(neutronMomentum.Mag2() + Mn*Mn),
+      neutronMomentum.x, neutronMomentum.y, neutronMomentum.z,
+      1, 1, 1, 0, 1
+      );
+
+  ev.SetRunnum(m_runnum);
+  ev.SetSubRunnum(m_subrunnum);
+
+  return ev;
+}
+
 SKSNSimVectorSNGenerator::SKSNSimVectorSNGenerator():
   m_runnum((int)SKSNSIMENUM::SKPERIODRUN::SKMC ),
   m_subrunnum(0),
