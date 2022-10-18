@@ -9,7 +9,6 @@
 #define __SKSNSIMENUM_H_INCLUDED__
 
 namespace SKSNSIMENUM {
-  enum struct SIMTYPE { kSNBURST = 0, kDSNB, kNSIMTYPE };
   enum struct NEUTRINOOSCILLATION { kNONE = 0, kNORMAL, kINVERTED, kNNEUTRINOOSCILLATION};
   enum struct TANKVOLUME { kIDFV = 0, kIDFULL, kTANKFULL, kNTANKVOLUME};
   enum struct SKPERIODRUN { // PERIOD >= __BEGIN && PERIOD < __END (END means it is excluded)

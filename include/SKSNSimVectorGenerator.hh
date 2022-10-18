@@ -271,6 +271,8 @@ class SKSNSimVectorGenerator {
     int SetSubRUNNUM(const int r) { m_subrunnum = r; return m_subrunnum; }
     int GetSubRUNNUM() const { return m_subrunnum; }
     void   SetRandomGenerator(std::shared_ptr<TRandom> rng) { randomgenerator = rng; }
+    bool SetFlatPositronFlux(const bool f) { m_flat_pos_energy = f; return m_flat_pos_energy; }
+    bool GetFlatPositronFlux() const { return m_flat_pos_energy; }
 };
 
 class SKSNSimVectorSNGenerator {

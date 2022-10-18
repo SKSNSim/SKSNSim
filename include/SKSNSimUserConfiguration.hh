@@ -21,9 +21,12 @@
 
 class SKSNSimUserConfiguration{
   public:
-    enum struct MODERUNTIME { kEVNUM = 0, kRUNTIMERUNNUM, kRUNTIMEPERIOD, kNMODERUNTIME };
+    enum struct MODERUNTIME   { kEVNUM = 0, kRUNTIMERUNNUM, kRUNTIMEPERIOD, kNMODERUNTIME };
+    enum struct MODEGENERATOR { kSNBURST = 0, kDSNB, kNMODEGENERATOR };
 
   private:
+    /* mode */
+    const MODEGENERATOR m_mode_generator;
 
     /* Event range related */
     double m_energy_min;
@@ -75,8 +78,8 @@ class SKSNSimUserConfiguration{
 
   public:
     void SetDefaultConfiguation() {
-      m_energy_min = GetDefaultFluxEnergyMin();
-      m_energy_max = GetDefaultFluxEnergyMax();
+      m_energy_min = GetDefaultFluxEnergyMin(m_mode_generator);
+      m_energy_max = GetDefaultFluxEnergyMax(m_mode_generator);
       m_energy_nbins = GetDefaultEnergyNBins();
       m_time_min = GetDefaultFluxTimeMin();
       m_time_max = GetDefaultFluxTimeMax();
@@ -108,19 +111,25 @@ class SKSNSimUserConfiguration{
       m_random_seed = GetDefaultRandomSeed();
     }
 
-    SKSNSimUserConfiguration(){
-      m_randomgenerator = std::make_shared<TRandom3>( GetDefaultRandomSeed() );// new TRandom3());
-      SetDefaultConfiguation();
-    }
+    SKSNSimUserConfiguration( MODEGENERATOR mode = MODEGENERATOR::kDSNB ): 
+      m_mode_generator( mode ) {
+        m_randomgenerator = std::make_shared<TRandom3>( GetDefaultRandomSeed() );// new TRandom3());
+        SetDefaultConfiguation();
+      }
     ~SKSNSimUserConfiguration(){}
 
     void LoadFromArgsDSNB(int, char *[]); // Parser from arguments of the main function. For DSNB  generator program
     void LoadFromArgsSN(int, char *[]); // Parser from arguments of the main function this is for SN burst program
 
     /* Default configuration: please define default values through them */
-    const static SKSNSIMENUM::SIMTYPE GetDefaultSimType() { return SKSNSIMENUM::SIMTYPE::kSNBURST; }
-    const static double GetDefaultFluxEnergyMin () { return   0.0 /* MeV */;}
-    const static double GetDefaultFluxEnergyMax () { return 300.0 /* MeV */;}
+    const static double GetDefaultFluxEnergyMin (MODEGENERATOR m) { if(m==MODEGENERATOR::kSNBURST) return   0.0 /* MeV */;
+      else if(m==MODEGENERATOR::kDSNB) return 5.0 /* MeV */;
+      return 0.0 /* MeV */;
+    }
+    const static double GetDefaultFluxEnergyMax (MODEGENERATOR m) { if(m==MODEGENERATOR::kSNBURST) return 300.0 /* MeV */;
+      else if(m==MODEGENERATOR::kDSNB) return 80.0 /* MeV */;
+      return 300.0 /* MeV */;
+    }
     const static size_t GetDefaultEnergyNBins () { return 3000;}
     const static double GetDefaultFluxTimeMin () { return   0. /* sec */;}
     const static double GetDefaultFluxTimeMax () { return 20. /* sec */;}
@@ -141,7 +150,7 @@ class SKSNSimUserConfiguration{
     const static bool GetDefaultRuntimeNormalization() { return false; }
     const static double GetDefaultRuntimeNormFactor() { return 24.0; }
     const static std::string GetDefaultSNBurstFluxModel () { return "nakazato/intp2002.data";}
-    const static std::string GetDefaultDSNBFluxModel () { return "Horiuchi09-8MeV";}
+    const static std::string GetDefaultDSNBFluxModel () { return "expect/horiuchi/8MeV_Nominal.dat";}
     const static bool GetDefaultDSNBFlatFlux () { return false;}
     const static int GetDefaultRunnum () { return (int) SKSNSIMENUM::SKPERIODRUN::SKMC; }
     const static int GetDefaultSubRunnum () { return 0; }

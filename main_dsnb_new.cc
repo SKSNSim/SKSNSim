@@ -25,12 +25,12 @@ int main(int argc, char **argv){
 
   auto vectgen = std::make_unique<SKSNSimVectorGenerator>();
   config->Apply(*vectgen);
-  auto fluxhoriuch = std::make_unique<SKSNSimFluxDSNBHoriuchi>();
+  auto flux = std::make_unique<SKSNSimDSNBFluxCustom>( config->GetDSNBFluxModel() );
   //fluxhoriuch->DumpFlux();
   auto xsec = std::make_unique<SKSNSimXSecIBDSV>();
 
   vectgen->SetRandomGenerator(config->GetRandomGenerator());
-  vectgen->AddFluxModel((SKSNSimFluxModel*)fluxhoriuch.release());
+  vectgen->AddFluxModel((SKSNSimFluxModel*)flux.release());
   vectgen->AddXSecModel((SKSNSimCrosssectionModel*)xsec.release());
 
   auto flist = GenerateOutputFileList(*config);

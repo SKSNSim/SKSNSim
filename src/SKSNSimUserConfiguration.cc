@@ -98,7 +98,7 @@ void ShowHelpDSNB(const char *argv0){
     << " [--runtime_period {5/6}]"
     << " [--neventsperfile {int}]"
     << " [--outprefix {pref}]"
-    << " [--flatflux]"
+    << " [--flatposflux]"
     << " [-h,--help]"
     << " [-s,--seed {unsigned}]"
     << " [outputdirectory]"
@@ -107,9 +107,9 @@ void ShowHelpDSNB(const char *argv0){
   std::cout << "Note: {} is essencial arguments, and [] is optional arguments" << std::endl << std::endl;
   std::cout << "Arguments: "  << std::endl
     << " -c,--customflux {flux_filename}: this option enforce to use specified flux file which should be formatted with \"energy(MeV) flux\". In default meaning without this option, it generates events according to the Horiuchi-09 8MeV model." << std::endl
-    << " --energy_min {energy_MeV}: lower energy limit to be generated in MeV ( default = " << SKSNSimUserConfiguration::GetDefaultFluxEnergyMin() << " MeV )" << std::endl
-    << " --energy_max {energy_MeV}: uppwer energy limit to be generated in MeV ( default = " << SKSNSimUserConfiguration::GetDefaultFluxEnergyMax() << " MeV )" << std::endl
-    << " --flatflux: generate flat positron energy in range between --energy_min and --energy_max. " <<  std::endl
+    << " --energy_min {energy_MeV}: lower energy limit to be generated in MeV ( default = " << SKSNSimUserConfiguration::GetDefaultFluxEnergyMin(SKSNSimUserConfiguration::MODEGENERATOR::kDSNB) << " MeV )" << std::endl
+    << " --energy_max {energy_MeV}: uppwer energy limit to be generated in MeV ( default = " << SKSNSimUserConfiguration::GetDefaultFluxEnergyMax(SKSNSimUserConfiguration::MODEGENERATOR::kDSNB) << " MeV )" << std::endl
+    << " --flatposflux: generate flat positron energy in range between --energy_min and --energy_max. " <<  std::endl
     << " --runtimefactor {float}: number of events per day for runtime normalization ( default = " << SKSNSimUserConfiguration::GetDefaultRuntimeNormFactor() << " evt/day )" << std::endl
     << " -n,--nevents {int}: number of events to be generated (exclusive with --runtime and --runtimefactor) ( default = " << SKSNSimUserConfiguration::GetDefaultNumEvents() << " )" << std::endl
     << " -o,--outdir {directory}: output directory. The generator fill events in the filename: {outdir}/{outprefix}_000000.root... ( default = " << SKSNSimUserConfiguration::GetDefaultOutputDirectory() << " )"  << std::endl
@@ -166,8 +166,8 @@ void ShowHelpSN(const char *argv0){
     << " -g,--fillevent [int]: if generate event kinematics for detector simulator: 0 = \"NO(just calculate expected num of evt) / 1 = YES (fill kinematics for detector sim.) (default = " << SKSNSimUserConfiguration::GetDefaultVectorGeneration() << " ). If you just specify \"-g\", turned ON" << std::endl
     << " --neventsperfile {numberofevents}: number of events in one file (default = " << SKSNSimUserConfiguration::GetDefaultNumEventsPerFile() << " )" << std::endl
     << " -s,--seed {randomseed}: random seed (default = " << SKSNSimUserConfiguration::GetDefaultRandomSeed() << " )" << std::endl
-    << " --energy_min {energy_MeV}: energy lower limit in MeV (default = " << SKSNSimUserConfiguration::GetDefaultFluxEnergyMin() << " MeV )" << std::endl
-    << " --energy_max {energy_MeV}: energy upper limit in MeV (default = " << SKSNSimUserConfiguration::GetDefaultFluxEnergyMax() << " MeV )" << std::endl
+    << " --energy_min {energy_MeV}: energy lower limit in MeV (default = " << SKSNSimUserConfiguration::GetDefaultFluxEnergyMin(SKSNSimUserConfiguration::MODEGENERATOR::kSNBURST) << " MeV )" << std::endl
+    << " --energy_max {energy_MeV}: energy upper limit in MeV (default = " << SKSNSimUserConfiguration::GetDefaultFluxEnergyMax(SKSNSimUserConfiguration::MODEGENERATOR::kSNBURST) << " MeV )" << std::endl
     << " --energy_nbins {nbins}: number of bins for energy (default = " << SKSNSimUserConfiguration::GetDefaultEnergyNBins() << " )" << std::endl
     << " --time_min {time_sec}: time lower limit in second (default = " << SKSNSimUserConfiguration::GetDefaultFluxTimeMin() << " sec )" << std::endl
     << " --time_max {time_sec}: time upper limit in second (default = " << SKSNSimUserConfiguration::GetDefaultFluxTimeMax() << " sec )" << std::endl
@@ -205,7 +205,7 @@ void SKSNSimUserConfiguration::LoadFromArgsDSNB(int argc, char *argv[]){
       {"outprefix",     required_argument, 0,   0}, // 11 
       {"help",                no_argument, 0, 'h'},
       {"seed",          required_argument, 0, 's'},
-      {"flatflux",            no_argument, 0,   0},
+      {"flatposflux",         no_argument, 0,   0},
       {0,                               0, 0,   0}
     };
 
@@ -373,6 +373,7 @@ void SKSNSimUserConfiguration::Dump() const {
   std::cout << "SNDistance ( kpc ) = " << GetSNDistanceKpc() << std::endl;
   std::cout << "SNBurstFluxModel = " << GetSNBurstFluxModel() << std::endl;
   std::cout << "DSNBFluxModel = " << GetDSNBFluxModel() << std::endl;
+  std::cout << "DSNBFlatFlux = " << GetDSNBFlatFlux() << std::endl;
   std::cout << "NuOscType = " << (int)GetNuOscType() << std::endl;
   std::cout << "RandomSeed = " << GetRandomSeed() << std::endl;
   std::cout << "====> Fine?  " << CheckHealth() << std::endl;
@@ -403,6 +404,7 @@ void SKSNSimUserConfiguration::Apply( SKSNSimVectorGenerator &gen ) const {
   gen.SetRuntimeBegin( GetRuntimeRunBegin() );
   gen.SetRuntimeEnd( GetRuntimeRunEnd() );
   gen.SetRuntimePeriod( GetRuntimePeriod() );
+  gen.SetFlatPositronFlux( GetDSNBFlatFlux() );
   gen.SetRUNNUM( GetRunnum() );
   gen.SetSubRUNNUM( GetSubRunnum() );
 }
