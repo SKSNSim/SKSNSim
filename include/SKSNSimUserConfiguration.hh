@@ -18,8 +18,15 @@
 #include "SKSNSimEnum.hh"
 #include "SKSNSimVectorGenerator.hh"
 
+
 class SKSNSimUserConfiguration{
+  public:
+    enum struct MODERUNTIME   { kEVNUM = 0, kRUNTIMERUNNUM, kRUNTIMEPERIOD, kNMODERUNTIME };
+    enum struct MODEGENERATOR { kSNBURST = 0, kDSNB, kNMODEGENERATOR };
+
   private:
+    /* mode */
+    const MODEGENERATOR m_mode_generator;
 
     /* Event range related */
     double m_energy_min;
@@ -42,6 +49,7 @@ class SKSNSimUserConfiguration{
     double m_factor_runtime; 
     int m_runtime_runbegin;
     int m_runtime_runend;
+    int m_runtime_period;
 
     /* RUN number (exclusive to DSNB runtime normalization) */
     int m_runnum;
@@ -53,6 +61,8 @@ class SKSNSimUserConfiguration{
     /* Physics related */
     SKSNSIMENUM::NEUTRINOOSCILLATION m_nuosc_type;
     std::string m_snburst_fluxmodel;
+    std::string m_dsnb_fluxmodel;
+    bool m_dsnb_flatflux;
 
     /* Random Generator related */
     unsigned m_random_seed;
@@ -68,8 +78,8 @@ class SKSNSimUserConfiguration{
 
   public:
     void SetDefaultConfiguation() {
-      m_energy_min = GetDefaultFluxEnergyMin();
-      m_energy_max = GetDefaultFluxEnergyMax();
+      m_energy_min = GetDefaultFluxEnergyMin(m_mode_generator);
+      m_energy_max = GetDefaultFluxEnergyMax(m_mode_generator);
       m_energy_nbins = GetDefaultEnergyNBins();
       m_time_min = GetDefaultFluxTimeMin();
       m_time_max = GetDefaultFluxTimeMax();
@@ -82,36 +92,44 @@ class SKSNSimUserConfiguration{
       m_eventgen_volume = GetDefaultEventVolume();
 
       m_num_events = GetDefaultNumEvents();
-      m_runtime_normalization = GetDefaultRuttimeNormalization();
-      m_factor_runtime = GetDefaultRuttimeNormFactor();
+      m_runtime_normalization = GetDefaultRuntimeNormalization();
+      m_factor_runtime = GetDefaultRuntimeNormFactor();
       m_runtime_runbegin = GetDefaultRuntimeBegin();
       m_runtime_runend = GetDefaultRuntimeEnd();
+      m_runtime_period = GetDefaultRuntimePeriod();
 
       m_runnum = GetDefaultRunnum();
       m_subrunnum = GetDefaultSubRunnum();
 
-
       m_sndistance_kpc = GetDefaultSNDistanceKPC();
       m_snburst_fluxmodel = GetDefaultSNBurstFluxModel();
+      m_dsnb_fluxmodel = GetDefaultDSNBFluxModel();
+      m_dsnb_flatflux = GetDefaultDSNBFlatFlux();
 
       m_nuosc_type = GetDefaultNeutrinoOscType();
 
       m_random_seed = GetDefaultRandomSeed();
     }
 
-    SKSNSimUserConfiguration(){
-      m_randomgenerator = std::make_shared<TRandom3>();// new TRandom3());
-      SetDefaultConfiguation();
-    }
+    SKSNSimUserConfiguration( MODEGENERATOR mode = MODEGENERATOR::kDSNB ): 
+      m_mode_generator( mode ) {
+        m_randomgenerator = std::make_shared<TRandom3>( GetDefaultRandomSeed() );// new TRandom3());
+        SetDefaultConfiguation();
+      }
     ~SKSNSimUserConfiguration(){}
 
     void LoadFromArgsDSNB(int, char *[]); // Parser from arguments of the main function. For DSNB  generator program
     void LoadFromArgsSN(int, char *[]); // Parser from arguments of the main function this is for SN burst program
 
     /* Default configuration: please define default values through them */
-    const static SKSNSIMENUM::SIMTYPE GetDefaultSimType() { return SKSNSIMENUM::SIMTYPE::kSNBURST; }
-    const static double GetDefaultFluxEnergyMin () { return   0.0 /* MeV */;}
-    const static double GetDefaultFluxEnergyMax () { return 300.0 /* MeV */;}
+    const static double GetDefaultFluxEnergyMin (MODEGENERATOR m) { if(m==MODEGENERATOR::kSNBURST) return   0.0 /* MeV */;
+      else if(m==MODEGENERATOR::kDSNB) return 5.0 /* MeV */;
+      return 0.0 /* MeV */;
+    }
+    const static double GetDefaultFluxEnergyMax (MODEGENERATOR m) { if(m==MODEGENERATOR::kSNBURST) return 300.0 /* MeV */;
+      else if(m==MODEGENERATOR::kDSNB) return 80.0 /* MeV */;
+      return 300.0 /* MeV */;
+    }
     const static size_t GetDefaultEnergyNBins () { return 3000;}
     const static double GetDefaultFluxTimeMin () { return   0. /* sec */;}
     const static double GetDefaultFluxTimeMax () { return 20. /* sec */;}
@@ -128,9 +146,12 @@ class SKSNSimUserConfiguration{
     const static unsigned GetDefaultRandomSeed () { return 42;}
     const static int GetDefaultRuntimeBegin () { return (int) SKSNSIMENUM::SKPERIODRUN::SKVIBEGIN;}
     const static int GetDefaultRuntimeEnd () { return (int) SKSNSIMENUM::SKPERIODRUN::SKVIEND;}
-    const static bool GetDefaultRuttimeNormalization() { return false; }
-    const static double GetDefaultRuttimeNormFactor() { return 1.0; }
+    const static int GetDefaultRuntimePeriod() { return -1; /* using RuntimeBegin/End */}
+    const static bool GetDefaultRuntimeNormalization() { return false; }
+    const static double GetDefaultRuntimeNormFactor() { return 24.0; }
     const static std::string GetDefaultSNBurstFluxModel () { return "nakazato/intp2002.data";}
+    const static std::string GetDefaultDSNBFluxModel () { return "expect/horiuchi/8MeV_Nominal.dat";}
+    const static bool GetDefaultDSNBFlatFlux () { return false;}
     const static int GetDefaultRunnum () { return (int) SKSNSIMENUM::SKPERIODRUN::SKMC; }
     const static int GetDefaultSubRunnum () { return 0; }
 
@@ -156,8 +177,11 @@ class SKSNSimUserConfiguration{
     SKSNSimUserConfiguration &SetRandomSeed(unsigned s) { m_random_seed = s; m_randomgenerator->SetSeed(m_random_seed); return *this;}
     SKSNSimUserConfiguration &SetRuntimeRunBegin(int r) { m_runtime_runbegin = r; return *this;}
     SKSNSimUserConfiguration &SetRuntimeRunEnd(int r) { m_runtime_runend = r; return *this;}
+    SKSNSimUserConfiguration &SetRuntimePeriod(int p) { m_runtime_period = p; return *this;}
     SKSNSimUserConfiguration &SetSNDistanceKpc(double d) { m_sndistance_kpc = d; return *this;}
     SKSNSimUserConfiguration &SetSNBurstFluxModel(std::string f) { m_snburst_fluxmodel = f; return *this;}
+    SKSNSimUserConfiguration &SetDSNBFluxModel(std::string f) { m_dsnb_fluxmodel = f; return *this;}
+    SKSNSimUserConfiguration &SetDSNBFlatFlux(bool f) { m_dsnb_flatflux = f; return *this;}
     SKSNSimUserConfiguration &SetVectorGeneration(bool f) { m_eventvector_generation = f; return *this;}
     SKSNSimUserConfiguration &SetNeutrinoOscType( SKSNSIMENUM::NEUTRINOOSCILLATION t) { m_nuosc_type = t; return *this; }
     SKSNSimUserConfiguration &SetNeutrinoOscType( int t) { m_nuosc_type = (SKSNSIMENUM::NEUTRINOOSCILLATION)t; return *this; }
@@ -183,6 +207,7 @@ class SKSNSimUserConfiguration{
     double GetRuntimeFactor() const { return m_factor_runtime;}
     int GetRuntimeRunBegin() const {return m_runtime_runbegin; }
     int GetRuntimeRunEnd() const {return m_runtime_runend; }
+    int GetRuntimePeriod() const { return m_runtime_period; }
 
     /* RUN number (exclusive to DSNB runtime normalization) */
     int GetRunnum() const { return m_runnum;}
@@ -191,6 +216,8 @@ class SKSNSimUserConfiguration{
     /* SN related */
     double GetSNDistanceKpc() const { return m_sndistance_kpc; }
     std::string GetSNBurstFluxModel() const { return m_snburst_fluxmodel; }
+    std::string GetDSNBFluxModel() const { return m_dsnb_fluxmodel; }
+    bool GetDSNBFlatFlux() const { return m_dsnb_flatflux; }
 
     /* Physics related */
     SKSNSIMENUM::NEUTRINOOSCILLATION GetNuOscType() const { return m_nuosc_type; }
@@ -201,7 +228,11 @@ class SKSNSimUserConfiguration{
     bool CheckHealth () const;
     void Dump() const;
 
+
+    MODERUNTIME CheckMODERuntime() const;
+
     void Apply( SKSNSimVectorSNGenerator &gen ) const ;
+    void Apply( SKSNSimVectorGenerator   &gen ) const ;
 };
 
 

@@ -11,6 +11,7 @@
 #include <memory>
 #include <mcinfo.h>
 #include <TRandom3.h>
+#include <algorithm>
 #include "SKSNSimFlux.hh"
 #include "SKSNSimCrosssection.hh"
 #include "SKSNSimEnum.hh"
@@ -102,6 +103,8 @@ class SKSNSimSNEventVector {
     int m_runnum;
     int m_subrunnum;
 
+    size_t m_n_randomthrow;
+
     struct VERTEX {
       double x,y,z; // cm
       int iflvvc;
@@ -135,7 +138,7 @@ class SKSNSimSNEventVector {
 		///static void determineKinematics( SKSNSimSNEventVector &p);
 
   public:
-    SKSNSimSNEventVector() {sninfo.iEvt = -1;};
+    SKSNSimSNEventVector() : m_n_randomthrow(0) {sninfo.iEvt = -1;};
     ~SKSNSimSNEventVector() {};
     int AddVertex(
         double x, double y, double z,
@@ -190,6 +193,9 @@ class SKSNSimSNEventVector {
     UtilVector3<double> GetSNEvtInfoNuDir() const { return UtilVector3<double>(sninfo.nuDir); }
     auto GetSNEvtInfoNuDir(int i) const { return sninfo.nuDir[i]; }
 
+    auto GetNRandomThrow() const { return m_n_randomthrow; }
+    auto SetNRandomThrow(size_t n) { m_n_randomthrow = n; return GetNRandomThrow(); }
+
     bool operator< (const SKSNSimSNEventVector &a){ return sninfo.rTime < a.sninfo.rTime; }
 };
 
@@ -201,33 +207,72 @@ class SKSNSimVectorGenerator {
       return SKSNSimSNEventVector();
     }
 
+    //=====================
+    // Configuration
     double m_generator_energy_min;
     double m_generator_energy_max;
-
-    double m_max_hit_probability; // maximum of (flux) x (xsec) // should be updated with new flux or xsec models
-
+    bool m_runtime_norm;
+    double m_runtime_factor;
+    int m_runtime_runbegin;
+    int m_runtime_runend;
+    int m_runtime_period;
+    int m_runnum;
+    int m_subrunnum;
+    bool m_flat_pos_energy;
     SKSNSIMENUM::TANKVOLUME m_generator_volume;
-
     std::shared_ptr<TRandom> randomgenerator;
+    //===================== end configuration
 
+
+    // For hit-and-miss method
+    double m_max_hit_probability; // maximum of (flux) x (xsec) // should be updated with new flux or xsec models
     static double FindMaxProb ( SKSNSimFluxModel &, SKSNSimCrosssectionModel &);
-
     double SetMaximumHitProbability();
     
   public:
-    SKSNSimVectorGenerator(): m_generator_volume(SKSNSIMENUM::TANKVOLUME::kIDFULL) {}
+    SKSNSimVectorGenerator():
+      m_runnum((int)SKSNSIMENUM::SKPERIODRUN::SKMC),
+      m_subrunnum(0),
+      m_flat_pos_energy ( false ),
+      m_generator_volume(SKSNSIMENUM::TANKVOLUME::kIDFULL)
+    {}
     ~SKSNSimVectorGenerator(){}
     void AddFluxModel(SKSNSimFluxModel *fm){ fluxmodels.push_back(std::move(std::unique_ptr<SKSNSimFluxModel>(fm))); SetMaximumHitProbability(); } // after this, the pointer will be managed by SKSNSimVectorGenerator class
     void AddXSecModel(SKSNSimCrosssectionModel *xm){ xsecmodels.push_back(std::move(std::unique_ptr<SKSNSimCrosssectionModel>(xm))); SetMaximumHitProbability(); } // after this, the pointer will be managed by SKSNSimVectorGenerator class
-    SKSNSimSNEventVector GenerateEvent();
     SKSNSimSNEventVector GenerateEventIBD();
-    std::vector<SKSNSimSNEventVector> GenerateEvents(int);
-    std::vector<SKSNSimSNEventVector> GenerateEventsAlongLivetime(int, int);
+    SKSNSimSNEventVector GenerateEventIBDFlat();
+    SKSNSimSNEventVector GenerateEvent() { return m_flat_pos_energy? GenerateEventIBDFlat(): GenerateEventIBD(); }; // Tentatively, supporting only IBD channel
+    std::vector<SKSNSimSNEventVector> GenerateEvents(int n) {
+      std::vector<SKSNSimSNEventVector> buf(n);
+      for(auto it = buf.begin(); it != buf.end(); it++) *it = GenerateEvent();
+      return buf;
+    } ;
+    // std::vector<SKSNSimSNEventVector> GenerateEventsAlongLivetime(int, int, double);
+
+    // Configuration
     double SetEnergyMin(const double e){ m_generator_energy_min = e; return m_generator_energy_min;}
     double SetEnergyMax(const double e){ m_generator_energy_max = e; return m_generator_energy_max;}
     double GetEnergyMin() const {return m_generator_energy_min;}
     double GetEnergyMax() const {return m_generator_energy_max;}
+    SKSNSIMENUM::TANKVOLUME GetGeneratorVolume() const {return m_generator_volume;}
+    SKSNSIMENUM::TANKVOLUME SetGeneratorVolume(const SKSNSIMENUM::TANKVOLUME v){ m_generator_volume = v; return GetGeneratorVolume();}
+    bool SetNormRuntime(const bool f) { m_runtime_norm = f; return m_runtime_norm; }
+    bool GetNormRuntime() const { return m_runtime_norm; }
+    double  SetRuntimeFactor(const double r) { m_runtime_factor = r; return m_runtime_factor; }
+    double  GetRuntimeFactor() const { return m_runtime_factor; }
+    int SetRuntimeBegin(const int r) { m_runtime_runbegin = r; return m_runtime_runbegin; }
+    int GetRuntimeBegin() const { return m_runtime_runbegin; }
+    int SetRuntimeEnd(const int r) { m_runtime_runend = r; return m_runtime_runend; }
+    int GetRuntimeEnd() const { return m_runtime_runend; }
+    int SetRuntimePeriod(const int r) { m_runtime_period = r; return m_runtime_period; }
+    int GetRuntimePeriod() const { return m_runtime_period; }
+    int SetRUNNUM(const int r) { m_runnum = r; return m_runnum; }
+    int GetRUNNUM() const { return m_runnum; }
+    int SetSubRUNNUM(const int r) { m_subrunnum = r; return m_subrunnum; }
+    int GetSubRUNNUM() const { return m_subrunnum; }
     void   SetRandomGenerator(std::shared_ptr<TRandom> rng) { randomgenerator = rng; }
+    bool SetFlatPositronFlux(const bool f) { m_flat_pos_energy = f; return m_flat_pos_energy; }
+    bool GetFlatPositronFlux() const { return m_flat_pos_energy; }
 };
 
 class SKSNSimVectorSNGenerator {
@@ -282,6 +327,9 @@ class SKSNSimVectorSNGenerator {
     void AddFluxModel(SKSNSimFluxModel *fm){ fluxmodels.push_back(std::move(std::unique_ptr<SKSNSimFluxModel>(fm))); /* SetMaximumHitProbability(); */ } // after this, the pointer will be managed by SKSNSimVectorGenerator class
     void AddFluxModel(std::unique_ptr<SKSNSimFluxModel> fm){ fluxmodels.push_back(std::move(fm)); /* SetMaximumHitProbability(); */ } // after this, the pointer will be managed by SKSNSimVectorGenerator class
     std::vector<SKSNSimSNEventVector> GenerateEvents();
+
+    //========================================
+    // Configuration
     double SetEnergyMin(const double e){ m_generator_energy_min = e; return m_generator_energy_min;}
     double SetEnergyMax(const double e){ m_generator_energy_max = e; return m_generator_energy_max;}
     size_t SetEnergyNBins(const size_t n) { m_nu_energy_nbins = n; return GetEnergyNBins(); }

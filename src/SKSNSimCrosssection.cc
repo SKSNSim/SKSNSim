@@ -5,6 +5,7 @@
  *************************************/
 
 #include <cmath>
+#include <limits>
 #include <iostream>
 #include <fstream>
 #include <pdg_codes.h>
@@ -12,6 +13,16 @@
 #include "SKSNSimConstant.hh"
 
 using namespace SKSNSimPhysConst;
+
+namespace SKSNSimCrosssection {
+  double CalcIBDEnuFromEpos ( const double Epos /* MeV */, const double cosTheta ){
+    constexpr double delta = Mn-Mp;
+    constexpr double d = (delta*delta - Me*Me)/(2*Mp);
+    double pe=sqrt(Epos*Epos-Me*Me);
+
+    return((Epos+delta+d)/(1.-(Epos-pe*cosTheta)/Mp));
+  }
+}
 
 std::pair<double,double> SKSNSimXSecIBDSV::GetDiffCrosssection(double enu /* MeV */ , double costheta) const {
   /*********************************************************************/

@@ -29,6 +29,9 @@ enum struct NUREACTTYPE { kNUEBARP = 0,
   kNUEPNC, kNUENNC, kNUEBARPNC, kNUEBARNNC, kNUXPNC, kNUXNNC, kNUXBARPNC, kNUXBARNNC,
   kNNUREACTTYPE};
 
+namespace SKSNSimCrosssection {
+  double CalcIBDEnuFromEpos ( const double /* positron energy MeV */, const double /* cosTheta between positron and neutrino */);
+}
 
 class SKSNSimCrosssectionModel {
   public:

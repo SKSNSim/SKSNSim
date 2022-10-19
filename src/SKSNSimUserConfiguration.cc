@@ -84,21 +84,45 @@ bool SKSNSimUserConfiguration::CheckRuntimeFactor() const {
   return !badhealth;
 }
 
-void ShowHelp(const char *argv0){
+void ShowHelpDSNB(const char *argv0){
   std::cout << argv0
-    << " [-h,--help]"
-    << " [-o,--outdir outputdirectory]"
-    << " [-n,--nevents numberofevents]"
-    << " [--neventsperfile numberofevents]"
-    << " [-s,--seed randomseed]"
-    << " [--energy_min energy_MeV]"
-    << " [--energy_max energy_MeV]"
-    << " [--time_min time]"
-    << " [--time_max time]"
-    << " [--runtimefactor factor]"
+    << " [-c,--customflux {flux_filename}]"
+    << " [--energy_min {energy_MeV}]"
+    << " [--energy_max {energy_MeV}]"
+    << " [--runtimefactor {float}]"
+    << " [-n,--nevents {int}]"
+    << " [-o,--outdir {directory}]"
     << " [--runtime]"
-    << " [--outprefix prefix]"
-    << " outputdirectory"
+    << " [--runtime_begin {runnum}]"
+    << " [--runtime_end {runnum}]"
+    << " [--runtime_period {5/6}]"
+    << " [--neventsperfile {int}]"
+    << " [--outprefix {pref}]"
+    << " [--flatposflux]"
+    << " [-h,--help]"
+    << " [-s,--seed {unsigned}]"
+    << " [outputdirectory]"
+    << std::endl << std::endl;
+
+  std::cout << "Note: {} is essencial arguments, and [] is optional arguments" << std::endl << std::endl;
+  std::cout << "Arguments: "  << std::endl
+    << " -c,--customflux {flux_filename}: this option enforce to use specified flux file which should be formatted with \"energy(MeV) flux\" ( default = " << SKSNSimUserConfiguration::GetDefaultDSNBFluxModel() << " )" << std::endl
+    << " --energy_min {energy_MeV}: lower energy limit to be generated in MeV ( default = " << SKSNSimUserConfiguration::GetDefaultFluxEnergyMin(SKSNSimUserConfiguration::MODEGENERATOR::kDSNB) << " MeV )" << std::endl
+    << " --energy_max {energy_MeV}: uppwer energy limit to be generated in MeV ( default = " << SKSNSimUserConfiguration::GetDefaultFluxEnergyMax(SKSNSimUserConfiguration::MODEGENERATOR::kDSNB) << " MeV )" << std::endl
+    << " --flatposflux: generate flat positron energy in range between --energy_min and --energy_max. " <<  std::endl
+    << " --runtimefactor {float}: number of events per day for runtime normalization ( default = " << SKSNSimUserConfiguration::GetDefaultRuntimeNormFactor() << " evt/day )" << std::endl
+    << " -n,--nevents {int}: number of events to be generated (exclusive with --runtime and --runtimefactor) ( default = " << SKSNSimUserConfiguration::GetDefaultNumEvents() << " )" << std::endl
+    << " -o,--outdir {directory}: output directory. The generator fill events in the filename: {outdir}/{outprefix}_000000.root... ( default = " << SKSNSimUserConfiguration::GetDefaultOutputDirectory() << " )"  << std::endl
+    << " --runtime: this option enebles runtime normalization. ( default = " << SKSNSimUserConfiguration::GetDefaultRuntimeNormalization() << " )"  << std::endl
+    << " --runtime_begin {runnum}: begging run-number of runtime normalization ( default = " << SKSNSimUserConfiguration::GetDefaultRuntimeBegin() << " )"  << std::endl
+    << " --runtime_end {runnum}: end run-nummber of runtime normalization ( default = " << SKSNSimUserConfiguration::GetDefaultRuntimeEnd() << " )" << std::endl
+    << " --runtime_period {5/6}: SK period for runtime normalization: SK-IV = 3, SK-V = 4, SK-VI = 5 ( default = " << SKSNSimUserConfiguration::GetDefaultRuntimePeriod() << " , -1 means that period is specified by runnnumber. see --runtime_{begin/end}.)" << std::endl
+    << " --neventsperfile {int}: number of events per one file ( default = " << SKSNSimUserConfiguration::GetDefaultNumEventsPerFile() << " )" << std::endl
+    << " --outprefix {pref}: prefix of output file name ( default = " << SKSNSimUserConfiguration::GetDefaultOutputPrefix() << " )" << std::endl
+    << " -h,--help: show this help" << std::endl
+    << " -s,--seed {unsigned}: random seed ( default = " << SKSNSimUserConfiguration::GetDefaultRandomSeed() << " )" << std::endl
+    << " {outputdirectory}: output direcotry. Same with -o,--outdir. This has higher priority."
+    << std::endl
     << std::endl;
 }
 
@@ -142,8 +166,8 @@ void ShowHelpSN(const char *argv0){
     << " -g,--fillevent [int]: if generate event kinematics for detector simulator: 0 = \"NO(just calculate expected num of evt) / 1 = YES (fill kinematics for detector sim.) (default = " << SKSNSimUserConfiguration::GetDefaultVectorGeneration() << " ). If you just specify \"-g\", turned ON" << std::endl
     << " --neventsperfile {numberofevents}: number of events in one file (default = " << SKSNSimUserConfiguration::GetDefaultNumEventsPerFile() << " )" << std::endl
     << " -s,--seed {randomseed}: random seed (default = " << SKSNSimUserConfiguration::GetDefaultRandomSeed() << " )" << std::endl
-    << " --energy_min {energy_MeV}: energy lower limit in MeV (default = " << SKSNSimUserConfiguration::GetDefaultFluxEnergyMin() << " MeV )" << std::endl
-    << " --energy_max {energy_MeV}: energy upper limit in MeV (default = " << SKSNSimUserConfiguration::GetDefaultFluxEnergyMax() << " MeV )" << std::endl
+    << " --energy_min {energy_MeV}: energy lower limit in MeV (default = " << SKSNSimUserConfiguration::GetDefaultFluxEnergyMin(SKSNSimUserConfiguration::MODEGENERATOR::kSNBURST) << " MeV )" << std::endl
+    << " --energy_max {energy_MeV}: energy upper limit in MeV (default = " << SKSNSimUserConfiguration::GetDefaultFluxEnergyMax(SKSNSimUserConfiguration::MODEGENERATOR::kSNBURST) << " MeV )" << std::endl
     << " --energy_nbins {nbins}: number of bins for energy (default = " << SKSNSimUserConfiguration::GetDefaultEnergyNBins() << " )" << std::endl
     << " --time_min {time_sec}: time lower limit in second (default = " << SKSNSimUserConfiguration::GetDefaultFluxTimeMin() << " sec )" << std::endl
     << " --time_max {time_sec}: time upper limit in second (default = " << SKSNSimUserConfiguration::GetDefaultFluxTimeMax() << " sec )" << std::endl
@@ -167,29 +191,34 @@ void SKSNSimUserConfiguration::LoadFromArgsDSNB(int argc, char *argv[]){
     int option_index = 0;
 
     static struct option long_options[] = {
+      {"customflux",    required_argument, 0, 'c'},
       {"energy_min",    required_argument, 0,   0},
       {"energy_max",    required_argument, 0,   0},
-      {"time_min",      required_argument, 0,   0},
-      {"time_max",      required_argument, 0,   0},
       {"runtimefactor", required_argument, 0,   0},
       {"nevents",       required_argument, 0, 'n'},
       {"outdir",        required_argument, 0, 'o'},
-      {"runtime",             no_argument, 0,   0},
-      {"outprefix",     required_argument, 0,   0},
+      {"runtime",             no_argument, 0,   0}, // 6
+      {"runtime_begin", required_argument, 0,   0},
+      {"runtime_end",   required_argument, 0,   0},
+      {"runtime_period",required_argument, 0,   0},
+      {"neventsperfile",required_argument, 0,   0},
+      {"outprefix",     required_argument, 0,   0}, // 11 
       {"help",                no_argument, 0, 'h'},
       {"seed",          required_argument, 0, 's'},
-      {"neventsperfile",required_argument, 0,   0},
+      {"flatposflux",         no_argument, 0,   0},
       {0,                               0, 0,   0}
     };
 
-    c = getopt_long(argc, argv, "o:n:s:h",
+    c = getopt_long(argc, argv, "c:n:o:hs:",
         long_options, &option_index);
 
     if( c == -1 ) break;
 
+
     switch (c) {
+      case 'c': SetDSNBFluxModel(optarg); break;
       case 'h':
-        ShowHelp(argv[0]);
+        ShowHelpDSNB(argv[0]);
         exit(EXIT_SUCCESS);
         break;
       case 'o': SetOutputDirectory(std::string(optarg));break;
@@ -197,25 +226,24 @@ void SKSNSimUserConfiguration::LoadFromArgsDSNB(int argc, char *argv[]){
       case 's': SetRandomSeed(std::stoul(optarg)); break;
       case 0:
         switch (option_index) {
-          case 0: SetFluxEnergyMin(std::atof(optarg)); break;
-          case 1: SetFluxEnergyMax(std::atof(optarg)); break;
-          case 2: SetFluxTimeMin(std::atof(optarg)); break;
-          case 3: SetFluxTimeMax(std::atof(optarg)); break;
-          case 4: SetRuntimeFactor(std::atof(optarg)); break;
-          case 5: SetNumEvents(std::atoi(optarg)); break;
-          case 6: SetOutputDirectory(std::string(optarg)); break;
-          case 7: SetNormRuntime(true); break;
-          case 8: SetOutputPrefix(std::string(optarg)); break;
-          case 9: SetRandomSeed(std::stoul(optarg)); break;
+          case 1: SetFluxEnergyMin(std::atof(optarg)); break;
+          case 2: SetFluxEnergyMax(std::atof(optarg)); break;
+          case 3: SetRuntimeFactor(std::atof(optarg)); break;
+          case 6: SetNormRuntime(true); break;
+          case 7: SetRuntimeRunBegin(std::atoi(optarg)); break;
+          case 8: SetRuntimeRunEnd(std::atoi(optarg)); break;
+          case 9: SetRuntimePeriod(std::atoi(optarg)); break;
           case 10: SetNumEventsPerFile(std::atoi(optarg)); break;
+          case 11: SetOutputPrefix(optarg); break;
+          case 14: SetDSNBFlatFlux(true); break;
           default:
-            ShowHelp(argv[0]);
+            ShowHelpDSNB(argv[0]);
             exit(EXIT_FAILURE);
             break;
         }
         break;
       default:
-        ShowHelp(argv[0]);
+        ShowHelpDSNB(argv[0]);
         exit(EXIT_FAILURE);
         break;
     }
@@ -339,10 +367,13 @@ void SKSNSimUserConfiguration::Dump() const {
   std::cout << "RuntimeFactor = " << GetRuntimeFactor() << std::endl;
   std::cout << "RuntimeRunBegin = " << GetRuntimeRunBegin() << std::endl;
   std::cout << "RuntimeRunEnd = " << GetRuntimeRunEnd() << std::endl;
+  std::cout << "RuntimePeriod = " << GetRuntimePeriod() << std::endl;
   std::cout << "Runnum = " << GetRunnum() << std::endl;
   std::cout << "SubRunnum = " << GetSubRunnum() << std::endl;
   std::cout << "SNDistance ( kpc ) = " << GetSNDistanceKpc() << std::endl;
   std::cout << "SNBurstFluxModel = " << GetSNBurstFluxModel() << std::endl;
+  std::cout << "DSNBFluxModel = " << GetDSNBFluxModel() << std::endl;
+  std::cout << "DSNBFlatFlux = " << GetDSNBFlatFlux() << std::endl;
   std::cout << "NuOscType = " << (int)GetNuOscType() << std::endl;
   std::cout << "RandomSeed = " << GetRandomSeed() << std::endl;
   std::cout << "====> Fine?  " << CheckHealth() << std::endl;
@@ -362,4 +393,30 @@ void SKSNSimUserConfiguration::Apply( SKSNSimVectorSNGenerator &gen ) const {
   gen.SetGeneratorNuOscType( GetNuOscType() );
   gen.SetRUNNUM( GetRunnum() );
   gen.SetSubRUNNUM( GetSubRunnum() );
+}
+
+void SKSNSimUserConfiguration::Apply( SKSNSimVectorGenerator &gen ) const {
+  gen.SetEnergyMin( GetFluxEnergyMin() );
+  gen.SetEnergyMax( GetFluxEnergyMax() );
+  gen.SetGeneratorVolume( GetEventgenVolume() );
+  gen.SetNormRuntime( GetNormRuntime() );
+  gen.SetRuntimeFactor( GetRuntimeFactor() );
+  gen.SetRuntimeBegin( GetRuntimeRunBegin() );
+  gen.SetRuntimeEnd( GetRuntimeRunEnd() );
+  gen.SetRuntimePeriod( GetRuntimePeriod() );
+  gen.SetFlatPositronFlux( GetDSNBFlatFlux() );
+  gen.SetRUNNUM( GetRunnum() );
+  gen.SetSubRUNNUM( GetSubRunnum() );
+}
+
+SKSNSimUserConfiguration::MODERUNTIME SKSNSimUserConfiguration::CheckMODERuntime() const {
+  if( GetNormRuntime() ){
+    if( GetRuntimePeriod() == -1 )
+      return SKSNSimUserConfiguration::MODERUNTIME::kRUNTIMERUNNUM;
+    else
+      return SKSNSimUserConfiguration::MODERUNTIME::kRUNTIMEPERIOD;
+  }
+
+  return SKSNSimUserConfiguration::MODERUNTIME::kEVNUM;
+
 }

@@ -6,9 +6,12 @@
 
 #include <string>
 #include <memory>
+#include <sstream>
+#include <iomanip>
 #include "SKSNSimVectorGenerator.hh"
 #include "SKSNSimFileIO.hh"
 #include "SKSNSimFlux.hh"
+#include "SKSNSimTools.hh"
 #include "SKSNSimCrosssection.hh"
 #include "SKSNSimUserConfiguration.hh"
 
@@ -21,24 +24,21 @@ int main(int argc, char **argv){
   config->CheckHealth();
 
   auto vectgen = std::make_unique<SKSNSimVectorGenerator>();
-  auto fluxhoriuch = std::make_unique<SKSNSimFluxDSNBHoriuchi>();
+  config->Apply(*vectgen);
+  auto flux = std::make_unique<SKSNSimDSNBFluxCustom>( config->GetDSNBFluxModel() );
   //fluxhoriuch->DumpFlux();
   auto xsec = std::make_unique<SKSNSimXSecIBDSV>();
 
   vectgen->SetRandomGenerator(config->GetRandomGenerator());
-  vectgen->AddFluxModel((SKSNSimFluxModel*)fluxhoriuch.release());
+  vectgen->AddFluxModel((SKSNSimFluxModel*)flux.release());
   vectgen->AddXSecModel((SKSNSimCrosssectionModel*)xsec.release());
-  vectgen->SetEnergyMin(config->GetFluxEnergyMin());
-  vectgen->SetEnergyMax(config->GetFluxEnergyMax());
 
   auto flist = GenerateOutputFileList(*config);
   for(auto it = flist.begin(); it != flist.end(); it++){
-    auto vectio = std::make_unique<SKSNSimFileOutTFile>();
-    vectio->Open(it->GetFileName());
-    size_t pos = std::distance(flist.begin(), it);
-    for(int i = 0; i < it->GetNumEvents(); i++)
-      vectio->Write(vectgen->GenerateEventIBD());
-
+    auto vectio = std::make_unique<SKSNSimFileOutTFile>(it->GetFileName());
+    vectgen->SetRUNNUM( it->GetRun() );
+    vectgen->SetSubRUNNUM( it->GetSubrun() );
+    vectio->Write(vectgen->GenerateEvents(it->GetNumEvents()));
     vectio->Close();
   }
 
