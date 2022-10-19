@@ -106,7 +106,7 @@ void ShowHelpDSNB(const char *argv0){
 
   std::cout << "Note: {} is essencial arguments, and [] is optional arguments" << std::endl << std::endl;
   std::cout << "Arguments: "  << std::endl
-    << " -c,--customflux {flux_filename}: this option enforce to use specified flux file which should be formatted with \"energy(MeV) flux\". In default meaning without this option, it generates events according to the Horiuchi-09 8MeV model." << std::endl
+    << " -c,--customflux {flux_filename}: this option enforce to use specified flux file which should be formatted with \"energy(MeV) flux\" ( default = " << SKSNSimUserConfiguration::GetDefaultDSNBFluxModel() << " )" << std::endl
     << " --energy_min {energy_MeV}: lower energy limit to be generated in MeV ( default = " << SKSNSimUserConfiguration::GetDefaultFluxEnergyMin(SKSNSimUserConfiguration::MODEGENERATOR::kDSNB) << " MeV )" << std::endl
     << " --energy_max {energy_MeV}: uppwer energy limit to be generated in MeV ( default = " << SKSNSimUserConfiguration::GetDefaultFluxEnergyMax(SKSNSimUserConfiguration::MODEGENERATOR::kDSNB) << " MeV )" << std::endl
     << " --flatposflux: generate flat positron energy in range between --energy_min and --energy_max. " <<  std::endl
@@ -116,7 +116,7 @@ void ShowHelpDSNB(const char *argv0){
     << " --runtime: this option enebles runtime normalization. ( default = " << SKSNSimUserConfiguration::GetDefaultRuntimeNormalization() << " )"  << std::endl
     << " --runtime_begin {runnum}: begging run-number of runtime normalization ( default = " << SKSNSimUserConfiguration::GetDefaultRuntimeBegin() << " )"  << std::endl
     << " --runtime_end {runnum}: end run-nummber of runtime normalization ( default = " << SKSNSimUserConfiguration::GetDefaultRuntimeEnd() << " )" << std::endl
-    << " --runtime_period {5/6}: SK period for runtime normalization ( default = " << SKSNSimUserConfiguration::GetDefaultRuntimePeriod() << " , -1 means that period is specified by runnnumber. see --runtime_{begin/end}.)" << std::endl
+    << " --runtime_period {5/6}: SK period for runtime normalization: SK-IV = 3, SK-V = 4, SK-VI = 5 ( default = " << SKSNSimUserConfiguration::GetDefaultRuntimePeriod() << " , -1 means that period is specified by runnnumber. see --runtime_{begin/end}.)" << std::endl
     << " --neventsperfile {int}: number of events per one file ( default = " << SKSNSimUserConfiguration::GetDefaultNumEventsPerFile() << " )" << std::endl
     << " --outprefix {pref}: prefix of output file name ( default = " << SKSNSimUserConfiguration::GetDefaultOutputPrefix() << " )" << std::endl
     << " -h,--help: show this help" << std::endl
