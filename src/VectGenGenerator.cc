@@ -571,7 +571,7 @@ void VectGenGenerator::determineNmomentum( double &x, double &y, double &z )
 {
 	//random reaction of neutron
 	double phi = getRandomReal(0., 1., generator) * 2. * M_PI;
-	double theta = getRandomReal(0., 1., generator ) * M_PI;
+	double theta = acos(getRandomReal(-1., 1., generator ));
 	x = sin( theta ) * cos( phi );
 	y = sin( theta ) * sin( phi );
 	z = cos( theta );
@@ -1450,7 +1450,7 @@ void VectGenGenerator::Process(int NumEv){ // For DSBN vector generator
     }
     // determine neutrino direction
     double nuDir[3];
-    double theta = getRandomReal( 0., 1., generator ) * M_PI;
+    double theta = acos(getRandomReal( -1., 1., generator ));
     double phi = getRandomReal( 0., 1., generator ) * 2. * M_PI;
     nuDir[0] = sin( theta ) * cos( phi );
     nuDir[1] = sin( theta ) * sin( phi );
