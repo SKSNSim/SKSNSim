@@ -16,7 +16,6 @@ using namespace SKSNSimPhysConst;
 
 namespace SKSNSimCrosssection {
   double CalcIBDEnuFromEpos ( const double Epos /* MeV */, const double cosTheta ){
-    /* Just copied from VectGenNuCrosssection::getEnu */ // TODO check if it is correct
     constexpr double delta = Mn-Mp;
     constexpr double d = (delta*delta - Me*Me)/(2*Mp);
     double pe=sqrt(Epos*Epos-Me*Me);
