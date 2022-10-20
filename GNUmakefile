@@ -112,11 +112,11 @@ bin/main_snburst_new: obj/main_snburst_new.o $(OBJS)
 	@echo "[SKSNSim] Building executable:	$@..."
 	@LD_RUN_PATH=$(SKOFL) $(CXX) $(CXXFLAGS) -o $@ $< $(LDLIBS)
 
-bin/main_snburst:
+bin/main_snburst: bin/main_snburst_prev bin/main_snburst_new
 	@${LN} main_snburst_prev $@
 	#@${LN} main_snburst_new $@
 
-bin/main_dsnb:
+bin/main_dsnb: bin/main_dsnb_prev bin/main_dsnb_new
 	@${LN} main_dsnb_prev $@
 	#@${LN} main_dsnb_new $@
 
