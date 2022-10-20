@@ -32,7 +32,7 @@ LDFLAGS = $(LOCAL_LIBS) $(LOCAL_INC)
 #INCROOT=-I$(ROOTSYS)/include/
 #LIBSROOT=-L$(ROOTSYS)/lib/ -lCint -lCore -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -lGui
 
-LN = ln -s
+LN = ln -sf
 
 #
 #  Objects
@@ -112,11 +112,13 @@ bin/main_snburst_new: obj/main_snburst_new.o $(OBJS)
 	@echo "[SKSNSim] Building executable:	$@..."
 	@LD_RUN_PATH=$(SKOFL) $(CXX) $(CXXFLAGS) -o $@ $< $(LDLIBS)
 
-bin/main_snburst: bin/main_snburst_prev bin/main_snburst_new
+bin/main_snburst:
 	@${LN} main_snburst_prev $@
+	#@${LN} main_snburst_new $@
 
-bin/main_dsnb: obj/main_dsnb.o $(OBJS)
+bin/main_dsnb:
 	@${LN} main_dsnb_prev $@
+	#@${LN} main_dsnb_new $@
 
 obj bin:
 	@mkdir -p $@

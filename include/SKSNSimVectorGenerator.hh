@@ -104,6 +104,7 @@ class SKSNSimSNEventVector {
     int m_subrunnum;
 
     size_t m_n_randomthrow;
+    double m_weight_maxprob;
 
     struct VERTEX {
       double x,y,z; // cm
@@ -138,7 +139,7 @@ class SKSNSimSNEventVector {
 		///static void determineKinematics( SKSNSimSNEventVector &p);
 
   public:
-    SKSNSimSNEventVector() : m_n_randomthrow(0) {sninfo.iEvt = -1;};
+    SKSNSimSNEventVector() : m_n_randomthrow(0), m_weight_maxprob(0.) {sninfo.iEvt = -1;};
     ~SKSNSimSNEventVector() {};
     int AddVertex(
         double x, double y, double z,
@@ -195,6 +196,10 @@ class SKSNSimSNEventVector {
 
     auto GetNRandomThrow() const { return m_n_randomthrow; }
     auto SetNRandomThrow(size_t n) { m_n_randomthrow = n; return GetNRandomThrow(); }
+    auto AddNRandomThrow(size_t n) { m_n_randomthrow += n; return GetNRandomThrow(); }
+
+    auto GetWeightMaxProb() const { return m_weight_maxprob; }
+    auto SetWeightMaxProb(const double w) { m_weight_maxprob = w; return GetWeightMaxProb(); }
 
     bool operator< (const SKSNSimSNEventVector &a){ return sninfo.rTime < a.sninfo.rTime; }
 };

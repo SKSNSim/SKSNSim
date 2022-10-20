@@ -60,8 +60,10 @@ SKSNSimSNEventVector SKSNSimVectorGenerator::GenerateEventIBD() {
   auto SQ = [](double a){ return a*a;};
 
   // determine neutrino and positron energy, and its direction
+  ev.SetWeightMaxProb(m_max_hit_probability);
   while( 1 ){
     nuEne = rng.Uniform( GetEnergyMin(), GetEnergyMax());
+    ev.AddNRandomThrow(1);
 
     const double nuFlux = flux.GetFlux(nuEne, 0.0, SKSNSimFluxModel::FLUXNUEB);
 
