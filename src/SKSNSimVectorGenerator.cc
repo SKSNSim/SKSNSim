@@ -74,9 +74,7 @@ SKSNSimSNEventVector SKSNSimVectorGenerator::GenerateEventIBD() {
 
     double p = nuFlux * sigm;
     double x = rng.Uniform( 0., m_max_hit_probability);
-    if( x < p ){
-      break;
-    }
+    if( x < p ) break;
   }
 #ifdef DEBUG
   std::cout << "In GenerateEventIBD: eEne = " << eEne << std::endl;
