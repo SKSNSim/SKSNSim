@@ -32,6 +32,8 @@ LDFLAGS = $(LOCAL_LIBS) $(LOCAL_INC)
 #INCROOT=-I$(ROOTSYS)/include/
 #LIBSROOT=-L$(ROOTSYS)/lib/ -lCint -lCore -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -lGui
 
+LN = ln -s
+
 #
 #  Objects
 #
@@ -55,7 +57,7 @@ MAINSRCS += $(wildcard *.F)
 MAINOBJS = $(patsubst %.cc, obj/%.o, $(MAINSRCS))
 MAINBINS = $(patsubst %.cc, bin/%, $(MAINSRCS))
 
-main: obj bin bin/main_snburst bin/main_dsnb bin/main_dsnb_new bin/main_snburst_new
+main: obj bin bin/main_snburst bin/main_dsnb bin/main_snburst_prev bin/main_dsnb_prev bin/main_dsnb_new bin/main_snburst_new
 
 test:
 	@echo "MAINSRCS      "$(MAINSRCS)
@@ -94,11 +96,11 @@ obj/%.o: src/%.F
 	@echo "[SKSNSim] Building FORTRAN code: $*..."
 	@$(FC) $(FCFLAGS) -c $< -o $@
 
-bin/main_snburst: obj/main_snburst.o $(OBJS)
+bin/main_snburst_prev: obj/main_snburst.o $(OBJS)
 	@echo "[SKSNSim] Building executable:	$@..."
 	@LD_RUN_PATH=$(SKOFL) $(CXX) $(CXXFLAGS) -o $@ $< $(LDLIBS)
 
-bin/main_dsnb: obj/main_dsnb.o $(OBJS)
+bin/main_dsnb_prev: obj/main_dsnb.o $(OBJS)
 	@echo "[SKSNSim] Building executable:	$@..."
 	@LD_RUN_PATH=$(SKOFL) $(CXX) $(CXXFLAGS) -o $@ $< $(LDLIBS)
 
@@ -109,6 +111,12 @@ bin/main_dsnb_new: obj/main_dsnb_new.o $(OBJS)
 bin/main_snburst_new: obj/main_snburst_new.o $(OBJS)
 	@echo "[SKSNSim] Building executable:	$@..."
 	@LD_RUN_PATH=$(SKOFL) $(CXX) $(CXXFLAGS) -o $@ $< $(LDLIBS)
+
+bin/main_snburst: bin/main_snburst_prev bin/main_snburst_new
+	@${LN} main_snburst_prev $@
+
+bin/main_dsnb: obj/main_dsnb.o $(OBJS)
+	@${LN} main_dsnb_prev $@
 
 obj bin:
 	@mkdir -p $@
