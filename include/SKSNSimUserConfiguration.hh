@@ -68,6 +68,7 @@ class SKSNSimUserConfiguration{
     unsigned m_random_seed;
     std::shared_ptr<TRandom> m_randomgenerator;
 
+    /* Health checker. They should return true (if configuration is good (false if bad)) */
     bool CheckFluxEnergyMin() const;
     bool CheckFluxEnergyMax() const;
     bool CheckFluxTimeMin() const;
