@@ -23,7 +23,7 @@ FCFLAGS += -w -fPIC -lstdc++
 
 LOCAL_INC	+= -I./include/
 
-LOCAL_LIBS	= -lsnlib_1.0 -lsnevtinfo -lsollib_4.0 -lsklowe_7.0 -llibrary 
+LOCAL_LIBS	= -L$(SKOFL_LIBDIR) -lsnlib_1.0 -lsnevtinfo -lsollib_4.0 -lsklowe_7.0 -llibrary 
 
 LDFLAGS = $(LOCAL_LIBS) $(LOCAL_INC)
 #INCROOT=-I$(ROOTSYS)/include/
@@ -98,7 +98,7 @@ bin/main_dsnb: bin/main_dsnb_prev
 
 lib/libSKSNSim.so: $(SKSNSIMLIBOBJS)
 	@echo "[SKSNSim] Making shared library: $@..."
-	@LD_RUN_PATH=$(SKOFL) $(CXX) $(LDFLAGS) $(CXXFLAGS) $(LDLIBS) -shared -o $@ $(SKSNSIMLIBOBJS)
+	LD_RUN_PATH=$(SKOFL) $(CXX) $(LDFLAGS) $(CXXFLAGS) -shared -o $@ $(SKSNSIMLIBOBJS)  $(LDLIBS) #$(SKOFL_LIBDIR)/libsollib_4.0.a $(SKOFL_LIBDIR)/libsnlib_1.0.a $(SKOFL_LIBDIR)/libiolib.a
 
 obj bin lib:
 	@mkdir -p $@
