@@ -25,22 +25,24 @@ SKSNSimDSNBFluxCustom::SKSNSimDSNBFluxCustom()
       return;
 }
 
-SKSNSimDSNBFluxCustom::SKSNSimDSNBFluxCustom(const std::string fname)
+SKSNSimDSNBFluxCustom::SKSNSimDSNBFluxCustom(const std::string fname, const std::string delim)
 {
       std::cout << " DSNB flux file: "<<fname<< std::endl;
       ene_flux_v = std::make_unique<std::vector<std::pair<double,double>>>();
-      this->loadFile(fname);
+      this->loadFile(fname, delim);
       return;
 }
 
-void SKSNSimDSNBFluxCustom::loadFile(const std::string fname)
+void SKSNSimDSNBFluxCustom::loadFile(const std::string fname, const std::string delim)
 {
   ene_flux_v->clear();
   std::ifstream datafile(fname.c_str());
   double ene, flux;
   for(std::string line; std::getline(datafile, line); ){
-    std::stringstream ss(line);
-    ss >> ene >> flux;
+    auto pos_delim = line.find(delim);
+    double ene = std::stod( line.substr(0, pos_delim) );
+    double flux = std::stod( line.substr(pos_delim+1) );
+
     ene_flux_v->push_back(std::make_pair(ene, flux));
   }
   datafile.close();
@@ -96,6 +98,13 @@ double SKSNSimDSNBFluxCustom::GetFlux(const double nu_ene_MeV, const double time
 #endif
 
   return nuFlux;
+}
+
+double SKSNSimDSNBFluxCustom::CalcIntegratedFlux() const {
+  double sum = 0.0;
+  for(size_t b = 0; b < getNBins(); b++)
+    sum += getBinnedFlux(b) * getBinWidth();
+  return sum;
 }
 
 
@@ -224,18 +233,18 @@ double SKSNSimSNFluxCustom::GetFlux(const double e, const double t, const FLUXNU
 
 }
 
-void SKSNSimFluxMonthlyCustom::AddMonthlyFlux( const int elapsday, std::unique_ptr<SKSNSimDSNBFluxCustom> flux_ptr) {
+void SKSNSimDSNBFluxMonthlyCustom::AddMonthlyFlux( const int elapsday, std::unique_ptr<SKSNSimDSNBFluxCustom> flux_ptr) {
   custommonthlyflux.push_back( std::make_pair( elapsday, std::move(flux_ptr) ));
   sortByTime();
 }
 
-void SKSNSimFluxMonthlyCustom::sortByTime() {
+void SKSNSimDSNBFluxMonthlyCustom::sortByTime() {
   std::sort( custommonthlyflux.begin(), custommonthlyflux.end(),
       [](std::pair<int, std::unique_ptr<SKSNSimDSNBFluxCustom>> &a,
         std::pair<int, std::unique_ptr<SKSNSimDSNBFluxCustom>> &b) { return a.first < b.first;});
 }
 
-SKSNSimDSNBFluxCustom &SKSNSimFluxMonthlyCustom::findFluxByTime(const int elapsed_day) const {
+SKSNSimDSNBFluxCustom &SKSNSimDSNBFluxMonthlyCustom::findFluxByTime(const int elapsed_day) const {
   for(auto it = custommonthlyflux.begin(); it != custommonthlyflux.end(); it++){
     if ( elapsed_day < it->first ) continue;
     else {
@@ -246,10 +255,20 @@ SKSNSimDSNBFluxCustom &SKSNSimFluxMonthlyCustom::findFluxByTime(const int elapse
   throw std::out_of_range("elapsed_day is out of range");
 }
 
-double SKSNSimFluxMonthlyCustom::GetFlux(const double e, const double elapsed_day, const FLUXNUTYPE type) const {
+double SKSNSimDSNBFluxMonthlyCustom::GetFlux(const double e, const double elapsed_day, const FLUXNUTYPE type) const {
   try {
     return findFluxByTime(elapsed_day).GetFlux(e,0,type);
   } catch (const std::exception& e){
     return -1.0;
   }
 }
+
+double SKSNSimDSNBFluxMonthlyCustom::FindMaxFluxTime() const {
+  std::vector<std::pair<int, double>> calculated_integrated_flux;
+  for(auto it = custommonthlyflux.begin(); it != custommonthlyflux.end(); it ++)
+    calculated_integrated_flux.push_back(std::make_pair( it->first, it->second->CalcIntegratedFlux()));
+  std::sort ( calculated_integrated_flux.begin(), calculated_integrated_flux.end(), 
+      [](std::pair<int,double> &a, std::pair<int,double>&b){ return a.second < b.second ; });
+  return calculated_integrated_flux.back().first;
+}
+

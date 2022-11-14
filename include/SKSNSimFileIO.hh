@@ -46,6 +46,8 @@ class SKSNSimFileOutTFile : public SKSNSimFileOutput {
     SNEvtInfo *m_SN;
     TTree *m_OutTree;
 
+    Double_t weight;
+    TTree *m_OutWeightTree;
 
   public:
     SKSNSimFileOutTFile (){ m_fileptr = NULL; m_MC = NULL; m_SN = NULL; }

@@ -31,6 +31,7 @@ class SKSNSimFluxModel {
     virtual double /* MeV */ GetEnergyLimit(const bool b) const {return ( b? GetEnergyLimitMax(): GetEnergyLimitMin());};
     virtual double /* sec */ GetTimeLimit(const bool b) const {return ( b? GetTimeLimitMax(): GetTimeLimitMin());};
     virtual const std::set<FLUXNUTYPE> &GetSupportedNuTypes () const = 0;
+    virtual double FindMaxFluxTime() const = 0;
 };
 
 class SKSNSimBinnedFluxModel : public SKSNSimFluxModel {
@@ -49,7 +50,7 @@ class SKSNSimDSNBFluxCustom : public SKSNSimBinnedFluxModel {
     double upper_energy_bin_width;
     void sortByEnergy();
 
-    void loadFile(const std::string /*fname*/);
+    void loadFile(const std::string /*fname*/, const std::string /* delimeter */ = "\t");
     inline double getFluxLimit(const bool lower_limit = true /* if false -> return upper limit*/) const{
 #ifdef RETURNEXCEPATIONS
       if ( ene_flux_v == NULL ) throw std::bad_typeid("ene_flux_v is not allocated");
@@ -66,7 +67,7 @@ class SKSNSimDSNBFluxCustom : public SKSNSimBinnedFluxModel {
 
   public:
     SKSNSimDSNBFluxCustom();
-    SKSNSimDSNBFluxCustom(const std::string fname);
+    SKSNSimDSNBFluxCustom(const std::string fname, const std::string /* delimeter */ = "\t");
     ~SKSNSimDSNBFluxCustom(){}
     void DumpFlux(std::ostream &out = std::cout) const;
     double GetFlux(const double, const double t = 0.0, const FLUXNUTYPE nutype = FLUXNUEB) const;
@@ -81,6 +82,8 @@ class SKSNSimDSNBFluxCustom : public SKSNSimBinnedFluxModel {
     int GetNBinsTime() const { return 1; }
     double GetBinWidthEne(int b) const { return getBinWidth(); }
     double GetBinWidthTime(int b) const { return 0.0; }
+    double CalcIntegratedFlux() const;
+    double FindMaxFluxTime() const {return 0.0;}
 };
 
 class SKSNSimSNFluxCustom : public SKSNSimBinnedFluxModel {
@@ -106,7 +109,8 @@ class SKSNSimSNFluxCustom : public SKSNSimBinnedFluxModel {
     int GetNBinsEne() const { return getNBinsEne(); }
     int GetNBinsTime() const { return getNBinsTime(); }
     double GetBinWidthEne(int b) const { return getBinWidthEne(b); }
-    double GetBinWidthTime(int b) const { return getBinWidthTime(b); }
+    double GetBinWidthTime(int b) const { return getBinWidthTime(b); } 
+    double FindMaxFluxTime() const {return 0.0;} // TODO at this momenent, this function does NOT work
 };
 const std::set<SKSNSimFluxModel::FLUXNUTYPE> SKSNSimSNFluxCustom::supportedType = {};
 
@@ -135,7 +139,7 @@ class SKSNSimSNFluxNakazatoFormat : public SKSNSimBinnedFluxModel {
     int GetNBinsTime()       const { return flux->GetNBinsTime(); }
     double GetBinWidthEne(int b)  const { return flux->GetBinWidthEne(b); }
     double GetBinWidthTime(int b) const { return flux->GetBinWidthTime(b); }
-    
+    double FindMaxFluxTime() const {return flux->FindMaxFluxTime();}
 };
 
 class SKSNSimSNFluxNakazato : public SKSNSimBinnedFluxModel {
@@ -156,7 +160,7 @@ class SKSNSimSNFluxNakazato : public SKSNSimBinnedFluxModel {
     int GetNBinsTime()       const { return flux->GetNBinsTime(); }
     double GetBinWidthEne(int b)  const { return flux->GetBinWidthEne(b); }
     double GetBinWidthTime(int b) const { return flux->GetBinWidthTime(b); }
-    
+    double FindMaxFluxTime() const {return flux->FindMaxFluxTime();}
 };
 
 class SKSNSimFluxDSNBHoriuchi : SKSNSimFluxModel {
@@ -175,6 +179,7 @@ class SKSNSimFluxDSNBHoriuchi : SKSNSimFluxModel {
     double GetTimeLimitMin() const { return customflux->GetEnergyLimitMin(); }
     void DumpFlux(std::ostream &out = std::cout) const { customflux->DumpFlux(out);};
     const std::set<FLUXNUTYPE> &GetSupportedNuTypes() const { return customflux->GetSupportedNuTypes(); }
+    double FindMaxFluxTime() const {return customflux->FindMaxFluxTime();}
 };
 
 class SKSNSimFluxFlat : SKSNSimFluxModel {
@@ -187,9 +192,10 @@ class SKSNSimFluxFlat : SKSNSimFluxModel {
     double GetEnergyLimitMax() const { return 100.0; }
     double GetEnergyLimitMin() const { return 10.0; }
     const std::set<FLUXNUTYPE> &GetSupportedNuTypes() const { return supportedType; }
+    double FindMaxFluxTime() const {return 0.0;}
 };
 
-class SKSNSimFluxMonthlyCustom : SKSNSimFluxModel {
+class SKSNSimDSNBFluxMonthlyCustom : SKSNSimFluxModel {
   private: 
     std::vector< std::pair< int /* begin_elapsday */, std::unique_ptr<SKSNSimDSNBFluxCustom> > > custommonthlyflux;
     void sortByTime ();
@@ -197,11 +203,13 @@ class SKSNSimFluxMonthlyCustom : SKSNSimFluxModel {
     SKSNSimDSNBFluxCustom &findFluxByTime(const int /* elapsed day from 1996/01/01 */) const;
 
   public:
-    SKSNSimFluxMonthlyCustom() {}
-    ~SKSNSimFluxMonthlyCustom() {}
+    SKSNSimDSNBFluxMonthlyCustom() {}
+    ~SKSNSimDSNBFluxMonthlyCustom() {}
     void AddMonthlyFlux( const int /* elapse_day from 1996/01/01 */, std::unique_ptr<SKSNSimDSNBFluxCustom> ); /* unique_ptr will be moved to this class */
     double GetFlux(const double /* MeV */, const double /* elapsed day from 1996/01/01 */, const FLUXNUTYPE ) const;
     /* this return flux which fulfilling "t >= (elem[n]->begin_elapsed_day) && t < (elem[n+1]->begin_elapsed_day)" */
+
+    double FindMaxFluxTime() const ;
 
     double GetEnergyLimitMax() const { if(custommonthlyflux.empty()) return -1.0;
       return custommonthlyflux.front().second->GetEnergyLimitMax(); }

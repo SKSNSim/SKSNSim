@@ -17,6 +17,9 @@ namespace SKSNSimTools{
   };
 
   SKSNSIMENUM::SKPERIOD FindSKPeriod(int /* run */);
+
+  int elapseday(int /* year */, int /* month */, int /* day */);
+  int elapseday(int /* run */);
 }
 
 namespace SKSNSimLiveTime {
