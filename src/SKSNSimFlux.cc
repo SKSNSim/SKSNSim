@@ -13,9 +13,7 @@
 #include "SKSNSimFlux.hh"
 #include "SKSNSimConstant.hh"
 
-#ifdef RETURNEXCEPATIONS
 #include <stdexcept>
-#endif
 
 using namespace SKSNSimPhysConst;
 
@@ -224,4 +222,34 @@ double SKSNSimSNFluxCustom::GetFlux(const double e, const double t, const FLUXNU
 
   return nspc;
 
+}
+
+void SKSNSimFluxMonthlyCustom::AddMonthlyFlux( const int elapsday, std::unique_ptr<SKSNSimDSNBFluxCustom> flux_ptr) {
+  custommonthlyflux.push_back( std::make_pair( elapsday, std::move(flux_ptr) ));
+  sortByTime();
+}
+
+void SKSNSimFluxMonthlyCustom::sortByTime() {
+  std::sort( custommonthlyflux.begin(), custommonthlyflux.end(),
+      [](std::pair<int, std::unique_ptr<SKSNSimDSNBFluxCustom>> &a,
+        std::pair<int, std::unique_ptr<SKSNSimDSNBFluxCustom>> &b) { return a.first < b.first;});
+}
+
+SKSNSimDSNBFluxCustom &SKSNSimFluxMonthlyCustom::findFluxByTime(const int elapsed_day) const {
+  for(auto it = custommonthlyflux.begin(); it != custommonthlyflux.end(); it++){
+    if ( elapsed_day < it->first ) continue;
+    else {
+      if( it + 1 == custommonthlyflux.end() || elapsed_day < (it+1)->first)
+        return *(it->second);
+    }
+  }
+  throw std::out_of_range("elapsed_day is out of range");
+}
+
+double SKSNSimFluxMonthlyCustom::GetFlux(const double e, const double elapsed_day, const FLUXNUTYPE type) const {
+  try {
+    return findFluxByTime(elapsed_day).GetFlux(e,0,type);
+  } catch (const std::exception& e){
+    return -1.0;
+  }
 }

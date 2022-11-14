@@ -141,7 +141,6 @@ class SKSNSimSNFluxNakazatoFormat : public SKSNSimBinnedFluxModel {
 class SKSNSimSNFluxNakazato : public SKSNSimBinnedFluxModel {
   private:
     std::unique_ptr<SKSNSimSNFluxCustom> flux;; // TODO modify to changeable file name (model)
-
   public:
     SKSNSimSNFluxNakazato(){
       flux = std::make_unique<SKSNSimSNFluxCustom>( "/home/sklowe/supernova/data/nakazato/intp2002.data" );
@@ -187,6 +186,31 @@ class SKSNSimFluxFlat : SKSNSimFluxModel {
     double GetFlux(const double e, const double t, const FLUXNUTYPE type) const { return 0.0; }
     double GetEnergyLimitMax() const { return 100.0; }
     double GetEnergyLimitMin() const { return 10.0; }
+    const std::set<FLUXNUTYPE> &GetSupportedNuTypes() const { return supportedType; }
+};
+
+class SKSNSimFluxMonthlyCustom : SKSNSimFluxModel {
+  private: 
+    std::vector< std::pair< int /* begin_elapsday */, std::unique_ptr<SKSNSimDSNBFluxCustom> > > custommonthlyflux;
+    void sortByTime ();
+    const std::set<FLUXNUTYPE> supportedType = {FLUXNUEB};
+    SKSNSimDSNBFluxCustom &findFluxByTime(const int /* elapsed day from 1996/01/01 */) const;
+
+  public:
+    SKSNSimFluxMonthlyCustom() {}
+    ~SKSNSimFluxMonthlyCustom() {}
+    void AddMonthlyFlux( const int /* elapse_day from 1996/01/01 */, std::unique_ptr<SKSNSimDSNBFluxCustom> ); /* unique_ptr will be moved to this class */
+    double GetFlux(const double /* MeV */, const double /* elapsed day from 1996/01/01 */, const FLUXNUTYPE ) const;
+    /* this return flux which fulfilling "t >= (elem[n]->begin_elapsed_day) && t < (elem[n+1]->begin_elapsed_day)" */
+
+    double GetEnergyLimitMax() const { if(custommonthlyflux.empty()) return -1.0;
+      return custommonthlyflux.front().second->GetEnergyLimitMax(); }
+    double GetEnergyLimitMin() const { if(custommonthlyflux.empty()) return -1.0;
+      return custommonthlyflux.front().second->GetEnergyLimitMin(); }
+    double GetTimeLimitMax() const { if(custommonthlyflux.empty()) return -1.0;
+      return custommonthlyflux.front().first; }
+    double GetTimeLimitMin() const { if(custommonthlyflux.empty()) return -1.0;
+      return custommonthlyflux.back().first; } // !!Be careful!! THIS IS AN EXCEPTION OF LIMIT VALUE. THIS IS INCLUSIVE.
     const std::set<FLUXNUTYPE> &GetSupportedNuTypes() const { return supportedType; }
 };
 
