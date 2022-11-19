@@ -1,6 +1,9 @@
 /*********************************
  * SKSNSimConstant.hh
  ********************************/
+#ifndef __SKSNSIMCONSTANT_H_INCLUDED__
+#define __SKSNSIMCONSTANT_H_INCLUDED__
+
 #include <cmath>
 #include <map>
 #include "SKSNSimEnum.hh"
@@ -24,6 +27,8 @@ namespace SKSNSimPhysConst {
   constexpr double Ntarget_p = 2.173e33;
   constexpr double Ntarget_e = 1.086e34;
   constexpr double Ntarget_o = 1.086e33;
+
+  constexpr double FVCUT = 200.;
 
   // Unit of the distance to the Supenova 10kpc = 3.086 x 10^22 cm
   constexpr double Distance = 3.086e22; // cm for 10kpc
@@ -54,3 +59,4 @@ namespace SKSNSimPhysConst {
   double GetNuOscNuxb2(SKSNSIMENUM::NEUTRINOOSCILLATION t){return std::get<7>(NuOscProbCollection.at(t));}
 
 }
+#endif

@@ -210,6 +210,7 @@ class SKSNSimDSNBFluxMonthlyCustom : SKSNSimFluxModel {
     /* this return flux which fulfilling "t >= (elem[n]->begin_elapsed_day) && t < (elem[n+1]->begin_elapsed_day)" */
 
     double FindMaxFluxTime() const ;
+    SKSNSimDSNBFluxCustom &FindFluxByTime(const int d /* elapsed day from 1996/01/01 */) const { return findFluxByTime(d);}
 
     double GetEnergyLimitMax() const { if(custommonthlyflux.empty()) return -1.0;
       return custommonthlyflux.front().second->GetEnergyLimitMax(); }
