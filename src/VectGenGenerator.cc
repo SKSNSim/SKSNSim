@@ -132,50 +132,51 @@ void VectGenGenerator::determineAngleElastic( const int nReact, const double nuE
 
 void VectGenGenerator::determineAngleNueO(const int Reaction, const int State, const int Ex_state, const int channel, const double nuEne, double & eEne, double & eTheta, double & ePhi )
 {
-	double nuEnergy = nuEne;
-	double cost, p, x, eEnergy;
+    double nuEnergy = nuEne;
+    double cost, p, x, eEnergy;
 
-	// find maximum values, which depends on nuEne
-	double maxP = 0.;
-	int rcn = 0;
-	for(int iCost=0;iCost<costNBins;iCost++){
-		cost = costMin + costBinSize * (iCost + 0.5);
-		p = reco -> AngleRecCC(Reaction, State, Ex_state, channel, nuEne, cost);
-		//if(Reaction==0 && State==3 && Ex_state==29 && channel==8) std::cout << "AngleRecCC sub" << " " << p << std::endl;
-		eEnergy = rece -> RecEneCC(Reaction, State, Ex_state, channel, nuEne);
-		//if(Reaction==0 && State==3 && Ex_state==29 && channel==8) std::cout << "RecEneCC" << " " << eEnergy << std::endl;
-		//std::cout << "determineAngleNueO" << " " << Reaction << " " << State << " " << Ex_state << " " << channel << " " << nuEne << " " << cost << " " << p << " " << eEnergy << std::endl; //nakanisi
-		if(p>maxP){ maxP = p; }
-		while(1){
-			cost = getRandomReal( costMin, costMax, generator );
-			//dir_oxigfunc_( & nuEnergy, & cost, & p, & eEnergy );
-			x = getRandomReal( 0., maxP, generator );
-			//std::cout << maxP << " " << p << " " << x << std::endl; //nakanisi
-			if(x<p){
-				eTheta = acos( cost );
-				ePhi = getRandomReal( -M_PI, M_PI, generator );
-				eEne = eEnergy;
-				//std::cout << "break" << " " << Reaction << " " << State << " " << Ex_state << " " << channel << " " << eTheta << " " << ePhi << " " << eEnergy << std::endl; //nakanisi
-				break;
-			}
-		}
-	}
-	//dir_oxigfunc_( & nuEnergy, & cost, & p, & eEnergy );
-	//if(p>maxP){ maxP = p; }
-/*
-	while(1){
-		cost = getRandomReal( costMin, costMax, generator );
-		//dir_oxigfunc_( & nuEnergy, & cost, & p, & eEnergy );
-		x = getRandomReal( 0., maxP, generator );
-		std::cout << maxP << " " << p << " " << x << std::endl; //nakanisi
-		if(x<p){
-			eTheta = acos( cost );
-			ePhi = getRandomReal( -M_PI, M_PI, generator );
-			break;
-		}
-	}
-*/
-	return;
+    // find maximum values, which depends on nuEne
+    double maxP = 0.;
+    int rcn = 0;
+    for(int iCost=0;iCost<costNBins;iCost++){
+        cost = costMin + costBinSize * (iCost + 0.5);
+        p = reco -> AngleRecCC(Reaction, State, Ex_state, channel, nuEne, cost);
+        //if(Reaction==0 && State==3 && Ex_state==29 && channel==8) std::cout << "AngleRecCC sub" << " " << p << std::endl;
+        eEnergy = rece -> RecEneCC(Reaction, State, Ex_state, channel, nuEne);
+        //if(Reaction==0 && State==3 && Ex_state==29 && channel==8) std::cout << "RecEneCC" << " " << eEnergy << std::endl;
+        //std::cout << "determineAngleNueO" << " " << Reaction << " " << State << " " << Ex_state << " " << channel << " " << nuEne << " " << cost << " " << p << " " << eEnergy << std::endl; //nakanisi
+        if(p>maxP){ maxP = p; }
+    }
+    while(1){
+        cost = getRandomReal( costMin, costMax, generator );
+        p = reco -> AngleRecCC(Reaction, State, Ex_state, channel, nuEne, cost);
+        //dir_oxigfunc_( & nuEnergy, & cost, & p, & eEnergy );
+        x = getRandomReal( 0., maxP, generator );
+        //std::cout << maxP << " " << p << " " << x << std::endl; //nakanisi
+        if(x<p){
+            eTheta = acos( cost );
+            ePhi = getRandomReal( -M_PI, M_PI, generator );
+            eEne = eEnergy;
+            //std::cout << "break" << " " << Reaction << " " << State << " " << Ex_state << " " << channel << " " << eTheta << " " << ePhi << " " << eEnergy << std::endl; //nakanisi
+            break;
+        }
+    }
+    //dir_oxigfunc_( & nuEnergy, & cost, & p, & eEnergy );
+    //if(p>maxP){ maxP = p; }
+    /*
+       while(1){
+       cost = getRandomReal( costMin, costMax, generator );
+    //dir_oxigfunc_( & nuEnergy, & cost, & p, & eEnergy );
+    x = getRandomReal( 0., maxP, generator );
+    std::cout << maxP << " " << p << " " << x << std::endl; //nakanisi
+    if(x<p){
+    eTheta = acos( cost );
+    ePhi = getRandomReal( -M_PI, M_PI, generator );
+    break;
+    }
+    }
+    */
+    return;
 }
 
 void VectGenGenerator::determineKinematics( const int nReact, const double nuEne, double * snDir, MCInfo * mc )
