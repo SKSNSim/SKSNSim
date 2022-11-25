@@ -7,7 +7,7 @@
 
 .PHONY: all clean obj
 
-TARGET = main_dsnb main_snburst
+TARGET = main_dsnb main_snburst main_dsnb_new main_snburst_new
 
 all: main
 	@echo "[SKSNSim] Done!"
@@ -19,7 +19,7 @@ endif
 include $(SKOFL_ROOT)/config.gmk
 
 CXX=g++
-CXXFLAGS += -DNO_EXTERN_COMMON_POINTERS
+CXXFLAGS += -DNO_EXTERN_COMMON_POINTERS #-DDEBUG
 FC=gfortran
 FCFLAGS += -w -fPIC -lstdc++
 
@@ -32,13 +32,14 @@ LDFLAGS = $(LOCAL_LIBS) $(LOCAL_INC)
 #INCROOT=-I$(ROOTSYS)/include/
 #LIBSROOT=-L$(ROOTSYS)/lib/ -lCint -lCore -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -lGui
 
+LN = ln -sf
+
 #
 #  Objects
 #
 
 OBJS = $(patsubst src/%.cc, obj/%.o, $(wildcard src/*.cc))
 OBJS += $(patsubst src/%.F, obj/%.o, $(wildcard src/*.F))
-
 
 
 #SRCS = $(wildcard src/*.cc)
@@ -56,7 +57,7 @@ MAINSRCS += $(wildcard *.F)
 MAINOBJS = $(patsubst %.cc, obj/%.o, $(MAINSRCS))
 MAINBINS = $(patsubst %.cc, bin/%, $(MAINSRCS))
 
-main: obj bin bin/main_snburst bin/main_dsnb
+main: obj bin bin/main_snburst bin/main_dsnb bin/main_snburst_prev bin/main_dsnb_prev bin/main_dsnb_new bin/main_snburst_new
 
 test:
 	@echo "MAINSRCS      "$(MAINSRCS)
@@ -77,6 +78,16 @@ obj/main_dsnb.o: main_dsnb.cc
 	@echo "[SKSNSim] Building $* ..."
 	@$(CXX) $(CXXFLAGS) -c $< -o $@
 
+obj/main_dsnb_new.o: main_dsnb_new.cc
+	@echo "[SKSNSim] Building $* ..."
+	@$(CXX) $(CXXFLAGS) -c $< -o $@
+#main_dsnb_new.d: main_dsnb_new.cc
+#	$(CXX) $(CXXFLAGS) -MM -o $@ $<
+
+obj/main_snburst_new.o: main_snburst_new.cc
+	@echo "[SKSNSim] Building $* ..."
+	@$(CXX) $(CXXFLAGS) -c $< -o $@
+
 obj/%.o: src/%.cc
 	@echo "[SKSNSim] Building $* ..."
 	@$(CXX) $(CXXFLAGS) -c $< -o $@
@@ -85,16 +96,34 @@ obj/%.o: src/%.F
 	@echo "[SKSNSim] Building FORTRAN code: $*..."
 	@$(FC) $(FCFLAGS) -c $< -o $@
 
-bin/main_snburst: obj/main_snburst.o $(OBJS)
+bin/main_snburst_prev: obj/main_snburst.o $(OBJS)
 	@echo "[SKSNSim] Building executable:	$@..."
 	@LD_RUN_PATH=$(SKOFL) $(CXX) $(CXXFLAGS) -o $@ $< $(LDLIBS)
 
-bin/main_dsnb: obj/main_dsnb.o $(OBJS)
+bin/main_dsnb_prev: obj/main_dsnb.o $(OBJS)
 	@echo "[SKSNSim] Building executable:	$@..."
 	@LD_RUN_PATH=$(SKOFL) $(CXX) $(CXXFLAGS) -o $@ $< $(LDLIBS)
+
+bin/main_dsnb_new: obj/main_dsnb_new.o $(OBJS)
+	@echo "[SKSNSim] Building executable:	$@..."
+	@LD_RUN_PATH=$(SKOFL) $(CXX) $(CXXFLAGS) -o $@ $< $(LDLIBS)
+
+bin/main_snburst_new: obj/main_snburst_new.o $(OBJS)
+	@echo "[SKSNSim] Building executable:	$@..."
+	@LD_RUN_PATH=$(SKOFL) $(CXX) $(CXXFLAGS) -o $@ $< $(LDLIBS)
+
+bin/main_snburst:
+	@${LN} main_snburst_prev $@
+	#@${LN} main_snburst_new $@
+
+bin/main_dsnb:
+	@${LN} main_dsnb_prev $@
+	#@${LN} main_dsnb_new $@
 
 obj bin:
 	@mkdir -p $@
 
 clean: 
 	$(RM) -r *.o *~ src/*~ include/*~ core obj/* bin/* obj bin $(TARGET)
+
+-include main_dsnb_new.d

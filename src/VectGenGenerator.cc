@@ -448,7 +448,7 @@ void VectGenGenerator::determineKinematics( const int nReact, const double nuEne
 							// Neutron
 							i_nucre++;
 							double x = 9999., y = 9999., z = 9999.;
-                            double amom = sqrt(SQ(0.5+Mn) - SQ(Mn));
+              double amom = sqrt(SQ(0.5+Mn) - SQ(Mn));
 							determineNmomentum(x, y, z);
 							mc->ipvc[mc->nvc] = 2112; // neutron
 							mc->energy[mc->nvc] = 0.5+Mn; // ENERGY ( MEV )
@@ -458,7 +458,7 @@ void VectGenGenerator::determineKinematics( const int nReact, const double nuEne
 							mc->iorgvc[mc->nvc] = 1;  // ID OF ORIGINAL PARTICLE PARENT PARTICLE
 							mc->ivtivc[mc->nvc] = 1;  // VERTEX # ( INITIAL )
 							mc->iflgvc[mc->nvc] = 0;  // FINAL STATE FLAG
-                            mc->icrnvc[mc->nvc] = 1;  // CHERENKOV FLAG
+              mc->icrnvc[mc->nvc] = 1;  // CHERENKOV FLAG
 							mc->ivtfvc[mc->nvc] = 1;  // VERTEX # ( FINAL )
 							mc->nvc++;
 							//std::cout << "neutron information " << nReact << " " << i_nucre << " " << mc->ipvc[2+i_nucre] << " " << x << " " << y << " " << z << std::endl;
@@ -571,7 +571,7 @@ void VectGenGenerator::determineNmomentum( double &x, double &y, double &z )
 {
 	//random reaction of neutron
 	double phi = getRandomReal(0., 1., generator) * 2. * M_PI;
-	double theta = getRandomReal(0., 1., generator ) * M_PI;
+	double theta = acos(getRandomReal(-1., 1., generator ));
 	x = sin( theta ) * cos( phi );
 	y = sin( theta ) * sin( phi );
 	z = cos( theta );
@@ -808,9 +808,12 @@ void VectGenGenerator::MakeEvent(double time, double nu_energy, int nReact, int 
 
 void VectGenGenerator::Process(){
 
+#ifdef DEBUG
+	std::cout << "Prcess of sn_burst side" << std::endl;//nakanisi
+#endif
 	/*---- Fill total cross section into array to avoid repeating calculation ----*/
-	double nuEne_min = nuEneMin;
-	double nuEne_max = nuEneMax;
+	const double nuEne_min = nuEneMin;
+	const double nuEne_max = nuEneMax;
 	double totcrsIBD[nuEneNBins] = {0.};
 	double totcrsNue[nuEneNBins] = {0.}, totcrsNueb[nuEneNBins] = {0.}, totcrsNux[nuEneNBins] = {0.}, totcrsNuxb[nuEneNBins] = {0.};
 
@@ -1447,7 +1450,7 @@ void VectGenGenerator::Process(int NumEv){ // For DSBN vector generator
     }
     // determine neutrino direction
     double nuDir[3];
-    double theta = getRandomReal( 0., 1., generator ) * M_PI;
+    double theta = acos(getRandomReal( -1., 1., generator ));
     double phi = getRandomReal( 0., 1., generator ) * 2. * M_PI;
     nuDir[0] = sin( theta ) * cos( phi );
     nuDir[1] = sin( theta ) * sin( phi );
@@ -1481,7 +1484,7 @@ void VectGenGenerator::Process(int NumEv){ // For DSBN vector generator
 
 		// IBD interaction
 
-		fMC->nvc = 4;
+		fMC->nvc = 0;
 
 		// Original neutrino
 		fMC->ipvc[0] = -12; // anti-electron neutrino
