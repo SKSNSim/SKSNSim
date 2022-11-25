@@ -312,9 +312,9 @@ void VectGenGenerator::determineKinematics( const int nReact, const double nuEne
             determineNmomentum(x, y, z);
             mc->ipvc[1] = 2212; // proton
             mc->energy[1] = Mp+0.5;
-            mc->pvc[1][0] = x;
-            mc->pvc[1][1] = y;
-            mc->pvc[1][2] = z;
+            mc->pvc[1][0] = amom*x;
+            mc->pvc[1][1] = amom*y;
+            mc->pvc[1][2] = amom*z;
             mc->iorgvc[1] = 1; // ID OF ORIGINAL PARTICLE PARENT PARTICLE
             mc->ivtivc[1] = 1; // VERTEX # ( INITIAL )
             mc->iflgvc[1] = 0; // FINAL STATE FLAG
