@@ -132,50 +132,51 @@ void VectGenGenerator::determineAngleElastic( const int nReact, const double nuE
 
 void VectGenGenerator::determineAngleNueO(const int Reaction, const int State, const int Ex_state, const int channel, const double nuEne, double & eEne, double & eTheta, double & ePhi )
 {
-	double nuEnergy = nuEne;
-	double cost, p, x, eEnergy;
+    double nuEnergy = nuEne;
+    double cost, p, x, eEnergy;
 
-	// find maximum values, which depends on nuEne
-	double maxP = 0.;
-	int rcn = 0;
-	for(int iCost=0;iCost<costNBins;iCost++){
-		cost = costMin + costBinSize * (iCost + 0.5);
-		p = reco -> AngleRecCC(Reaction, State, Ex_state, channel, nuEne, cost);
-		//if(Reaction==0 && State==3 && Ex_state==29 && channel==8) std::cout << "AngleRecCC sub" << " " << p << std::endl;
-		eEnergy = rece -> RecEneCC(Reaction, State, Ex_state, channel, nuEne);
-		//if(Reaction==0 && State==3 && Ex_state==29 && channel==8) std::cout << "RecEneCC" << " " << eEnergy << std::endl;
-		//std::cout << "determineAngleNueO" << " " << Reaction << " " << State << " " << Ex_state << " " << channel << " " << nuEne << " " << cost << " " << p << " " << eEnergy << std::endl; //nakanisi
-		if(p>maxP){ maxP = p; }
-		while(1){
-			cost = getRandomReal( costMin, costMax, generator );
-			//dir_oxigfunc_( & nuEnergy, & cost, & p, & eEnergy );
-			x = getRandomReal( 0., maxP, generator );
-			//std::cout << maxP << " " << p << " " << x << std::endl; //nakanisi
-			if(x<p){
-				eTheta = acos( cost );
-				ePhi = getRandomReal( -M_PI, M_PI, generator );
-				eEne = eEnergy;
-				//std::cout << "break" << " " << Reaction << " " << State << " " << Ex_state << " " << channel << " " << eTheta << " " << ePhi << " " << eEnergy << std::endl; //nakanisi
-				break;
-			}
-		}
-	}
-	//dir_oxigfunc_( & nuEnergy, & cost, & p, & eEnergy );
-	//if(p>maxP){ maxP = p; }
-/*
-	while(1){
-		cost = getRandomReal( costMin, costMax, generator );
-		//dir_oxigfunc_( & nuEnergy, & cost, & p, & eEnergy );
-		x = getRandomReal( 0., maxP, generator );
-		std::cout << maxP << " " << p << " " << x << std::endl; //nakanisi
-		if(x<p){
-			eTheta = acos( cost );
-			ePhi = getRandomReal( -M_PI, M_PI, generator );
-			break;
-		}
-	}
-*/
-	return;
+    // find maximum values, which depends on nuEne
+    double maxP = 0.;
+    int rcn = 0;
+    for(int iCost=0;iCost<costNBins;iCost++){
+        cost = costMin + costBinSize * (iCost + 0.5);
+        p = reco -> AngleRecCC(Reaction, State, Ex_state, channel, nuEne, cost);
+        //if(Reaction==0 && State==3 && Ex_state==29 && channel==8) std::cout << "AngleRecCC sub" << " " << p << std::endl;
+        eEnergy = rece -> RecEneCC(Reaction, State, Ex_state, channel, nuEne);
+        //if(Reaction==0 && State==3 && Ex_state==29 && channel==8) std::cout << "RecEneCC" << " " << eEnergy << std::endl;
+        //std::cout << "determineAngleNueO" << " " << Reaction << " " << State << " " << Ex_state << " " << channel << " " << nuEne << " " << cost << " " << p << " " << eEnergy << std::endl; //nakanisi
+        if(p>maxP){ maxP = p; }
+    }
+    while(1){
+        cost = getRandomReal( costMin, costMax, generator );
+        p = reco -> AngleRecCC(Reaction, State, Ex_state, channel, nuEne, cost);
+        //dir_oxigfunc_( & nuEnergy, & cost, & p, & eEnergy );
+        x = getRandomReal( 0., maxP, generator );
+        //std::cout << maxP << " " << p << " " << x << std::endl; //nakanisi
+        if(x<p){
+            eTheta = acos( cost );
+            ePhi = getRandomReal( -M_PI, M_PI, generator );
+            eEne = eEnergy;
+            //std::cout << "break" << " " << Reaction << " " << State << " " << Ex_state << " " << channel << " " << eTheta << " " << ePhi << " " << eEnergy << std::endl; //nakanisi
+            break;
+        }
+    }
+    //dir_oxigfunc_( & nuEnergy, & cost, & p, & eEnergy );
+    //if(p>maxP){ maxP = p; }
+    /*
+       while(1){
+       cost = getRandomReal( costMin, costMax, generator );
+    //dir_oxigfunc_( & nuEnergy, & cost, & p, & eEnergy );
+    x = getRandomReal( 0., maxP, generator );
+    std::cout << maxP << " " << p << " " << x << std::endl; //nakanisi
+    if(x<p){
+    eTheta = acos( cost );
+    ePhi = getRandomReal( -M_PI, M_PI, generator );
+    break;
+    }
+    }
+    */
+    return;
 }
 
 void VectGenGenerator::determineKinematics( const int nReact, const double nuEne, double * snDir, MCInfo * mc )
@@ -283,7 +284,7 @@ void VectGenGenerator::determineKinematics( const int nReact, const double nuEne
 	}
 	
     else if(nReact>1000 && nReact < 10000){
-         mc->nvc = 3;
+         mc->nvc = 4;
         int Reaction = nReact/1000;
         int Excit_pre = nReact/100;
         int Excit = ((nReact - (Reaction)*1000)/100) - 1;
@@ -305,65 +306,77 @@ void VectGenGenerator::determineKinematics( const int nReact, const double nuEne
 		mc->icrnvc[0] = 0;  // CHERENKOV FLAG
 		mc->ivtfvc[0] = 1;  // VERTEX # ( FINAL )
 
+        // Oxygen
+        mc->ipvc[1] = 1000080160;
+        mc->energy[1] = 0.; // ENERGY ( MEV )
+        mc->pvc[1][0] = 0.; // MOMENTUM OF I-TH PARTICLE ( MEV/C )
+        mc->pvc[1][1] = 0.;
+        mc->pvc[1][2] = 0.;
+        mc->iorgvc[1] = 0;  // ID OF ORIGIN PARTICLE PARENT PARTICLE
+        mc->ivtivc[1] = 1;  // VERTEX # ( INITIAL )
+        mc->iflgvc[1] = -1; // FINAL STATE FLAG
+        mc->icrnvc[1] = 0;  // CHERENKOV FLAG
+        mc->ivtfvc[1] = 1;  // VERTEX # ( FINAL )
+
         double pTheta, pPhi, pDir[3];
         if(particle == 0){
             double x = 9999., y = 9999., z = 9999.;
             double amom = sqrt(SQ(Mp+0.5) - SQ(Mp));
             determineNmomentum(x, y, z);
-            mc->ipvc[1] = 2212; // proton
-            mc->energy[1] = Mp+0.5;
-            mc->pvc[1][0] = x;
-            mc->pvc[1][1] = y;
-            mc->pvc[1][2] = z;
-            mc->iorgvc[1] = 1; // ID OF ORIGINAL PARTICLE PARENT PARTICLE
-            mc->ivtivc[1] = 1; // VERTEX # ( INITIAL )
-            mc->iflgvc[1] = 0; // FINAL STATE FLAG
-            mc->icrnvc[1] = 1; // CHERENKOV FLAG
-            mc->ivtfvc[1] = 1; // VERTEX # ( FINAL )
+            mc->ipvc[2] = 2212; // proton
+            mc->energy[2] = Mp+0.5;
+            mc->pvc[2][0] = amom*x;
+            mc->pvc[2][1] = amom*y;
+            mc->pvc[2][2] = amom*z;
+            mc->iorgvc[2] = 1; // ID OF ORIGINAL PARTICLE PARENT PARTICLE
+            mc->ivtivc[2] = 1; // VERTEX # ( INITIAL )
+            mc->iflgvc[2] = 0; // FINAL STATE FLAG
+            mc->icrnvc[2] = 1; // CHERENKOV FLAG
+            mc->ivtfvc[2] = 1; // VERTEX # ( FINAL )
 
 	        // Gamma ray
             x = 9999., y = 9999., z = 9999.;
 			determineNmomentum(x, y, z);
-			mc->ipvc[2] = 22; // gamma
-			mc->energy[2] = eneGamN[channel]; // ENERGY ( MEV )
-			mc->pvc[2][0] = x*mc->energy[2];
-		    mc->pvc[2][1] = y*mc->energy[2];
-			mc->pvc[2][2] = z*mc->energy[2];
-			mc->iorgvc[2] = 1; // ID OF ORIGINAL PARTICLE PARENT PARTICLE
-			mc->ivtivc[2] = 1; // VERTEX # ( INITIAL )
-			mc->iflgvc[2] = 0; // FINAL STATE FLAG
-			mc->icrnvc[2] = 1; // CHERENKOV FLAG
-            mc->ivtfvc[2] = 1; // VERTEX # ( FINAL )
+			mc->ipvc[3] = 22; // gamma
+			mc->energy[3] = eneGamN[channel]; // ENERGY ( MEV )
+			mc->pvc[3][0] = x*mc->energy[2];
+		    mc->pvc[3][1] = y*mc->energy[2];
+			mc->pvc[3][2] = z*mc->energy[2];
+			mc->iorgvc[3] = 1; // ID OF ORIGINAL PARTICLE PARENT PARTICLE
+			mc->ivtivc[3] = 1; // VERTEX # ( INITIAL )
+			mc->iflgvc[3] = 0; // FINAL STATE FLAG
+			mc->icrnvc[3] = 1; // CHERENKOV FLAG
+            mc->ivtfvc[3] = 1; // VERTEX # ( FINAL )
 			std::cout << "NC gamma emission " << mc->ipvc[2] << " " << mc->energy[2] << " " << x << " " << y << " " << z << std::endl; // nakanisi
         }
         else if(particle == 1){
             double x = 9999., y = 9999., z = 9999.;
             double amom = sqrt(SQ(0.5+Mn) - SQ(Mn));
             determineNmomentum(x, y, z);
-            mc->ipvc[1] = 2112; //neutron
-            mc->energy[1] = 0.5+Mn;
-            mc->pvc[1][0] = amom*x;
-            mc->pvc[1][1] = amom*y;
-            mc->pvc[1][2] = amom*z;
-            mc->iorgvc[1] = 1; // ID OF ORIGINAL PARTICLE PARENT PARTICLE
-            mc->ivtivc[1] = 1; // VERTEX # ( INITIAL )
-            mc->iflgvc[1] = 0; // FINAL STATE FLAG
-            mc->icrnvc[1] = 1; // CHERENKOV FLAG
-            mc->ivtfvc[1] = 1; // VERTEX # ( FINAL )
+            mc->ipvc[2] = 2112; //neutron
+            mc->energy[2] = 0.5+Mn;
+            mc->pvc[2][0] = amom*x;
+            mc->pvc[2][1] = amom*y;
+            mc->pvc[2][2] = amom*z;
+            mc->iorgvc[2] = 1; // ID OF ORIGINAL PARTICLE PARENT PARTICLE
+            mc->ivtivc[2] = 1; // VERTEX # ( INITIAL )
+            mc->iflgvc[2] = 0; // FINAL STATE FLAG
+            mc->icrnvc[2] = 1; // CHERENKOV FLAG
+            mc->ivtfvc[2] = 1; // VERTEX # ( FINAL )
 
 	        // Gamma ray
             x = 9999., y = 9999., z = 9999.;
 			determineNmomentum(x, y, z);
-			mc->ipvc[2] = 22; // gamma
-			mc->energy[2] = eneGamN[channel]; // ENERGY ( MEV )
-			mc->pvc[2][0] = x*mc->energy[2];
-		    mc->pvc[2][1] = y*mc->energy[2];
-			mc->pvc[2][2] = z*mc->energy[2];
-			mc->iorgvc[2] = 1; // ID OF ORIGINAL PARTICLE PARENT PARTICLE
-			mc->ivtivc[2] = 1; // VERTEX # ( INITIAL )
-			mc->iflgvc[2] = 0; // FINAL STATE FLAG
-			mc->icrnvc[2] = 1; // CHERENKOV FLAG
-            mc->ivtfvc[2] = 1; // VERTEX # ( FINAL )
+			mc->ipvc[3] = 22; // gamma
+			mc->energy[3] = eneGamN[channel]; // ENERGY ( MEV )
+			mc->pvc[3][0] = x*mc->energy[2];
+		    mc->pvc[3][1] = y*mc->energy[2];
+			mc->pvc[3][2] = z*mc->energy[2];
+			mc->iorgvc[3] = 1; // ID OF ORIGINAL PARTICLE PARENT PARTICLE
+			mc->ivtivc[3] = 1; // VERTEX # ( INITIAL )
+			mc->iflgvc[3] = 0; // FINAL STATE FLAG
+			mc->icrnvc[3] = 1; // CHERENKOV FLAG
+            mc->ivtfvc[3] = 1; // VERTEX # ( FINAL )
 			//std::cout << "gamma emission " << i_nucre << " " << mc->ipvc[mc->nvc] << " " << mc->energy[mc->nvc] << " " << x << " " << y << " " << z << std::endl; // nakanisi
 			std::cout << "NC gamma emission " << mc->ipvc[2] << " " << mc->energy[2] << " " << x << " " << y << " " << z << std::endl; // nakanisi
         }
