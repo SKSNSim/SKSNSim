@@ -5,7 +5,7 @@
 # SKOFL_ROOT = /skofl
 #
 
-.PHONY: all clean obj bin lib
+.PHONY: all clean obj bin lib doc
 
 all: main library
 	@echo "[SKSNSim] Done!"
@@ -49,6 +49,11 @@ SKSNSIMLIBOBJS = $(filter obj/SKSNSim%, $(OBJS))
 main: bin obj bin/main_snburst bin/main_dsnb bin/main_snburst_prev bin/main_dsnb_prev bin/main_dsnb_new bin/main_snburst_new
 
 library: lib lib/libSKSNSim.so
+
+doc: doc/guide_sksnsim.pdf
+
+doc/guide_sksnsim.pdf: doc/guide_sksnsim.texi
+	cd doc && pwd && texi2any --pdf guide_sksnsim.texi && cd ../
 
 test:
 	@echo "MAINSRCS      "$(MAINSRCS)

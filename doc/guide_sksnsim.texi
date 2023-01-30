@@ -1,0 +1,176 @@
+\input texinfo
+
+@settitle Guide of SKSNSim
+@setfilename guide_sksnsim.info
+
+@copying
+This is a guide of SKSNSim for users and developpers.
+
+Copyright @copyright{} 2023 Shota Izumiyama, Fumi Nakanishi, Masayuki Harada, Yusuke Koshio for the Super-Kamiokande Low Energy Group
+@end copying
+
+@titlepage
+
+@title Guide of SKSNSim
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@contents
+
+@node Top
+@top Preamble
+
+This documents is written for user and developper.
+
+The repository holds library of cross section, flux and kinematics generator.
+You can generate kinematics vectors of the SKROOT MC class with selecting the cross section model and flux model.
+
+
+@node Basic
+@chapter Basic
+
+
+SKSNSim is a simulator of neutrino interaction in the water mainlly.
+This supports other reaction relating the low energy physics such as beta decays from spalltion products.
+It is designed so that this is used in the software pipeline of MC production for neutrino events such as Diffuse Supernova Neutrino Background and Supernova burst.
+The output can be used as input vector for the SK-G4, detector simulator.
+
+The program is divided to several parts:
+@enumerate
+@item
+Cross section model
+
+@item
+Flux model
+
+@item
+Kinematics generator
+@end enumerate
+These parts are implemented separately as C++ classes and can be called via a shared library.
+The technical detail is explained in the @xref{For developpers}.
+
+Information for the users is available in the @xref{For users}.
+
+@node For users
+@chapter Usage
+
+This describes how to use this programs.
+
+@section Requirements
+
+This requires SKOFL.
+Before using the program, you need to load SKOFL libraries with CERN ROOT.
+
+
+@section Compile
+
+Compile process is based on GNUMake. It is fine to just execute @command{make}.
+
+@example
+$ make clean &&  make
+@end example
+
+Compiled binaries and shared library are put into @file{bin} and @file{lib} directory.
+
+@section Binaries
+@subsection For SN burst
+
+For previous version, main_snburst, the basic usage is @code{main_snburst @{model@} @{nuosc@} @{distance@} @{generatormode@} @{outputdirectory@} @{randomseed@}}.
+List of arguments are below:
+@itemize
+@item
+1st: model name (e.g. nakazato/intp2001.data)
+@item
+2nd: neutrino-oscillation (0:no, 1:normal, 2:inverted)
+@item
+3rd: Distance (normalized to 10kpc)
+@item
+4th: Generate event or not (0: No just calculate expected, 1: Yes for detector simulation)
+@item
+5th: Output directory, default: ./data/(SN model)
+@item
+6th: Random seed (not supported yet)
+@end itemize
+For new version, you can see detail usage via executing @command{main_snburst_new --help}.
+Basically, a format of the previous version is available.
+But we recommend to use new format which can be specified via options starting @code{--} (e.g. @option{--seed}).
+All options have default value, and you do not have to specify all of them.
+Detail can be dumped by executing @command{main_dsnb(_new) --help}.
+Basically, you can run by just executing @command{main_dsnb(_new)} with wanted options you would like to change.
+
+@subsection For DSNB
+
+Detail can be dumped by executing @command{main_dsnb(_new) --help}.
+Basically, you can run by just executing @command{main_dsnb(_new)} with wanted options you would like to change.
+
+
+@node For developpers
+@chapter Implementation guide
+
+The program is divided into several parts: cross section model, flux model and vector generator.
+These functions are compiled as a shared library so that we can use them in external programs.
+You can create new flux model and cross section model as a C++ class as following manner.
+
+This chapter describes the technical details.
+
+@section Cross section model
+
+Cross seciton model is available via the @code{SKSNSimCrosssectionModel} class.
+This class defines an interface to access the total cross section and differential cross section.
+The definition of the interface is like:
+@example
+class SKSNSimCrosssectionModel @{
+  public:
+    enum XSECNUTYPE @{ XSECNUE = 0, XSECNUEB, XSECNUX, NXSECNUTYPE@};
+    virtual ~SKSNSimCrosssectionModel();
+    virtual double /* cm^2 */                          GetCrosssection(double /* MeV */) const = 0; // energy -> xsec
+    virtual std::pair<double,double> /* <cm^2, MeV> */ GetDiffCrosssection(double /* MeV */, double /* a.u. */) const = 0; // energy -> angle -> (xsec, scattered energy)
+@}
+@end example
+
+Currentry supporting these models:
+@enumerate
+@item
+Flat model
+@item
+IBD of Strumia-Vissani
+@item
+IBD of Vogel-Beacom
+@item
+Elastic scattering
+@item
+NC of oxygen
+@item
+CC of oxygen
+@end enumerate
+
+If you want to implement new model, please impelement functions of @code{GetCrosssection} for total cross section and @code{GetDiffCrosssection} for differential cross section.
+
+@section Flux model
+
+Flux models are available via the @code{SKSNSimFluxModel} class.
+This defines an interface to use the flux model.
+@example
+class SKSNSimFluxModel @{
+  public:
+    enum FLUXNUTYPE @{ FLUXNUE = 0, FLUXNUEB, FLUXNUX, NFLUXNUTYPE@};
+    virtual ~SKSNSimFluxModel();
+    virtual double /* /cm^2/s */ GetFlux(const double /* MeV */, const double /* sec */, const FLUXNUTYPE) const = 0; // energy -> flux
+    virtual double /* MeV */ GetEnergyLimitMax() const = 0;
+    virtual double /* MeV */ GetEnergyLimitMin() const = 0;
+    virtual double /* sec */ GetTimeLimitMax() const = 0;
+    virtual double /* sec */ GetTimeLimitMin() const = 0;
+    virtual double /* MeV */ GetEnergyLimit(const bool b) const @{return ( b? GetEnergyLimitMax(): GetEnergyLimitMin());@};
+    virtual double /* sec */ GetTimeLimit(const bool b) const @{return ( b? GetTimeLimitMax(): GetTimeLimitMin());@};
+    virtual const std::set<FLUXNUTYPE> &GetSupportedNuTypes () const = 0;
+@};
+@end example
+
+If you want to implement new model, please implement your class with inheriting this interface class.
+If you have flux model as CSV file, you might be able to use the @code{SKSNSimDSNBFluxCustom} with only loading your CSV file.
+
+
+
+@bye
