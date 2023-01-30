@@ -25,3 +25,7 @@ For new version, you can see detail usage via executing ``main\_snburst\_new --h
 ### main\_dsnb(\_new)
 Detail can be dumped by executing ``main\_dsnb(\_new) --help``.
 Basically, you can run by just executing ``main\_dsnb(\_new)`` with wanted options you would like to change.
+
+## More detail:
+
+The guide for users and developpers are available on https://www-sk1.icrr.u-tokyo.ac.jp/~sizu/sk/guide_sksnsim/ (SuperK internal only), which is output of doc/guide_sksnsim.texi (Texinfo file). If you want to see the PDF version, please do ``make doc``.
