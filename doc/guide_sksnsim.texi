@@ -105,6 +105,18 @@ Basically, you can run by just executing @command{main_dsnb(_new)} with wanted o
 Detail can be dumped by executing @command{main_dsnb(_new) --help}.
 Basically, you can run by just executing @command{main_dsnb(_new)} with wanted options you would like to change.
 
+@section Detail parameters
+
+SKSNSim uses several parameters such as neutrino oscillation parameters. If you want to modify them, you need to check following files:
+@itemize
+@item
+Neutrino oscillation parameters: @file{include/VectGenSnConst.hh} (L:14) for previous version (@command{main_snburst}), @file{include/SKSNSimConstant.hh} (L:37) for @command{main_snburst_new}.
+Currently, it refers old value (@code{sin2theta12=0.28}).
+
+@item
+Number of proton, oxygen or electron: @file{include/VectGenSnConst.hh} (L:23) for @command{main_snburst}, @file{include/SKSNSimConstant.hh} (L:24).
+@end itemize
+
 
 @node For developpers
 @chapter Implementation guide
