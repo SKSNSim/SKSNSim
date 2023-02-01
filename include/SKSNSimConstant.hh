@@ -6,13 +6,13 @@
 #include "SKSNSimEnum.hh"
 
 namespace SKSNSimPhysConst {
-  constexpr double Me = 0.510998950e0 /* MeV */;// electron mass(from PDG 2020) // TODO this is different against with Me in sl_nue_dif_rad.F in sollib
+  constexpr double Me = 0.510998950e0 /* MeV */;// electron mass(from PDG 2022) // TODO this is different against with Me in sl_nue_dif_rad.F in sollib
   constexpr double Mp = 938.272088e0 /* MeV */; // proton mass
   constexpr double Mn = 939.565421e0 /* MeV */; // neutron mass
-  constexpr double Mpi = 139.57061e0 /* MeV */; // pion mass
+  constexpr double Mpi = 139.57039 /* MeV */; // charged pion mass
   constexpr double DeltaM = Mn - Mp; //mass difference proton and neutron
   constexpr double costheta_cabibo = 0.974; // cabibo angle
-  constexpr double Gf = 0.04541638e-5; // fermi constant(fm**2), G_F/(hbarc)^3 * (hbarc)^2 in PDG
+  constexpr double Gf = 0.04541638e-5; // fermi constant(fm**2), G_F/(hbarc)^3 * (hbarc)^2 in PDG 2022
   constexpr double HBARC = 197.3269804; // (MeV fm)
 
   constexpr double PI = M_PI /*3.14159265358979833*/;
@@ -35,7 +35,11 @@ namespace SKSNSimPhysConst {
 
   //========================
   // Neutrino Oscillation Parameter
+#ifdef ORIGINAL_NUOSCPARAMETER
   constexpr double PMNSSinSqTheta12 = 0.28; // PMNS matrix
+#else
+  constexpr double PMNSSinSqTheta12 = 0.307; // From PDG 2022 (R.L. Workmanet al.(Particle Data Group), Prog.Theor.Exp.Phys.2022, 083C01 (2022))
+#endif
   constexpr double PMNSCosSqTheta12 = 1. - PMNSSinSqTheta12;
   const std::map<SKSNSIMENUM::NEUTRINOOSCILLATION, std::tuple<double,double,double,double,double,double,double,double>> NuOscProbCollection = {
     /* Oscillation type -> { nue1, nue2, neb1, neb2, nux1, nux2, nxb1, nxb2} */

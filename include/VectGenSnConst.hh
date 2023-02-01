@@ -5,14 +5,18 @@
 const double Me = 0.510998950e0;// electron mass(from PDG 2020)
 const double Mp = 938.272088e0; // proton mass
 const double Mn = 939.565421e0; // neutron mass
-const double Mpi = 139.57061e0; // pion mass
+const double Mpi = 139.57039; // pion mass
  
 //const double DeltaM = 1.2933317e0; //mass difference proton and neutron
 double DeltaM = Mn - Mp; //mass difference proton and neutron
 const double pi = 3.14159265358979833;
 
 // neutrino oscillation
+#ifdef ORIGINAL_NUOSCPARAMETER
 const double sin2th12  = 0.28;
+#else
+const double sin2th12  = 0.307; // From PDG 2022 (R.L. Workmanet al.(Particle Data Group), Prog.Theor.Exp.Phys.2022, 083C01 (2022))
+#endif
 double cos2th12 = 1. - sin2th12;
 
 //

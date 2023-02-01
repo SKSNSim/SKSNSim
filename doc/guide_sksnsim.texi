@@ -111,7 +111,7 @@ SKSNSim uses several parameters such as neutrino oscillation parameters. If you 
 @itemize
 @item
 Neutrino oscillation parameters: @file{include/VectGenSnConst.hh} (L:14) for previous version (@command{main_snburst}), @file{include/SKSNSimConstant.hh} (L:37) for @command{main_snburst_new}.
-Currently, it refers old value (@code{sin2theta12=0.28}).
+If you want to use latest parameter of @code{sin2theta12=0.307} (PDG2022) instead of original configuration (@code{0.28}), please modify @file{GNUMakefile} (L:22) to exclude @option{-DORIGINAL_NUOSCPARAMETERS}.
 
 @item
 Number of proton, oxygen or electron: @file{include/VectGenSnConst.hh} (L:23) for @command{main_snburst}, @file{include/SKSNSimConstant.hh} (L:24).
