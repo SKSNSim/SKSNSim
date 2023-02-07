@@ -105,6 +105,7 @@ class SKSNSimSNEventVector {
 
     size_t m_n_randomthrow;
     double m_weight_maxprob;
+    double m_weight;
 
     struct VERTEX {
       double x,y,z; // cm
@@ -139,7 +140,7 @@ class SKSNSimSNEventVector {
 		///static void determineKinematics( SKSNSimSNEventVector &p);
 
   public:
-    SKSNSimSNEventVector() : m_n_randomthrow(0), m_weight_maxprob(0.) {sninfo.iEvt = -1;};
+    SKSNSimSNEventVector() : m_n_randomthrow(0), m_weight_maxprob(0.), m_weight(0.) {sninfo.iEvt = -1;};
     ~SKSNSimSNEventVector() {};
     int AddVertex(
         double x, double y, double z,
@@ -201,6 +202,9 @@ class SKSNSimSNEventVector {
     auto GetWeightMaxProb() const { return m_weight_maxprob; }
     auto SetWeightMaxProb(const double w) { m_weight_maxprob = w; return GetWeightMaxProb(); }
 
+    auto GetWeight() const { return m_weight; }
+    auto SetWeight(const double w) { m_weight= w; return GetWeight(); }
+
     bool operator< (const SKSNSimSNEventVector &a){ return sninfo.rTime < a.sninfo.rTime; }
 };
 
@@ -231,7 +235,7 @@ class SKSNSimVectorGenerator {
 
     // For hit-and-miss method
     double m_max_hit_probability; // maximum of (flux) x (xsec) // should be updated with new flux or xsec models
-    static double FindMaxProb ( SKSNSimFluxModel &, SKSNSimCrosssectionModel &);
+    static double FindMaxProb ( SKSNSimFluxModel &, SKSNSimCrosssectionModel &, int /* elapseday */ = -1);
     double SetMaximumHitProbability();
     
   public:

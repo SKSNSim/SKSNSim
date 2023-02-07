@@ -51,18 +51,22 @@ void SKSNSimFileOutTFile::Open(const std::string fname, const bool including_sne
 
 	// define tree
 	m_OutTree = new TTree("data", "SK 5 tree");
+	m_OutWeightTree = new TTree("weightTr", "Weight");
 	// new MF
 	m_OutTree->SetCacheSize(40*1024*1024);
 	int bufsize = 8*1024*1024;      // may be this is the best 15-OCT-2007 Y.T.
 	m_OutTree->Branch(TopBranch,bufsize);
+  m_OutWeightTree->Branch("weight", &weight, "weight/D");
 }
 
 void SKSNSimFileOutTFile::Close(){
   std::cout << m_fileptr->GetName() << std::endl;
 	m_fileptr->cd();
 	m_OutTree->Write();
+  m_OutWeightTree->Write();
   m_fileptr->Save();
 	m_OutTree->Reset();
+  m_OutWeightTree->Reset();
 	m_fileptr->Close();
 }
 
@@ -112,6 +116,9 @@ void SKSNSimFileOutTFile::Write(const SKSNSimSNEventVector &ev){
   }
 
   m_OutTree->Fill();
+
+  weight = ev.GetWeight();
+  m_OutWeightTree->Fill();
 }
 
 std::vector<SKSNSimFileSet> GenerateOutputFileListNoRuntime(const SKSNSimUserConfiguration &conf){

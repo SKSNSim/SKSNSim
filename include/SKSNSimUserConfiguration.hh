@@ -234,6 +234,10 @@ class SKSNSimUserConfiguration{
 
     void Apply( SKSNSimVectorSNGenerator &gen ) const ;
     void Apply( SKSNSimVectorGenerator   &gen ) const ;
+
+  public:
+    static void ShowHelpDSNB(const char *argv0);
+    static void ShowHelpSN(const char *argv0);
 };
 
 

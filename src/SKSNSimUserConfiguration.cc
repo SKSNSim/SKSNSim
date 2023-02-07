@@ -84,7 +84,7 @@ bool SKSNSimUserConfiguration::CheckRuntimeFactor() const {
   return !badhealth;
 }
 
-void ShowHelpDSNB(const char *argv0){
+void SKSNSimUserConfiguration::ShowHelpDSNB(const char *argv0){
   std::cout << argv0
     << " [-c,--customflux {flux_filename}]"
     << " [--energy_min {energy_MeV}]"
@@ -126,7 +126,7 @@ void ShowHelpDSNB(const char *argv0){
     << std::endl;
 }
 
-void ShowHelpSN(const char *argv0){
+void SKSNSimUserConfiguration::ShowHelpSN(const char *argv0){
 
   std::cout << argv0
     << " [-h,--help]"
