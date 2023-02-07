@@ -5,8 +5,8 @@
  * Desctiption:
  *   Collection of enumeration for SKSNSim
  ***********************************/
-#ifndef __SKSNSIMENUM_H_INCLUDED__
-#define __SKSNSIMENUM_H_INCLUDED__
+#ifndef SKSNSIMENUM_H_INCLUDED
+#define SKSNSIMENUM_H_INCLUDED
 
 namespace SKSNSIMENUM {
   enum struct NEUTRINOOSCILLATION { kNONE = 0, kNORMAL, kINVERTED, kNNEUTRINOOSCILLATION};

@@ -4,8 +4,8 @@
  * Cross section interface
  *************************************/
 
-#ifndef __SKSNSIMCROSSSECTION_H_INCLUDED__
-#define __SKSNSIMCROSSSECTION_H_INCLUDED__
+#ifndef SKSNSIMCROSSSECTION_H_INCLUDED
+#define SKSNSIMCROSSSECTION_H_INCLUDED
 
 #include <utility>
 #include <memory>

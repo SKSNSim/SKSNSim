@@ -1,5 +1,5 @@
-#ifndef __SKSNSIMTOOLS_H_INCLUDED__
-#define __SKSNSIMTOOLS_H_INCLUDED__
+#ifndef SKSNSIMTOOLS_H_INCLUDED
+#define SKSNSIMTOOLS_H_INCLUDED
 
 #include <TString.h>
 #include <TRandom.h>

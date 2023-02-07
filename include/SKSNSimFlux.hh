@@ -5,8 +5,8 @@
  ****************************************/
 
 
-#ifndef __SKSNSIMFLUX_H_INCLUDED__
-#define __SKSNSIMFLUX_H_INCLUDED__
+#ifndef SKSNSIMFLUX_H_INCLUDED
+#define SKSNSIMFLUX_H_INCLUDED
 
 #include <vector>
 #include <utility>
