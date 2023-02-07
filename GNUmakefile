@@ -25,7 +25,7 @@ FCFLAGS += -w -fPIC -lstdc++
 
 LOCAL_INC	+= -I./include/
 
-LOCAL_LIBS	= -L$(SKOFL_LIBDIR) -lsnlib_1.0 -lsnevtinfo -lsollib_4.0 -lsklowe_7.0 -llibrary 
+LOCAL_LIBS	= -L$(SKOFL_LIBDIR) -lsnlib_1.0 -lsnevtinfo -lsollib_4.0 -lsklowe_7.0 -lwtlib_5.1 -llibrary 
 
 LDFLAGS = $(LOCAL_LIBS) $(LOCAL_INC)
 #INCROOT=-I$(ROOTSYS)/include/
@@ -47,6 +47,7 @@ MAINSRCS += $(wildcard *.F)
 MAINOBJS = $(patsubst %.cc, obj/%.o, $(MAINSRCS))
 MAINBINS = $(patsubst %.cc, bin/%, $(MAINSRCS))
 SKSNSIMLIBOBJS = $(filter obj/SKSNSim%, $(OBJS))
+SKSNSIMLIBOBJS += $(filter obj/elapseday%, $(OBJS))
 
 main: bin obj bin/main_snburst bin/main_dsnb bin/main_snburst_prev bin/main_dsnb_prev bin/main_dsnb_new bin/main_snburst_new
 
@@ -73,7 +74,7 @@ obj/%.o: %.cc
 
 obj/%.o: src/%.cc
 	@echo "[SKSNSim] Building $* ..."
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	@$(CXX) $(CXXFLAGS) -c $< -o $@
 
 obj/%.o: src/%.F
 	@echo "[SKSNSim] Building FORTRAN code: $*..."
@@ -97,15 +98,15 @@ bin/main_snburst_new: obj/main_snburst_new.o $(OBJS)
 
 bin/main_snburst: bin/main_snburst_prev
 	@${LN} main_snburst_prev $@
-	#@${LN} main_snburst_new $@
+# @${LN} main_snburst_new $@
 
 bin/main_dsnb: bin/main_dsnb_prev
 	@${LN} main_dsnb_prev $@
-	#@${LN} main_dsnb_new $@
+# @${LN} main_dsnb_new $@
 
 lib/libSKSNSim.so: $(SKSNSIMLIBOBJS)
 	@echo "[SKSNSim] Making shared library: $@..."
-	LD_RUN_PATH=$(SKOFL) $(CXX) $(LDFLAGS) $(CXXFLAGS) -shared -o $@ $(SKSNSIMLIBOBJS)  $(LDLIBS) #$(SKOFL_LIBDIR)/libsollib_4.0.a $(SKOFL_LIBDIR)/libsnlib_1.0.a $(SKOFL_LIBDIR)/libiolib.a
+	@LD_RUN_PATH=$(SKOFL) $(CXX) $(LDFLAGS) $(CXXFLAGS) -shared -o $@ $^ $(LDLIBS)
 
 obj bin lib:
 	@mkdir -p $@

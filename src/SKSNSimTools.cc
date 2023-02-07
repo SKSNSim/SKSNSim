@@ -6,6 +6,11 @@
 #include <algorithm>
 #include "SKSNSimTools.hh"
 
+extern "C" {
+  void elapseday_date_(int *, int *, int *, int *);
+  void elapseday_run_(int *, int *);
+}
+
 namespace SKSNSimTools {
   SKSNSIMENUM::SKPERIOD FindSKPeriod(int rn /* run_number */) {
     auto checkRange = [] (int t, int b, int e) {
@@ -30,6 +35,16 @@ namespace SKSNSimTools {
     return SKSNSIMENUM::SKPERIOD::NSKPERIOD;
   }
 
+  int elapseday(int yy, int mm, int dd){
+    int eladay = -1;
+    elapseday_date_(&yy, &mm, &dd, &eladay);
+    return eladay;
+  }
+  int elapseday(int run){
+    int eladay = -1;
+    elapseday_run_(&run, &eladay);
+    return eladay;
+  }
 }
 
 namespace SKSNSimLiveTime {

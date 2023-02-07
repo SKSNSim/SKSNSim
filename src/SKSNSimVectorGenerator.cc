@@ -9,11 +9,14 @@
 #include "SKSNSimConstant.hh"
 #include "SKSNSimCrosssection.hh"
 #include "SKSNSimTools.hh"
+#include <typeinfo>
+#include <Math/Integrator.h> // For flux x xsec integration via ROOT
 
 using namespace SKSNSimPhysConst;
 
 
-double SKSNSimVectorGenerator::FindMaxProb ( SKSNSimFluxModel &flux, SKSNSimCrosssectionModel &xsec){
+double SKSNSimVectorGenerator::FindMaxProb ( SKSNSimFluxModel &flux, SKSNSimCrosssectionModel &xsec, int elapseday){
+  const double time_max_flux = (elapseday==-1)?flux.FindMaxFluxTime(): elapseday;
   double maxP = 0.;
   const double ene_min = flux.GetEnergyLimitMin();
   const double ene_max = flux.GetEnergyLimitMax();
@@ -27,7 +30,7 @@ double SKSNSimVectorGenerator::FindMaxProb ( SKSNSimFluxModel &flux, SKSNSimCros
     const double ene =  ene_min +  diff_ene* double(i);
     for(size_t j = 0; j < nbin_cost; j++){
       const double cost =  cost_min +  diff_cost* double(i);
-      const double p = flux.GetFlux(ene, 0.0, SKSNSimFluxModel::FLUXNUEB) * xsec.GetDiffCrosssection(ene, cost).first;
+      const double p = flux.GetFlux(ene, time_max_flux, SKSNSimFluxModel::FLUXNUEB) * xsec.GetDiffCrosssection(ene, cost).first;
       if(maxP < p) maxP = p;
     }
   }
@@ -57,6 +60,32 @@ SKSNSimSNEventVector SKSNSimVectorGenerator::GenerateEventIBD() {
   if(xsecmodels.size() == 0) return ev;
   SKSNSimCrosssectionModel &xsec = *xsecmodels[0]; // TODO modify for user to select models
 
+  static int static_runnum = -1;
+  static int elapseday = -1;
+  static double max_prob_elapseday = -1.;
+  static double flux_integral = -1.;
+  if( static_runnum != m_runnum ){
+    static_runnum = m_runnum;
+    elapseday = SKSNSimTools::elapseday(m_runnum);
+    max_prob_elapseday = FindMaxProb(flux,xsec, elapseday);
+
+    ROOT::Math::IntegratorOneDimOptions::SetDefaultAbsTolerance(1.e-6);
+    ROOT::Math::IntegratorOneDimOptions::SetDefaultRelTolerance(1.e-6);
+    auto func = std::bind([](const SKSNSimFluxModel &f, const SKSNSimCrosssectionModel &s, double e, int &eladay) {
+      return f.GetFlux(e, eladay, SKSNSimFluxModel::FLUXNUEB) * s.GetCrosssection(e);
+    }, std::ref(flux), std::ref(xsec), std::placeholders::_1, elapseday);
+    ROOT::Math::Integrator ig;
+    ig.SetFunction(func);
+    flux_integral = ig.Integral(GetEnergyMin(), GetEnergyMax());
+
+    std::cout << "[GenerateEventIBD()] runnum = " << m_runnum << " => elapseday = " << elapseday << " maxP " << max_prob_elapseday << " integral(fluxXxsec) " << flux_integral << " m_runtime_factor " << m_runtime_factor << " weight " << flux_integral * SKSNSimTools::GetNTargetP(m_generator_volume) / m_runtime_factor  << std::endl;
+  }
+#ifdef DEBUG
+  std::cout << "[GenerateEventIBD()] runnum = " << m_runnum << " => elapseday = " << elapseday << std::endl;
+#endif
+  ev.SetWeight( flux_integral * SKSNSimTools::GetNTargetP(m_generator_volume) / m_runtime_factor);
+
+
   auto SQ = [](double a){ return a*a;};
 
   // determine neutrino and positron energy, and its direction
@@ -65,7 +94,7 @@ SKSNSimSNEventVector SKSNSimVectorGenerator::GenerateEventIBD() {
     nuEne = rng.Uniform( GetEnergyMin(), GetEnergyMax());
     ev.AddNRandomThrow(1);
 
-    const double nuFlux = flux.GetFlux(nuEne, 0.0, SKSNSimFluxModel::FLUXNUEB);
+    const double nuFlux = flux.GetFlux(nuEne, elapseday, SKSNSimFluxModel::FLUXNUEB);
 
     cost = rng.Uniform( -1., 1.);
     const auto xsecpair = xsec.GetDiffCrosssection(nuEne, cost);
@@ -116,7 +145,7 @@ SKSNSimSNEventVector SKSNSimVectorGenerator::GenerateEventIBD() {
         hPositionRange = ZPINTK;
         break;
       case SKSNSIMENUM::TANKVOLUME::kTANKFULL: //entire detector volume (including OD)
-        rPositionRange = DITKTK;
+        rPositionRange = RTKTK;
         hPositionRange = ZPTKTK;
         break;
       default: //entire ID volume
@@ -236,7 +265,6 @@ SKSNSimSNEventVector SKSNSimVectorGenerator::GenerateEventIBDFlat() {
   {
     double rPositionRange = RINTK;
     double hPositionRange = ZPINTK;
-    const double FVCUT = 200.;
     switch (t)
     {
       case SKSNSIMENUM::TANKVOLUME::kIDFV: //Fiducial volume
@@ -248,7 +276,7 @@ SKSNSimSNEventVector SKSNSimVectorGenerator::GenerateEventIBDFlat() {
         hPositionRange = ZPINTK;
         break;
       case SKSNSIMENUM::TANKVOLUME::kTANKFULL: //entire detector volume (including OD)
-        rPositionRange = DITKTK;
+        rPositionRange = RTKTK;
         hPositionRange = ZPTKTK;
         break;
       default: //entire ID volume
@@ -1001,7 +1029,7 @@ std::vector<SKSNSimSNEventVector> SKSNSimVectorSNGenerator::MakeEvent(const doub
         hPositionRange = ZPINTK;
         break;
       case SKSNSIMENUM::TANKVOLUME::kTANKFULL: //entire detector volume (including OD)
-        rPositionRange = DITKTK;
+        rPositionRange = RTKTK;
         hPositionRange = ZPTKTK;
         break;
       default: //entire ID volume
