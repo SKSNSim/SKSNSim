@@ -2,8 +2,8 @@
  * File: SKSNSimFileIO.hh
  **********************************/
 
-#ifndef __SKSNSIMFILEIO_H_INCLUDED__
-#define __SKSNSIMFILEIO_H_INCLUDED__
+#ifndef SKSNSIMFILEIO_H_INCLUDED
+#define SKSNSIMFILEIO_H_INCLUDED
 
 #include <TFile.h>
 #include <TTree.h>

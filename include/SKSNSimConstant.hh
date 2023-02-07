@@ -1,8 +1,8 @@
 /*********************************
  * SKSNSimConstant.hh
  ********************************/
-#ifndef __SKSNSIMCONSTANT_H_INCLUDED__
-#define __SKSNSIMCONSTANT_H_INCLUDED__
+#ifndef SKSNSIMCONSTANT_H_INCLUDED
+#define SKSNSIMCONSTANT_H_INCLUDED
 
 #include <cmath>
 #include <map>

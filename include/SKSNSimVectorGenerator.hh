@@ -5,8 +5,8 @@
  * Desctiption:
  *********************************/
 
-#ifndef __SKSNSIMVECTORGENERATOR_H_INCLUDED__
-#define __SKSNSIMVECTORGENERATOR_H_INCLUDED__
+#ifndef SKSNSIMVECTORGENERATOR_H_INCLUDED
+#define SKSNSIMVECTORGENERATOR_H_INCLUDED
 
 #include <memory>
 #include <mcinfo.h>

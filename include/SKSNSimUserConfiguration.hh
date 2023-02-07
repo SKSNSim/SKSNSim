@@ -6,8 +6,8 @@
  *   Configuration
  ***********************************/
 
-#ifndef __SKSNSIMUSERCONFIGURATION_H_INCLUDED__
-#define __SKSNSIMUSERCONFIGURATION_H_INCLUDED__
+#ifndef SKSNSIMUSERCONFIGURATION_H_INCLUDED
+#define SKSNSIMUSERCONFIGURATION_H_INCLUDED
 
 #include <cstdlib>
 #include <string>
