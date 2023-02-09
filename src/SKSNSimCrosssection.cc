@@ -14,6 +14,10 @@
 
 using namespace SKSNSimPhysConst;
 
+// This enable precise calculation of cross section of RVV model
+// #define RVVMODEL_INCLUDE_G2ANDSECONDCURRENT
+//#define DEBUG
+
 namespace SKSNSimCrosssection {
   double CalcIBDEnuFromEpos ( const double Epos /* MeV */, const double cosTheta ){
     constexpr double delta = Mn-Mp;
@@ -235,6 +239,197 @@ double SKSNSimXSecIBDVB::GetCrosssection(double enu) const
   //cout << totcsnuebp_SV << endl;
   return totcsnuebp_vb;
 }
+
+std::pair<double,double> SKSNSimXSecIBDRVV::GetDiffCrosssection(double Enu, double costheta) const {
+  /*
+   * Differential cross section
+   * Detail of reference are in header file
+   *
+   * Here, this try to keep same notation in the paper, mn, mp, Delta, etc.
+   * Trying to reduce calculation steps with using constexpr and so on
+   * since this function is called too much times for every throwning RNG in hit-and-miss method.
+   *
+   * Note: constexpr constants are calcualted at compiling.
+   * 
+   */
+
+  // Physics parameters
+  constexpr double Gf = 1.16637886e-11; // MeV^-2 // SKSNSimPhysConst::Gf * SKSNSimPhysConst::Gf * 1.0e-26; // cm^2. From global constant since no value in paper. Some of values refering SKSNSimPhysConst namespace are same.
+  constexpr double Gf2 = Gf * Gf;
+  constexpr double ALPHA = SKSNSimPhysConst::ALPHA;
+  constexpr double cos2ThetaC = SKSNSimPhysConst::costheta_cabibo * SKSNSimPhysConst::costheta_cabibo;
+  constexpr double HBARC2 = SKSNSimPhysConst::HBARC * SKSNSimPhysConst::HBARC * 1e-26; // MeV^2 * cm^2
+  constexpr double Mp  = SKSNSimPhysConst::Mp;
+  constexpr double InvMp = 1.0 / Mp;
+  constexpr double Mp2 = Mp * Mp;
+  constexpr double Mn  = SKSNSimPhysConst::Mn;
+  constexpr double Mn2 = Mn * Mn;
+  constexpr double Me2 = SKSNSimPhysConst::Me * SKSNSimPhysConst::Me;
+  constexpr double Delta  = (Mn - Mp);
+  constexpr double Delta2 = Delta * Delta;
+  constexpr double M   = (Mp + Mn) * 0.5;
+  constexpr double M2  = M * M;
+  constexpr double InvM  = 1.0 / M; // To avoid division
+  constexpr double InvM2 = 1.0 / M2; // To avoid division
+  constexpr double MA2   = 1.014e3 /* +- 0.014e3 */ * 1.014e3; // MeV^2 (axial mass)^2
+  constexpr double InvMA2= 1.0 / MA2;
+  constexpr double mag_moment_p =  1.793;
+  constexpr double mag_moment_n = -1.913;
+  constexpr double diff_mag_moment = mag_moment_p - mag_moment_n;
+  constexpr double axial_coupling_lambda = 1.27605; // +- 0.00001
+  constexpr double f1_at_t0 = 1.0;
+  constexpr double f2_at_t0 = 1.0;
+  constexpr double delta = (Mn2 - Mp2 - Me2)*0.5/Mp; // from eq12 of ref2
+  constexpr double Ethr = ((Mn + Me)*(Mn+Me) - Mp2)*0.5/Mp;
+
+  // Calculation of Ee from Enu and costheta (eq 21 of ref2)
+  const double epsilon = Enu * InvMp;
+  const double kappa = (1.0 + epsilon * (1.0 + costheta)) * ( 1.0 + epsilon * ( 1.0 - costheta));
+  const double Ee_sqrt_int = (Enu - delta) * (Enu - delta) - Me2 * kappa;
+  const double Ee /* MeV */ = ( (Enu - delta) * (1.0 + epsilon) + epsilon * costheta * sqrt(Ee_sqrt_int) ) / kappa;
+  const double Pe = sqrt( Ee * Ee - Me2);
+
+
+  // Calculation of Mandelstam variables in rest frame of proton
+  const double t  =  Mp * ( (Mn + Mp)*(Mn*InvMp - 1.0) - 2.0 * ( Enu - Ee ));
+  const double s_minus_u   = 2.0 * Mp * ( Enu + Ee ) - Me2;
+  const double s_minus_Mp2 = 2.0 * Mp * Enu;
+  const double t2 = t * t;
+#ifdef DEBUG
+  std::cout << "[SKSNSimXSecIBDRVV] Mandelstam " << t << " " << s_minus_u << " " << s_minus_Mp2 << std::endl;
+#endif
+
+  auto f1_func = [f1_at_t0](double t /* MeV */) {
+    double f = f1_at_t0;
+    double cor = 2.41e-6 /* +- 0.02e-6 */ * t; // From bottom of p11
+    return f + cor;
+  };
+  auto f2_func = [diff_mag_moment, f2_at_t0](double t /* MeV */) {
+    double f = f2_at_t0;
+    double cor = 3.21e-6 /* +- 0.02e-6 */ * t; // From bottom of p11
+    return diff_mag_moment * (f + cor);
+  };
+  auto g1_func = [InvMA2, axial_coupling_lambda, f1_at_t0](double t /* MeV */){
+    double g = - axial_coupling_lambda * f1_at_t0;
+    double a = 1.0 - t * InvMA2;
+    return g / ( a * a );
+  };
+
+  const double f1 = f1_func(t);
+  const double f2 = f2_func(t);
+  const double g1 = g1_func(t);
+  const double f1f1 = f1 * f1;
+  const double f2f2 = f2 * f2;
+  const double g1g1 = g1 * g1;
+  const double f1f2 = f1 * f2;
+#ifdef DEBUG
+  std::cout << "[SKSNSimXSecIBDRVV] f1 f2 g1 " << f1 << " " << f2 << " " << g1 << " " << (f1+g1)*(f1-g1) << " " << f1f1 - g1g1 << std::endl;
+#endif
+
+
+  // Each component of matrix element
+  // Those are from eq (XXXXX)
+  // As written in the paper, g2 and second current compoents , which are commented out by macro, are negligible.
+  const double Ascc = 0.0; // Neglegeble
+  const double Anu1 = ( t - Me2 ) * (
+      32.0 * (f1 + g1) * (f1 - g1) * M2
+      + 8.0 * (f1f1 + g1g1) * (t + Me2)
+      + 2.0 * f2f2 * (t2 * InvM2 + 4.0 * t + 4 * Me2)
+#ifdef RVVMODEL_INCLUDE_G2ANDSECONDCURRENT
+      + 8.0 * Me2 * t * g2g2 / M2 
+#endif
+      + 16.0 * f1f2 * ( 2.0 * t + Me2 )
+#ifdef RVVMODEL_INCLUDE_G2ANDSECONDCURRENT
+      + 32.0 * Me2 * g1 * g2
+#endif
+      );
+  const double Anu2 =  - Delta2 * (
+         8.0 * t * f2f2
+        + ( 8.0 * (f1 + g1) * (f1 -g1) + 2.0 * t * f2f2 * InvM2) * (t - Me2)
+        + 32.0 * (f1f1 + g1g1) * M2
+#ifdef RVVMODEL_INCLUDE_G2ANDSECONDCURRENT
+        + 8.0 * Me2 * g2g2 * ( t - Me2) / M2
+#endif
+        + 16.0 * f1f2 * ( 2.0 * t - Me2)
+#ifdef RVVMODEL_INCLUDE_G2ANDSECONDCURRENT
+        + 32.0 * Me2 * g1 * g2
+#endif
+        );
+  const double Anu3 = - 64.0 * Me2 * M * Delta * g1 * (f1 + f2);
+
+  const double Anu = Anu1 + Anu2  + Anu3
+#ifdef RVVMODEL_INCLUDE_G2ANDSECONDCURRENT
+    + Ascc
+#endif
+    ;
+#ifdef DEBUG
+  std::cout <<"[SKSNSimXSecIBDRVV] Anu components " << Enu << " " << Anu << " " <<  Anu1 << "  " << Anu2 << " " << Anu3 << std::endl;
+#endif
+  
+  const double Bscc = 0.0; // Negligible
+  const double Bnu = 32.0 * t * g1 * (f1 + f2)
+    + 8.0 * Me2 * Delta * (f2f2
+        + f1f2
+#ifdef RVVMODEL_INCLUDE_G2ANDSECONDCURRENT
+        + 2 g1g2
+#endif
+        ) * InvM
+#ifdef RVVMODEL_INCLUDE_G2ANDSECONDCURRENT
+    + Bscc
+#endif
+    ;
+
+  const double Cscc = 0.0; // Negligible
+  const double Cnu = 8.0 * ( f1f1 + g1g1 )
+    -2.0 * t * f2f2 * InvM2
+#ifdef RVVMODEL_INCLUDE_G2ANDSECONDCURRENT
+    + Cscc
+#endif
+    ;
+
+
+  const double matrix_element2 = Anu - s_minus_u * Bnu + s_minus_u * s_minus_u * Cnu;
+
+  const double dsigma_per_dt = Gf2 * cos2ThetaC * matrix_element2 / ( 64.0 * M_PI * ( s_minus_Mp2 ) * ( s_minus_Mp2 ));
+
+#ifdef DEBUG
+  std::cout << "[SKSNSimXSecIBDRVV] dsigma_per_dt " << Enu << " " << dsigma_per_dt << " "  << matrix_element2 << " " << Anu << " " << Bnu << " " << s_minus_u * Bnu << " " << Cnu << " " << s_minus_Mp2 * Cnu << Ethr << std::endl;
+#endif
+
+  const double radiative_correction = ALPHA / M_PI * ( 6.0 + 1.5 * log(Mp * 0.5 / Ee) + 1.2 * pow(Me / Ee, 1.5)); // p6
+
+  // Jacobian to convert from dSigma/dt to dSigma/dCosTheta 
+  constexpr double dt_per_dEe /* MeV */ = 2.0 * Mp;
+  const double dEe_per_dcostheta /* MeV */ = Pe * epsilon / ( 1.0 + epsilon * ( 1.0 - Ee * costheta / Pe) );
+  const double dsigma_per_dconstheta /* cm^2 */ = dsigma_per_dt * dt_per_dEe * dEe_per_dcostheta * HBARC2 * ( 1.0 + radiative_correction);
+  
+  return std::make_pair(dsigma_per_dconstheta,Ee);
+}
+
+double SKSNSimXSecIBDRVV::GetCrosssection(double enu) const {
+  // TODO this is tentative implementation
+  double totcsnuebp_RVV = 0;
+  const double Ee = enu - DeltaM;
+  if(Ee <= Me) return 0.0;
+
+  constexpr double COSTHETARANGELOW  = -1.;
+  constexpr double COSTHETARANGEHIGH =  1.;
+  constexpr int    NBIN = 200;
+  constexpr double BINWIDTH = (COSTHETARANGEHIGH - COSTHETARANGELOW)/double(NBIN);
+  constexpr double HALFBINWIDTH = BINWIDTH / 2.0;
+  constexpr double COSTHETARANGELOWINCLBIAS = COSTHETARANGELOW + HALFBINWIDTH;
+  for(int b=0; b<NBIN; b++){
+    double costheta = COSTHETARANGELOWINCLBIAS + BINWIDTH * double(b);
+    double dcs0, Epo0;
+    auto result = GetDiffCrosssection(enu, costheta);
+    totcsnuebp_RVV += result.first;
+  }
+  totcsnuebp_RVV *= BINWIDTH;
+
+  //cout << totcsnuebp_SV << endl;
+  return totcsnuebp_RVv;
+}
+
 
 double SKSNSimXSecNuElastic::GetCrosssection(double enu, int ipart, FLAGETHR flag) const
 {

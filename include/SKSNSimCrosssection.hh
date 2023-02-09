@@ -74,6 +74,16 @@ class SKSNSimXSecIBDSV : public SKSNSimCrosssectionModel {
     std::pair<double,double> GetDiffCrosssection(double, double) const;
 };
 
+class SKSNSimXSecIBDRVV : public SKSNSimCrosssectionModel {
+  // Cross section model of IBD by Ricciardi-Vignaroli-Vissani (DOI: https://doi.org/10.1007/JHEP08(2022)212)
+  private:
+  public:
+    SKSNSimXSecIBDRVV(){}
+    ~SKSNSimXSecIBDRVV(){}
+    double GetCrosssection(double) const;
+    std::pair<double,double> GetDiffCrosssection(double, double) const;
+};
+
 class SKSNSimXSecNuElastic : public SKSNSimCrosssectionModel {
   // Cross section model of neutrino elastic scattering
   private:
