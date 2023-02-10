@@ -249,38 +249,21 @@ std::pair<double,double> SKSNSimXSecIBDRVV::GetDiffCrosssection(double Enu, doub
    * Trying to reduce calculation steps with using constexpr and so on
    * since this function is called too much times for every throwning RNG in hit-and-miss method.
    *
-   * Note: constexpr constants are calcualted at compiling.
-   * 
+   * Note:
+   *  - physics constants are listed in header file
+   *  - constexpr constants are calcualted at compiling.
    */
 
-  // Physics parameters
-  constexpr double Gf = 1.16637886e-11; // MeV^-2 // SKSNSimPhysConst::Gf * SKSNSimPhysConst::Gf * 1.0e-26; // cm^2. From global constant since no value in paper. Some of values refering SKSNSimPhysConst namespace are same.
-  constexpr double Gf2 = Gf * Gf;
-  constexpr double ALPHA = SKSNSimPhysConst::ALPHA;
-  constexpr double cos2ThetaC = SKSNSimPhysConst::costheta_cabibo * SKSNSimPhysConst::costheta_cabibo;
-  constexpr double HBARC2 = SKSNSimPhysConst::HBARC * SKSNSimPhysConst::HBARC * 1e-26; // MeV^2 * cm^2
-  constexpr double Mp  = SKSNSimPhysConst::Mp;
-  constexpr double InvMp = 1.0 / Mp;
-  constexpr double Mp2 = Mp * Mp;
-  constexpr double Mn  = SKSNSimPhysConst::Mn;
-  constexpr double Mn2 = Mn * Mn;
-  constexpr double Me2 = SKSNSimPhysConst::Me * SKSNSimPhysConst::Me;
-  constexpr double Delta  = (Mn - Mp);
-  constexpr double Delta2 = Delta * Delta;
-  constexpr double M   = (Mp + Mn) * 0.5;
-  constexpr double M2  = M * M;
-  constexpr double InvM  = 1.0 / M; // To avoid division
-  constexpr double InvM2 = 1.0 / M2; // To avoid division
-  constexpr double MA2   = 1.014e3 /* +- 0.014e3 */ * 1.014e3; // MeV^2 (axial mass)^2
-  constexpr double InvMA2= 1.0 / MA2;
-  constexpr double mag_moment_p =  1.793;
-  constexpr double mag_moment_n = -1.913;
-  constexpr double diff_mag_moment = mag_moment_p - mag_moment_n;
-  constexpr double axial_coupling_lambda = 1.27605; // +- 0.00001
+  if( Enu <= Ethr ){
+    std::cerr << "[SKSNSimXSecIBDRVV] Enu is smaller than threshold ( Enu = " << Enu << " <= " << Ethr << std::endl;
+    return std::make_pair(0, 0);
+  }
+
   constexpr double f1_at_t0 = 1.0;
   constexpr double f2_at_t0 = 1.0;
-  constexpr double delta = (Mn2 - Mp2 - Me2)*0.5/Mp; // from eq12 of ref2
-  constexpr double Ethr = ((Mn + Me)*(Mn+Me) - Mp2)*0.5/Mp;
+  constexpr double diff_mag_moment = mag_moment_p - mag_moment_n;
+  constexpr double InvMA2= 1.0 / MA2;
+  constexpr double axial_coupling_lambda = 1.27605; // +- 0.00001
 
   // Calculation of Ee from Enu and costheta (eq 21 of ref2)
   const double epsilon = Enu * InvMp;
@@ -406,28 +389,30 @@ std::pair<double,double> SKSNSimXSecIBDRVV::GetDiffCrosssection(double Enu, doub
   return std::make_pair(dsigma_per_dconstheta,Ee);
 }
 
-double SKSNSimXSecIBDRVV::GetCrosssection(double enu) const {
-  // TODO this is tentative implementation
+double SKSNSimXSecIBDRVV::GetCrosssection(double Enu /* MeV */) const {
+  if( Enu <= Ethr ){
+    std::cerr << "[SKSNSimXSecIBDRVV] Enu is smaller than threshold ( Enu = " << Enu << " <= " << Ethr << std::endl;
+    return 0;
+  }
   double totcsnuebp_RVV = 0;
-  const double Ee = enu - DeltaM;
-  if(Ee <= Me) return 0.0;
 
   constexpr double COSTHETARANGELOW  = -1.;
   constexpr double COSTHETARANGEHIGH =  1.;
-  constexpr int    NBIN = 200;
+  constexpr size_t NBIN = 200;
   constexpr double BINWIDTH = (COSTHETARANGEHIGH - COSTHETARANGELOW)/double(NBIN);
   constexpr double HALFBINWIDTH = BINWIDTH / 2.0;
   constexpr double COSTHETARANGELOWINCLBIAS = COSTHETARANGELOW + HALFBINWIDTH;
-  for(int b=0; b<NBIN; b++){
+  for(size_t b=0; b<NBIN; b++){
     double costheta = COSTHETARANGELOWINCLBIAS + BINWIDTH * double(b);
-    double dcs0, Epo0;
-    auto result = GetDiffCrosssection(enu, costheta);
+    auto result = GetDiffCrosssection(Enu, costheta);
     totcsnuebp_RVV += result.first;
   }
   totcsnuebp_RVV *= BINWIDTH;
 
-  //cout << totcsnuebp_SV << endl;
-  return totcsnuebp_RVv;
+#ifdef DEBUG
+  std::cout << totcsnuebp_SV << std::endl;
+#endif
+  return totcsnuebp_RVV;
 }
 
 

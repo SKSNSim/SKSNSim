@@ -13,6 +13,7 @@
 #include <pdg_codes.h>
 #include <TFile.h>
 #include <TTree.h>
+#include "SKSNSimConstant.hh"
 
 
 extern "C" {
@@ -77,6 +78,29 @@ class SKSNSimXSecIBDSV : public SKSNSimCrosssectionModel {
 class SKSNSimXSecIBDRVV : public SKSNSimCrosssectionModel {
   // Cross section model of IBD by Ricciardi-Vignaroli-Vissani (DOI: https://doi.org/10.1007/JHEP08(2022)212)
   private:
+  // Physics parameters
+    static constexpr double Gf = 1.16637886e-11; // MeV^-2 from PDG 2022
+    static constexpr double Gf2 = Gf * Gf;
+    static constexpr double ALPHA = SKSNSimPhysConst::ALPHA; // From global constant since no value in paper. Some of values refering SKSNSimPhysConst namespace are same.
+    static constexpr double cos2ThetaC = SKSNSimPhysConst::costheta_cabibo * SKSNSimPhysConst::costheta_cabibo;
+    static constexpr double HBARC2 = SKSNSimPhysConst::HBARC * SKSNSimPhysConst::HBARC * 1e-26; // MeV^2 * cm^2
+    static constexpr double Mp  = SKSNSimPhysConst::Mp;
+    static constexpr double InvMp = 1.0 / Mp;
+    static constexpr double Mp2 = Mp * Mp;
+    static constexpr double Mn  = SKSNSimPhysConst::Mn;
+    static constexpr double Mn2 = Mn * Mn;
+    static constexpr double Me2 = SKSNSimPhysConst::Me * SKSNSimPhysConst::Me;
+    static constexpr double Delta  = (Mn - Mp);
+    static constexpr double Delta2 = Delta * Delta;
+    static constexpr double M   = (Mp + Mn) * 0.5;
+    static constexpr double M2  = M * M;
+    static constexpr double InvM  = 1.0 / M; // To avoid division
+    static constexpr double InvM2 = 1.0 / M2; // To avoid division
+    static constexpr double MA2   = 1.014e3 /* +- 0.014e3 */ * 1.014e3; // MeV^2 (axial mass)^2
+    static constexpr double mag_moment_p =  1.793;
+    static constexpr double mag_moment_n = -1.913;
+    static constexpr double delta = (Mn2 - Mp2 - Me2)*0.5/Mp; // from eq12 of ref2
+    static constexpr double Ethr = ((SKSNSimPhysConst::Mn + SKSNSimPhysConst::Me)*(SKSNSimPhysConst::Mn + SKSNSimPhysConst::Me) - SKSNSimPhysConst::Mp * SKSNSimPhysConst::Mp)*0.5/SKSNSimPhysConst::Mp;
   public:
     SKSNSimXSecIBDRVV(){}
     ~SKSNSimXSecIBDRVV(){}
