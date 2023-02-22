@@ -15,8 +15,11 @@
 using namespace SKSNSimPhysConst;
 
 // This enable precise calculation of cross section of RVV model
-//#define RVVMODEL_INCLUDE_G2ANDSECONDCURRENT
+#define RVVMODEL_INCLUDE_G2
+//#define RVVMODEL_INCLUDE_SECONDCURRENT
 //#define RVVMODEL_DETAIL_FORMFACTOR_CALCULATION
+#define RVVMODEL_DIPOLE_FORMFACTOR_G1
+#define RVVMODEL_FINETUNED_AXIAL_RADIUS
 //#define DEBUG
 
 namespace SKSNSimCrosssection {
@@ -257,15 +260,35 @@ std::pair<double,double> SKSNSimXSecIBDRVV::GetDiffCrosssection(double Enu, doub
 
   // Physics parameters
   constexpr double Gf = 1.16637886e-11; // MeV^-2 from PDG 2022
-  constexpr double Gf2 = Gf * Gf;
   constexpr double ALPHA = SKSNSimPhysConst::ALPHA; // From global constant since no value in paper. Some of values refering SKSNSimPhysConst namespace are same.
-  constexpr double Vud = 0.9742732; // +- 0.000005 from eq(24)
-  constexpr double cos2ThetaC = Vud * Vud;
+  constexpr double Vud = 0.97427; // +- 0.00032 from eq(24)
   constexpr double HBARC2 = SKSNSimPhysConst::HBARC * SKSNSimPhysConst::HBARC * 1e-26; // MeV^2 * cm^2
+
   // Mass of particles
   constexpr double Mp  = SKSNSimPhysConst::Mp;
   constexpr double Mn  = SKSNSimPhysConst::Mn;
   constexpr double Me  = SKSNSimPhysConst::Me;
+
+  // Neutrino interaction: axial/vector mass for formfactor
+  constexpr double axial_raddius2 /* MeV^-2 */ = 
+#ifdef RVVMODEL_FINETUNED_AXIAL_RADIUS
+#ifdef RVVMODEL_DIPOLE_FORMFACTOR_G1
+    0.9508066 * 0.9508066 * // From private communication with N.Vignaroli
+#else
+    0.885 *
+#endif
+#endif
+    0.46 /* +- 0.16 [fm^2] */ * 1e-26 /* [cm^2 / fm^2] */ / HBARC2;
+  constexpr double MV2   = 0.71e6 /* MeV^2 */; // from footnote of eq(30) but this is ignored unless RVVMODEL_DETAIL_FORMFACTOR_CALCULATION is commented out
+  constexpr double mag_moment_p =  1.793; // from center of p11 
+  constexpr double mag_moment_n = -1.913;
+  constexpr double f1_at_t0 = 1.0;
+  constexpr double f2_at_t0_over_xi = 1.0;
+  constexpr double axial_coupling_lambda = 1.27601; // +- 0.00052 // eq(24)
+
+  // Pre-calculated variables
+  constexpr double Gf2 = Gf * Gf;
+  constexpr double cos2ThetaC = Vud * Vud;
   constexpr double Mp2 = Mp * Mp;
   constexpr double Mn2 = Mn * Mn;
   constexpr double Me2 = Me*Me;
@@ -278,18 +301,10 @@ std::pair<double,double> SKSNSimXSecIBDRVV::GetDiffCrosssection(double Enu, doub
   constexpr double InvM2 = 1.0 / M2; // To avoid division
   constexpr double delta =  (Mn2 - Mp2 - Me2)*0.5/Mp; // from eq12 of ref2
   constexpr double Ethr = ((Mn + Me)*(Mn + Me) - Mp2)*0.5/Mp;
-  // Neutrino interaction: axial/vector mass for formfactor
-  constexpr double axial_raddius2 /* MeV^-2 */ = /* 0.885 */ 0.46 /* +- 0.16 fm^2 */ * 1e-26 /* cm^2 / fm^2 */ / HBARC2;
   constexpr double MA2   = 12.0 / axial_raddius2;
-  constexpr double MV2   = 0.71e6 /* MeV^2 */; // from footnote of eq(30) but this is ignored unless RVVMODEL_DETAIL_FORMFACTOR_CALCULATION is commented out
-  constexpr double mag_moment_p =  1.793; // from center of p11 
-  constexpr double mag_moment_n = -1.913;
-  constexpr double f1_at_t0 = 1.0;
-  constexpr double f2_at_t0_over_xi = 1.0;
   constexpr double diff_mag_moment = mag_moment_p - mag_moment_n;
   constexpr double InvMA2= 1.0 / MA2;
   constexpr double InvMV2= 1.0 / MV2;
-  constexpr double axial_coupling_lambda = 1.2760152; // +- 0.00001 // eq(24)
 
 
   if( Enu <= Ethr ){
@@ -343,21 +358,22 @@ std::pair<double,double> SKSNSimXSecIBDRVV::GetDiffCrosssection(double Enu, doub
   };
 #endif
   auto g1_func =
-#ifdef RVVMODEL_DETAIL_FORMFACTOR_CALCULATION
-    [](double t /* MeV^2 */) {
+#ifdef RVVMODEL_DIPOLE_FORMFACTOR_G1
+    [axial_coupling_lambda, f1_at_t0, InvMA2](double t /* MeV^2 */) {
       double g = - axial_coupling_lambda * f1_at_t0;
       double top    = 1.0;
       double bottom = (1.0 - t * InvMA2) * (1.0 - t * InvMA2);
       return g * top / bottom;
     };
 #else
-    [] (double t /* MeV^2 */ ){
+    [axial_coupling_lambda, f1_at_t0] (double t /* MeV^2 */ ){
       constexpr double g = - axial_coupling_lambda * f1_at_t0;
       constexpr double cor = axial_raddius2 / 6.0;
       return g * ( 1.0 + cor * t);
     };
 #endif
-  auto g2_func = [] (double t /* MeV */, double g1){
+  auto g2_func = [M2] (double t /* MeV */, double g1){
+    // from eq(7) of ref [2]
     const double Mpi = SKSNSimPhysConst::Mpi;
     return 2.0 * M2 * g1 / ( Mpi*Mpi - t );
   };
@@ -390,7 +406,7 @@ std::pair<double,double> SKSNSimXSecIBDRVV::GetDiffCrosssection(double Enu, doub
   // Those are from eq (XXXXX)
   // As written in the paper, g2 and second current compoents , which are commented out by macro, are negligible.
   const double Ascc = 0.0 
-#ifdef RVVMODEL_INCLUDE_G2ANDSECONDCURRENT
+#ifdef RVVMODEL_INCLUDE_SECONDCURRENT
     - 2.0 * t * ( 4.0 - t * InvM2) * (
         4.0 * Me2 * f3f3 * + g3g3 * ( t - Me2)
         + 8.0 * Delta * M * g1g3 
@@ -403,22 +419,22 @@ std::pair<double,double> SKSNSimXSecIBDRVV::GetDiffCrosssection(double Enu, doub
         8.0 * f1f1 * (4.0*M2+t+Me2)
         + 8.0 * g1g1 * (-4.0*M2+t+Me2)
         + 2.0 * f2f2 * (t2*InvM2+4.0*t+4.0*Me2)
-#ifdef RVVMODEL_INCLUDE_G2ANDSECONDCURRENT
+#ifdef RVVMODEL_INCLUDE_G2
         + 8.0 * Me2 * t * g2g2 * InvM2
 #endif
         + 16.0 * f1f2 * (2.0*t+Me2)
-#ifdef RVVMODEL_INCLUDE_G2ANDSECONDCURRENT
+#ifdef RVVMODEL_INCLUDE_G2
         + 32.0 * Me2 * g1g2
 #endif
         )
     - Delta2 * (
         (8.0*f1f1 + 2.0*t*f2f2*InvM2) * (4.0*M2+t-Me2)
         + 8.0 * g1g1 * (4.0*M2-t+Me2)
-#ifdef RVVMODEL_INCLUDE_G2ANDSECONDCURRENT
+#ifdef RVVMODEL_INCLUDE_G2
         + 8.0 * Me2 * g2g2 * (t-Me2) * InvM2
 #endif
         + 16.0 * f1f2 * (2.0*t-Me2)
-#ifdef RVVMODEL_INCLUDE_G2ANDSECONDCURRENT
+#ifdef RVVMODEL_INCLUDE_G2
         + 32.0 * Me2 * g1g2
 #endif
         )
@@ -426,7 +442,7 @@ std::pair<double,double> SKSNSimXSecIBDRVV::GetDiffCrosssection(double Enu, doub
     + Ascc;
 
   const double Bscc = 0.0
-#ifdef RVVMODEL_INCLUDE_G2ANDSECONDCURRENT
+#ifdef RVVMODEL_INCLUDE_SECONDCURRENT
     + 8.0 * Me2 * (
         4.0 * f1f3 
         + f2f3 * t * InvM2
@@ -442,7 +458,7 @@ std::pair<double,double> SKSNSimXSecIBDRVV::GetDiffCrosssection(double Enu, doub
     + 8.0 * Me2 * Delta * (
         f2f2
         +f1f2
-#ifdef RVVMODEL_INCLUDE_G2ANDSECONDCURRENT
+#ifdef RVVMODEL_INCLUDE_G2
         +2.0*g1g2
 #endif
         ) * InvM
@@ -450,7 +466,7 @@ std::pair<double,double> SKSNSimXSecIBDRVV::GetDiffCrosssection(double Enu, doub
 
 
   const double Cscc = 0.0 
-#ifdef RVVMODEL_INCLUDE_G2ANDSECONDCURRENT
+#ifdef RVVMODEL_INCLUDE_SECONDCURRENT
     - 2.0 * g3g3 * t * InvM2
 #endif
     ;
@@ -506,31 +522,15 @@ double SKSNSimXSecIBDRVV::GetCrosssection(double Enu /* MeV */) const {
   return totcsnuebp_RVV;
 }
 
-//double SKSNSimXSecIBDRVV::GetCrosssectionError(double Enu /* MeV */, bool conservative_case) const {
-//  const double delta_sigm_VudLambda_perc = [conservative_case](double Enu){return (conservative_case? 0.94e-2: 0.52e-2);} (Enu);
-//  const double delta_ra /* MeV */ = 0.16 /* fm^2 */ * 1e-26 * HBARC2;
-//  const double delta_sigm_ra_perc = [delta_ra, matrix_element2](double Enu) {
-//    const double costheta = 0.0;
-//    const double epsilon = Enu * InvMp;
-//    const double kappa = (1.0 + epsilon * (1.0 + costheta)) * ( 1.0 + epsilon * ( 1.0 - costheta));
-//    const double Ee_sqrt_int = (Enu - delta) * (Enu - delta) - Me2 * kappa;
-//    const double Ee /* MeV */ = ( (Enu - delta) * (1.0 + epsilon) + epsilon * costheta * sqrt(Ee_sqrt_int) ) / kappa;
-//    const double t  =  Mp * ( (Mn + Mp)*(Mn*InvMp - 1.0) - 2.0 * ( Enu - Ee ));
-//    const double s_minus_u   = 2.0 * Mp * ( Enu + Ee ) - Me2;
-//    const double s_minus_Mp2 = 2.0 * Mp * Enu;
-//    const double t2 = t * t;
-//
-//    const double d_mat_elem_dg1 =  (t - Me2 - Delta2) * 16.0 * g1 * ( 4.0 * M2 - t + Me2) - 64.0 * Me2 * M * Delta * ( f1 + f2)
-//      - (s_minus_u) * 32.0 * t * (f1+f2)
-//      + s_minus_u * s_minus_u * 16 * g1;
-//    const double dg1_dra = 2 * g1 / (sqrt(3.0)  * ( MA2 / t - 1.0));
-//    const double d_mat_elem_dra = d_mat_elem_dg1 * dg1_dra;
-//
-//    return 0.0;
-//  }(Enu);
-//
-//  return sqrt(delta_sigm_VudLambda_perc *delta_sigm_VudLambda_perc + delta_sigm_ra_perc * delta_sigm_ra_perc);
-//}
+double SKSNSimXSecIBDRVV::GetCrosssectionError(double Enu /* MeV */) const {
+  /* Simple approximation of uncertainty in ref[1]. See detail in header file. */
+  constexpr double delta_vud_lambda = 9.4e-4;
+  double delta_axial_radii = [](double Enu){
+    return 2.0e-6 * pow( Enu , 2.0 );
+  } ( Enu );
+
+  return sqrt(delta_vud_lambda * delta_vud_lambda + delta_axial_radii * delta_axial_radii );
+}
 
 
 double SKSNSimXSecNuElastic::GetCrosssection(double enu, int ipart, FLAGETHR flag) const

@@ -31,7 +31,7 @@ int main(int argc, char **argv){
 
   /* Setup of flux model and xsec model */
   auto flux = std::make_unique<SKSNSimDSNBFluxCustom>( config->GetDSNBFluxModel() );
-  auto xsec = std::make_unique<SKSNSimXSecIBDSV>();
+  auto xsec = std::make_unique<SKSNSimXSecIBDRVV>();
   vectgen->AddFluxModel((SKSNSimFluxModel*)flux.release());
   vectgen->AddXSecModel((SKSNSimCrosssectionModel*)xsec.release());
 
