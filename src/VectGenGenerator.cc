@@ -339,9 +339,9 @@ void VectGenGenerator::determineKinematics( const int nReact, const double nuEne
 			determineNmomentum(x, y, z);
 			mc->ipvc[3] = 22; // gamma
 			mc->energy[3] = eneGamN[channel]; // ENERGY ( MEV )
-			mc->pvc[3][0] = x*mc->energy[2];
-		    mc->pvc[3][1] = y*mc->energy[2];
-			mc->pvc[3][2] = z*mc->energy[2];
+			mc->pvc[3][0] = x*mc->energy[3];
+		    mc->pvc[3][1] = y*mc->energy[3];
+			mc->pvc[3][2] = z*mc->energy[3];
 			mc->iorgvc[3] = 1; // ID OF ORIGINAL PARTICLE PARENT PARTICLE
 			mc->ivtivc[3] = 1; // VERTEX # ( INITIAL )
 			mc->iflgvc[3] = 0; // FINAL STATE FLAG
@@ -369,9 +369,9 @@ void VectGenGenerator::determineKinematics( const int nReact, const double nuEne
 			determineNmomentum(x, y, z);
 			mc->ipvc[3] = 22; // gamma
 			mc->energy[3] = eneGamN[channel]; // ENERGY ( MEV )
-			mc->pvc[3][0] = x*mc->energy[2];
-		    mc->pvc[3][1] = y*mc->energy[2];
-			mc->pvc[3][2] = z*mc->energy[2];
+			mc->pvc[3][0] = x*mc->energy[3];
+		    mc->pvc[3][1] = y*mc->energy[3];
+			mc->pvc[3][2] = z*mc->energy[3];
 			mc->iorgvc[3] = 1; // ID OF ORIGINAL PARTICLE PARENT PARTICLE
 			mc->ivtivc[3] = 1; // VERTEX # ( INITIAL )
 			mc->iflgvc[3] = 0; // FINAL STATE FLAG
