@@ -186,6 +186,8 @@ class SKSNSimUserConfiguration{
     SKSNSimUserConfiguration &SetVectorGeneration(bool f) { m_eventvector_generation = f; return *this;}
     SKSNSimUserConfiguration &SetNeutrinoOscType( SKSNSIMENUM::NEUTRINOOSCILLATION t) { m_nuosc_type = t; return *this; }
     SKSNSimUserConfiguration &SetNeutrinoOscType( int t) { m_nuosc_type = (SKSNSIMENUM::NEUTRINOOSCILLATION)t; return *this; }
+    SKSNSimUserConfiguration &SetRunnum(int r) { m_runnum = r; return *this; }
+    SKSNSimUserConfiguration &SetSubRunnum(int r) { m_subrunnum = r; return *this; }
 
     /* Event range related */
     double GetFluxEnergyMin() const { return m_energy_min;}

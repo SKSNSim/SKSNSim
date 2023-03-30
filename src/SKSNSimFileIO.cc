@@ -87,7 +87,7 @@ void SKSNSimFileOutTFile::Write(const SKSNSimSNEventVector &ev){
   }
 
   m_MC->mcrun = ev.GetRunnum();
-  m_MC->nmcinfo = 2;
+  m_MC->mcninfo = 2;
   m_MC->mcinfo[1] = ev.GetSubRunnum();
 
   // MCVERTEX (see $SKOFL_ROOT/inc/vcvrtx.h )

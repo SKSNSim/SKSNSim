@@ -313,8 +313,8 @@ void SKSNSimUserConfiguration::LoadFromArgsSN(int argc, char *argv[]){
           case 9: SetNeutrinoOscType(std::atoi(optarg)); break;
           case 11: SetOutputPrefix(std::string(optarg)); break;
           case 14: SetNumEventsPerFile(std::atoi(optarg)); break;
-          case 15: SetRUNNUM(std::atoi(optarg)); break;
-          case 16: SetSubRUNNUM(std::atoi(optarg)); break;
+          case 15: SetRunnum(std::atoi(optarg)); break;
+          case 16: SetSubRunnum(std::atoi(optarg)); break;
           default:
             ShowHelpSN(argv[0]);
             exit(EXIT_FAILURE);
