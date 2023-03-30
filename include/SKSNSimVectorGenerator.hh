@@ -103,6 +103,8 @@ class SKSNSimSNEventVector {
     int m_runnum;
     int m_subrunnum;
 
+    unsigned int m_randomseed;
+    
     size_t m_n_randomthrow;
     double m_weight_maxprob;
     double m_weight;
@@ -227,6 +229,7 @@ class SKSNSimVectorGenerator {
     int m_runtime_period;
     int m_runnum;
     int m_subrunnum;
+    unsigned int m_randomseed;
     bool m_flat_pos_energy;
     SKSNSIMENUM::TANKVOLUME m_generator_volume;
     std::shared_ptr<TRandom> randomgenerator;
@@ -279,6 +282,8 @@ class SKSNSimVectorGenerator {
     int GetRUNNUM() const { return m_runnum; }
     int SetSubRUNNUM(const int r) { m_subrunnum = r; return m_subrunnum; }
     int GetSubRUNNUM() const { return m_subrunnum; }
+    unsigned int GetRandomSeed() const { return m_randomseed; }
+    unsigned int SetRandomSeed(const unsigned int r) { m_randomseed = r; return m_randomseed; }
     void   SetRandomGenerator(std::shared_ptr<TRandom> rng) { randomgenerator = rng; }
     bool SetFlatPositronFlux(const bool f) { m_flat_pos_energy = f; return m_flat_pos_energy; }
     bool GetFlatPositronFlux() const { return m_flat_pos_energy; }
@@ -294,6 +299,8 @@ class SKSNSimVectorSNGenerator {
     // Event header
     int m_runnum;
     int m_subrunnum;
+
+    unsigned int m_randomseed;
 
     // Vector generator
     double m_generator_energy_min;
@@ -360,7 +367,7 @@ class SKSNSimVectorSNGenerator {
     SKSNSIMENUM::TANKVOLUME SetGeneratorVolume(SKSNSIMENUM::TANKVOLUME v) { m_generator_volume = v; return GetGeneratorVolume(); }
     SKSNSIMENUM::TANKVOLUME SetGeneratorVolume(int v) { m_generator_volume = (SKSNSIMENUM::TANKVOLUME)v; return GetGeneratorVolume(); }
     double GetSNDistanceKpc() const { return m_distance_kpc;}
-    double GetSNDistanceRatioTo10kpc() const { return GetSNDistanceKpc() / 10.0; }
+    double GetSNDistanceRatioTo10kpc() const { return  pow(10.0 / GetSNDistanceKpc(),2.); }
     double SetSNDistanceKpc(const double d) { m_distance_kpc = d; return GetSNDistanceKpc();}
     SKSNSIMENUM::NEUTRINOOSCILLATION GetGeneratorNuOscType () const { return m_nuosc_type; }
     SKSNSIMENUM::NEUTRINOOSCILLATION SetGeneratorNuOscType(SKSNSIMENUM::NEUTRINOOSCILLATION t) { m_nuosc_type = t; return GetGeneratorNuOscType(); }
@@ -369,6 +376,8 @@ class SKSNSimVectorSNGenerator {
     int SetRUNNUM(const int r){ m_runnum = r; return GetRUNNUM(); }
     int GetSubRUNNUM() const { return m_subrunnum; }
     int SetSubRUNNUM(const int r){ m_subrunnum = r; return GetSubRUNNUM(); }
+    unsigned int GetRandomSeed() const { return m_randomseed; }
+    unsigned int SetRandomSeed(const unsigned int r){ m_randomseed = r; return GetRandomSeed(); }
 };
 
 #endif

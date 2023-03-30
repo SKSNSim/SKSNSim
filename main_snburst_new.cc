@@ -58,6 +58,7 @@ int main( int argc, char ** argv )
   generator->SetRandomGenerator(std::move(rng));
   generator->AddFluxModel(std::move(flux));
   config->Apply(*generator);
+  generator->SetRandomGenerator(config->GetRandomGenerator());
   auto buffer = generator->GenerateEvents();
   SKSNSimTools::DumpDebugMessage(Form("Successed GenerateEvents -> %d events", (int)buffer.size()));
 

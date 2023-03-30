@@ -393,6 +393,8 @@ void SKSNSimUserConfiguration::Apply( SKSNSimVectorSNGenerator &gen ) const {
   gen.SetGeneratorNuOscType( GetNuOscType() );
   gen.SetRUNNUM( GetRunnum() );
   gen.SetSubRUNNUM( GetSubRunnum() );
+  gen.SetRandomSeed( GetRandomSeed() );
+  std::cout << "getTiemNBins= " << GetTimeNBins() << std::endl;
 }
 
 void SKSNSimUserConfiguration::Apply( SKSNSimVectorGenerator &gen ) const {
