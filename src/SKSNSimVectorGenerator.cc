@@ -50,6 +50,7 @@ double SKSNSimVectorGenerator::SetMaximumHitProbability(){
 
 SKSNSimSNEventVector SKSNSimVectorGenerator::GenerateEventIBD() {
   SKSNSimSNEventVector ev;
+  ev.SetRandomSeed(GetRandomSeed());
 
   double nuEne, cost, eEne;
   double nEne;
@@ -59,6 +60,8 @@ SKSNSimSNEventVector SKSNSimVectorGenerator::GenerateEventIBD() {
   SKSNSimFluxModel &flux = *fluxmodels[0]; // TODO modify for user to select models
   if(xsecmodels.size() == 0) return ev;
   SKSNSimCrosssectionModel &xsec = *xsecmodels[0]; // TODO modify for user to select models
+
+
 
   static int static_runnum = -1;
   static int elapseday = -1;
@@ -235,6 +238,7 @@ SKSNSimSNEventVector SKSNSimVectorGenerator::GenerateEventIBDFlat() {
   //                    \n
   */
   SKSNSimSNEventVector ev;
+  ev.SetRandomSeed(GetRandomSeed());
 
   TRandom &rng = *randomgenerator;
   if(xsecmodels.size() == 0) return ev;
@@ -1063,6 +1067,7 @@ std::vector<SKSNSimSNEventVector> SKSNSimVectorSNGenerator::MakeEvent(const doub
       //SNEvtInfo evtInfo;
       //evtInfo.iEvt = dRandTotEvts;
       SKSNSimSNEventVector evtInfo;
+      evtInfo.SetRandomSeed(GetRandomSeed());
 
       const double rvtx [3] = {xyz.x, xyz.y, xyz.z};
       evtInfo.SetSNEvtInfo(nReact, tReact, nuType, nuEne, m_sn_dir, rvtx);

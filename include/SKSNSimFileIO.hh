@@ -50,8 +50,8 @@ class SKSNSimFileOutTFile : public SKSNSimFileOutput {
     TTree *m_OutWeightTree;
 
   public:
-    SKSNSimFileOutTFile (){ m_fileptr = NULL; m_MC = NULL; m_SN = NULL; }
-    SKSNSimFileOutTFile (const std::string fname) { Open(fname); }
+    SKSNSimFileOutTFile () : m_fileptr(NULL), m_MC(NULL), m_SN(NULL) { }
+    SKSNSimFileOutTFile (const std::string fname) : m_fileptr(NULL), m_MC(NULL), m_SN(NULL) { Open(fname); }
     ~SKSNSimFileOutTFile (){ if (m_fileptr != NULL) delete m_fileptr; }
 
     void Open(const std::string fname, const bool including_snevtinfo);

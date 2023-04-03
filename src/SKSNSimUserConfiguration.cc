@@ -140,6 +140,8 @@ void SKSNSimUserConfiguration::ShowHelpSN(const char *argv0){
     << " [--energy_min energy_MeV]"
     << " [--energy_max energy_MeV]"
     << " [--energy_nbins nbins]"
+    << " [--runnum runnum]"
+    << " [--subrunnum runnum]"
     << " [--time_min time]"
     << " [--time_max time]"
     << " [--time_nbins nbins]"
@@ -169,6 +171,8 @@ void SKSNSimUserConfiguration::ShowHelpSN(const char *argv0){
     << " --energy_min {energy_MeV}: energy lower limit in MeV (default = " << SKSNSimUserConfiguration::GetDefaultFluxEnergyMin(SKSNSimUserConfiguration::MODEGENERATOR::kSNBURST) << " MeV )" << std::endl
     << " --energy_max {energy_MeV}: energy upper limit in MeV (default = " << SKSNSimUserConfiguration::GetDefaultFluxEnergyMax(SKSNSimUserConfiguration::MODEGENERATOR::kSNBURST) << " MeV )" << std::endl
     << " --energy_nbins {nbins}: number of bins for energy (default = " << SKSNSimUserConfiguration::GetDefaultEnergyNBins() << " )" << std::endl
+    << " --runnum {runnum}: run-number for MC (default =  none (999999))" << std::endl
+    << " --subrunnum {runnum}: sub-run-number for MC (default = 0)" << std::endl
     << " --time_min {time_sec}: time lower limit in second (default = " << SKSNSimUserConfiguration::GetDefaultFluxTimeMin() << " sec )" << std::endl
     << " --time_max {time_sec}: time upper limit in second (default = " << SKSNSimUserConfiguration::GetDefaultFluxTimeMax() << " sec )" << std::endl
     << " --time_nbins {nbins}: number of bins for time (default = " << SKSNSimUserConfiguration::GetDefaultTimeNBins() << " )" << std::endl
@@ -276,6 +280,8 @@ void SKSNSimUserConfiguration::LoadFromArgsSN(int argc, char *argv[]){
       {"help",                no_argument, 0, 'h'},
       {"seed",          required_argument, 0, 's'},
       {"neventsperfile",required_argument, 0,   0},
+      {"runnum",        required_argument, 0,   0},
+      {"subrunnum",     required_argument, 0,   0},
       {0,                               0, 0,   0}
     };
 
@@ -307,6 +313,8 @@ void SKSNSimUserConfiguration::LoadFromArgsSN(int argc, char *argv[]){
           case 9: SetNeutrinoOscType(std::atoi(optarg)); break;
           case 11: SetOutputPrefix(std::string(optarg)); break;
           case 14: SetNumEventsPerFile(std::atoi(optarg)); break;
+          case 15: SetRunnum(std::atoi(optarg)); break;
+          case 16: SetSubRunnum(std::atoi(optarg)); break;
           default:
             ShowHelpSN(argv[0]);
             exit(EXIT_FAILURE);
@@ -393,6 +401,8 @@ void SKSNSimUserConfiguration::Apply( SKSNSimVectorSNGenerator &gen ) const {
   gen.SetGeneratorNuOscType( GetNuOscType() );
   gen.SetRUNNUM( GetRunnum() );
   gen.SetSubRUNNUM( GetSubRunnum() );
+  gen.SetRandomSeed( GetRandomSeed() );
+  std::cout << "getTiemNBins= " << GetTimeNBins() << std::endl;
 }
 
 void SKSNSimUserConfiguration::Apply( SKSNSimVectorGenerator &gen ) const {
@@ -407,6 +417,7 @@ void SKSNSimUserConfiguration::Apply( SKSNSimVectorGenerator &gen ) const {
   gen.SetFlatPositronFlux( GetDSNBFlatFlux() );
   gen.SetRUNNUM( GetRunnum() );
   gen.SetSubRUNNUM( GetSubRunnum() );
+  gen.SetRandomSeed( GetRandomSeed() );
 }
 
 SKSNSimUserConfiguration::MODERUNTIME SKSNSimUserConfiguration::CheckMODERuntime() const {
