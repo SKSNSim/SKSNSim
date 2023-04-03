@@ -417,6 +417,7 @@ void SKSNSimUserConfiguration::Apply( SKSNSimVectorGenerator &gen ) const {
   gen.SetFlatPositronFlux( GetDSNBFlatFlux() );
   gen.SetRUNNUM( GetRunnum() );
   gen.SetSubRUNNUM( GetSubRunnum() );
+  gen.SetRandomSeed( GetRandomSeed() );
 }
 
 SKSNSimUserConfiguration::MODERUNTIME SKSNSimUserConfiguration::CheckMODERuntime() const {

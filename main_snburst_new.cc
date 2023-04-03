@@ -48,14 +48,12 @@ int main( int argc, char ** argv )
   config->Dump();
 
 
-  std::unique_ptr<TRandom3> rng = std::make_unique<TRandom3>(42);
   std::unique_ptr<SKSNSimSNFluxNakazatoFormat> flux (new SKSNSimSNFluxNakazatoFormat());
   flux->SetModel(config->GetSNBurstFluxModel());
   
 
 	/*-----Geneartion-----*/
   std::unique_ptr<SKSNSimVectorSNGenerator> generator = std::make_unique<SKSNSimVectorSNGenerator>();
-  generator->SetRandomGenerator(std::move(rng));
   generator->AddFluxModel(std::move(flux));
   config->Apply(*generator);
   generator->SetRandomGenerator(config->GetRandomGenerator());

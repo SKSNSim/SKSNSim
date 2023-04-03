@@ -102,8 +102,6 @@ class SKSNSimSNEventVector {
   private:
     int m_runnum;
     int m_subrunnum;
-
-    unsigned int m_randomseed;
     
     size_t m_n_randomthrow;
     double m_weight_maxprob;
@@ -140,6 +138,9 @@ class SKSNSimSNEventVector {
     } sninfo;
 
 		///static void determineKinematics( SKSNSimSNEventVector &p);
+
+    // Configuration of generator at exectuted-time
+    unsigned int m_randomseed;
 
   public:
     SKSNSimSNEventVector() : m_n_randomthrow(0), m_weight_maxprob(0.), m_weight(0.) {sninfo.iEvt = -1;};
@@ -207,6 +208,9 @@ class SKSNSimSNEventVector {
     auto GetWeight() const { return m_weight; }
     auto SetWeight(const double w) { m_weight= w; return GetWeight(); }
 
+    unsigned int GetRandomSeed() const { return m_randomseed; }
+    unsigned int SetRandomSeed(const unsigned int r) { m_randomseed = r; return GetRandomSeed(); } // This does NOT apply seed value. Just holding runtime-configuration
+
     bool operator< (const SKSNSimSNEventVector &a){ return sninfo.rTime < a.sninfo.rTime; }
 };
 
@@ -229,10 +233,10 @@ class SKSNSimVectorGenerator {
     int m_runtime_period;
     int m_runnum;
     int m_subrunnum;
-    unsigned int m_randomseed;
     bool m_flat_pos_energy;
     SKSNSIMENUM::TANKVOLUME m_generator_volume;
     std::shared_ptr<TRandom> randomgenerator;
+    unsigned int m_randomseed;
     //===================== end configuration
 
 
@@ -282,8 +286,8 @@ class SKSNSimVectorGenerator {
     int GetRUNNUM() const { return m_runnum; }
     int SetSubRUNNUM(const int r) { m_subrunnum = r; return m_subrunnum; }
     int GetSubRUNNUM() const { return m_subrunnum; }
-    unsigned int GetRandomSeed() const { return m_randomseed; }
-    unsigned int SetRandomSeed(const unsigned int r) { m_randomseed = r; return m_randomseed; }
+    unsigned int GetRandomSeed() const {return m_randomseed; }
+    unsigned int SetRandomSeed(unsigned int s) { m_randomseed = s; return GetRandomSeed(); } // This does NOT apply the seed. Just holding the runtime-information.
     void   SetRandomGenerator(std::shared_ptr<TRandom> rng) { randomgenerator = rng; }
     bool SetFlatPositronFlux(const bool f) { m_flat_pos_energy = f; return m_flat_pos_energy; }
     bool GetFlatPositronFlux() const { return m_flat_pos_energy; }
@@ -299,8 +303,6 @@ class SKSNSimVectorSNGenerator {
     // Event header
     int m_runnum;
     int m_subrunnum;
-
-    unsigned int m_randomseed;
 
     // Vector generator
     double m_generator_energy_min;
@@ -324,6 +326,7 @@ class SKSNSimVectorSNGenerator {
     // double m_max_hit_probability; // maximum of (flux) x (xsec) // should be updated with new flux or xsec models
 
     std::shared_ptr<TRandom> randomgenerator;
+    unsigned int m_randomseed;
 
     static double FindMaxProb ( const double, const SKSNSimCrosssectionModel &);
 
@@ -362,6 +365,8 @@ class SKSNSimVectorSNGenerator {
     double GetTimeBinWidth() const { return (GetTimeMax() - GetTimeMin())/(double)GetTimeNBins(); }
     bool   GetFlagFillEvent() const { return m_fill_event; }
     bool   SetFlagFillEvent(const bool f){ m_fill_event = f; return GetFlagFillEvent(); }
+    unsigned int GetRandomSeed() const {return m_randomseed; }
+    unsigned int SetRandomSeed(unsigned int s) { m_randomseed = s; return GetRandomSeed(); } // This does NOT apply the seed. Just holding the runtime-information.
     void   SetRandomGenerator(std::shared_ptr<TRandom> rng) { randomgenerator = rng; }
     SKSNSIMENUM::TANKVOLUME GetGeneratorVolume() const { return m_generator_volume; }
     SKSNSIMENUM::TANKVOLUME SetGeneratorVolume(SKSNSIMENUM::TANKVOLUME v) { m_generator_volume = v; return GetGeneratorVolume(); }
@@ -376,8 +381,6 @@ class SKSNSimVectorSNGenerator {
     int SetRUNNUM(const int r){ m_runnum = r; return GetRUNNUM(); }
     int GetSubRUNNUM() const { return m_subrunnum; }
     int SetSubRUNNUM(const int r){ m_subrunnum = r; return GetSubRUNNUM(); }
-    unsigned int GetRandomSeed() const { return m_randomseed; }
-    unsigned int SetRandomSeed(const unsigned int r){ m_randomseed = r; return GetRandomSeed(); }
 };
 
 #endif
