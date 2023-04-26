@@ -131,6 +131,12 @@ std::vector<SKSNSimFileSet> GenerateOutputFileListNoRuntime(const SKSNSimUserCon
   auto genFileName = [](const SKSNSimUserConfiguration &c, int i){
     char buf[1000];
     snprintf(buf, 999, "%s/%s_%06d.root", c.GetOutputDirectory().c_str(), c.GetOutputPrefix().c_str(), i);
+    if( c.GetOutputNameTemplate() != SKSNSimUserConfiguration::GetDefaultOutputNameTemplate() ){
+      auto pos = c.GetOutputNameTemplate().find("RUNNUM");
+      auto pref = c.GetOutputNameTemplate().substr(0,pos);
+      auto suf  = c.GetOutputNameTemplate().substr(pos+6);
+      snprintf(buf, 999, "%s/%s%06d%s", c.GetOutputDirectory().c_str(), pref.c_str(), i, suf.c_str());
+    }
     return std::string(buf);
   };
 
@@ -161,7 +167,15 @@ std::vector<SKSNSimFileSet> GenerateOutputFileListRuntime(SKSNSimUserConfigurati
     auto vectio = std::make_unique<SKSNSimFileOutTFile>();
     const int run = std::get<0>(*it);
     std::stringstream ss;
-    ss << conf.GetOutputDirectory() << "/" << conf.GetOutputPrefix() << "." << std::setfill('0') << std::setw(6) << run << ".root";
+    if( conf.GetOutputNameTemplate() != SKSNSimUserConfiguration::GetDefaultOutputNameTemplate() ){
+      auto pos  = conf.GetOutputNameTemplate().find("RUNNUM");
+      auto pref = conf.GetOutputNameTemplate().substr(0,pos);
+      auto suf  = conf.GetOutputNameTemplate().substr(pos+6);
+      ss << conf.GetOutputDirectory() << "/" << pref << std::setfill('0') << std::setw(6) << run << suf;
+
+    } else {
+      ss << conf.GetOutputDirectory() << "/" << conf.GetOutputPrefix() << "." << std::setfill('0') << std::setw(6) << run << ".root";
+    }
     const std::string fname(ss.str());
 
     std::cout << "fname " << fname << " nev " << std::get<1>(*it) <<std::endl;
