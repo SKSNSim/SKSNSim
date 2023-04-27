@@ -39,6 +39,7 @@ class SKSNSimUserConfiguration{
     /* Output file related */
     std::string m_output_directory;
     std::string m_outputfile_prefix;
+    std::string m_outputfile_template;
     size_t m_num_per_file;
     bool m_eventvector_generation;
     SKSNSIMENUM::TANKVOLUME m_eventgen_volume;
@@ -88,6 +89,7 @@ class SKSNSimUserConfiguration{
 
       m_output_directory = GetDefaultOutputDirectory();
       m_outputfile_prefix = GetDefaultOutputPrefix();
+      m_outputfile_template = GetDefaultOutputNameTemplate();
       m_num_per_file = GetDefaultNumEventsPerFile();
       m_eventvector_generation = GetDefaultVectorGeneration();
       m_eventgen_volume = GetDefaultEventVolume();
@@ -142,6 +144,7 @@ class SKSNSimUserConfiguration{
     const static bool GetDefaultVectorGeneration () { return true; } 
     const static std::string GetDefaultOutputDirectory () { return "./vectout"; }
     const static std::string GetDefaultOutputPrefix () { return "snmcvect"; }
+    const static std::string GetDefaultOutputNameTemplate () { return ""; }
     const static size_t GetDefaultNumEvents () { return 1000;}
     const static size_t GetDefaultNumEventsPerFile () { return 1000; }
     const static unsigned GetDefaultRandomSeed () { return 42;}
@@ -175,6 +178,7 @@ class SKSNSimUserConfiguration{
     SKSNSimUserConfiguration &SetRuntimeFactor(double f){ m_factor_runtime = f; return *this;}
     SKSNSimUserConfiguration &SetOutputDirectory(std::string dir) { m_output_directory = dir; return *this;}
     SKSNSimUserConfiguration &SetOutputPrefix(std::string pref) { m_outputfile_prefix = pref; return *this;}
+    SKSNSimUserConfiguration &SetOutputNameTemplate(std::string tmp) { m_outputfile_template = tmp; return *this;}
     SKSNSimUserConfiguration &SetRandomSeed(unsigned s) { m_random_seed = s; m_randomgenerator->SetSeed(m_random_seed); return *this;}
     SKSNSimUserConfiguration &SetRuntimeRunBegin(int r) { m_runtime_runbegin = r; return *this;}
     SKSNSimUserConfiguration &SetRuntimeRunEnd(int r) { m_runtime_runend = r; return *this;}
@@ -200,6 +204,7 @@ class SKSNSimUserConfiguration{
     /* Output file related */
     std::string GetOutputDirectory() const { return m_output_directory;}
     std::string GetOutputPrefix() const { return m_outputfile_prefix;}
+    std::string GetOutputNameTemplate() const { return m_outputfile_template;}
     size_t GetNumEventsPerFile() const {return m_num_per_file;}
     bool   GetEventVectorGeneration() const { return m_eventvector_generation; }
     SKSNSIMENUM::TANKVOLUME GetEventgenVolume() const { return m_eventgen_volume; }
