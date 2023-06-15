@@ -337,9 +337,13 @@ void SKSNSimFileOutNuance::Write(const SKSNSimSNEventVector &ev) {
   auto convReactionMode = [](const SKSNSimSNEventVector &ev) {
     return "nuance " + std::to_string(ev.GetSNEvtInfoRType());};
   auto convVertex = [] (const SKSNSimSNEventVector &ev) {
-    return ( "vertex " + std::to_string(ev.GetSNEvtInfoRVtx(0)) + " "
-        + std::to_string(ev.GetSNEvtInfoRVtx(1)) + " "
-        + std::to_string(ev.GetSNEvtInfoRVtx(2)) + " " 
+    return ( "vertex "
+        //+ std::to_string(ev.GetSNEvtInfoRVtx(0)) + " "
+        //+ std::to_string(ev.GetSNEvtInfoRVtx(1)) + " "
+        //+ std::to_string(ev.GetSNEvtInfoRVtx(2)) + " " 
+        + std::to_string(ev.GetVertexPositionX(0)) + " "
+        + std::to_string(ev.GetVertexPositionY(0)) + " "
+        + std::to_string(ev.GetVertexPositionZ(0)) + " "
         + std::to_string(ev.GetSNEvtInfoRTime())
           );
   };

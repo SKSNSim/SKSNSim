@@ -51,7 +51,7 @@ int main(int argc, char **argv){
 
   for(auto it = flist.begin(); it != flist.end(); it++){
     /* Open file IO and then generate events from file configuration */
-    auto vectio = std::make_unique<SKSNSimFileOutTFile>(it->GetFileName());
+    auto vectio = std::make_unique<SKSNSimFileOutNuance>(it->GetFileName());
     vectgen->SetRUNNUM( it->GetRun() );
     vectgen->SetSubRUNNUM( it->GetSubrun() );
     auto evt_buffer = vectgen->GenerateEvents(it->GetNumEvents());
