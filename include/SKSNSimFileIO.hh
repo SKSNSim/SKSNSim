@@ -5,6 +5,8 @@
 #ifndef SKSNSIMFILEIO_H_INCLUDED
 #define SKSNSIMFILEIO_H_INCLUDED
 
+#include <iostream>
+#include <fstream>
 #include <TFile.h>
 #include <TTree.h>
 #include <mcinfo.h>
@@ -56,6 +58,25 @@ class SKSNSimFileOutTFile : public SKSNSimFileOutput {
 
     void Open(const std::string fname, const bool including_snevtinfo);
     void Open(const std::string fname) { Open(fname, false);};
+    void Close();
+
+    void Write(const SKSNSimSNEventVector &);
+    void Write(const std::vector<SKSNSimSNEventVector> &vecs)
+    {for(auto it = vecs.begin(); it != vecs.end(); it++) Write(*it);};
+};
+
+class SKSNSimFileOutNuance : public SKSNSimFileOutput {
+  private:
+
+    Double_t weight;
+    std::unique_ptr<std::ofstream> ofs;
+
+  public:
+    SKSNSimFileOutNuance () {};
+    SKSNSimFileOutNuance (const std::string fname) { Open(fname); }
+    ~SKSNSimFileOutNuance (){ if( ofs->is_open()) Close(); }
+
+    void Open(const std::string fname);
     void Close();
 
     void Write(const SKSNSimSNEventVector &);

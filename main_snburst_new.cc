@@ -62,8 +62,8 @@ int main( int argc, char ** argv )
 
   auto flist = GenerateOutputFileList(*config);
   for(auto it = flist.begin(); it != flist.end(); it++){
-    auto vectio = std::make_unique<SKSNSimFileOutTFile>();
-    vectio->Open(it->GetFileName(), true);
+    auto vectio = std::make_unique<SKSNSimFileOutNuance>();
+    vectio->Open(it->GetFileName());
     vectio->Write(buffer);
     vectio->Close();
   }
