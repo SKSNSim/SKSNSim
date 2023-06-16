@@ -105,6 +105,21 @@ Basically, you can run by just executing @command{main_dsnb(_new)} with wanted o
 Detail can be dumped by executing @command{main_dsnb(_new) --help}.
 Basically, you can run by just executing @command{main_dsnb(_new)} with wanted options you would like to change.
 
+@section Output format
+
+SKSNSim supports two type of output format, usual SKROOT and NUANCE format.
+These can be switched via the option @command{--outputformat}.
+
+In the NUANCE format, there are records of @command{nuance __interaction_mode__}, @command{vertex __x__ __y__ __z__ __time___}, and @command{track __pid__ __total_energy__ __dir_x__ __dir_y__ __dir_z__ __interaction_flag__}.
+@itemize
+@item
+@command{__interaction_mode__}: based on SKSNSim internal code
+@item
+@command{__pid__}: PDG_CODE
+@item
+@command{__ineraction_flag__}: 0 is the final state particle after interaction, -1 is initial state particle, -2 is final state particle before interactions. Only 0 should be propagated to detector simulation.
+@end itemize
+
 @section Detail parameters
 
 SKSNSim uses several parameters such as neutrino oscillation parameters. If you want to modify them, you need to check following files:
