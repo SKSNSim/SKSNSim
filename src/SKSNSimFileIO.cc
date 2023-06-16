@@ -365,7 +365,7 @@ void SKSNSimFileOutNuance::Write(const SKSNSimSNEventVector &ev) {
     }
     int mode = -9999;
     if( ev.GetTrackICRNVC(i) != 0 ) mode = 0;
-    else if ( ev.GetTrackIORGVC(i) != 0 ) mode = -1;
+    else if ( ev.GetTrackIFLGVC(i) != 0 ) mode = -1;
     else mode = -2;
     return "track "
       + std::to_string(ev.GetTrackPID(i)) + " "
