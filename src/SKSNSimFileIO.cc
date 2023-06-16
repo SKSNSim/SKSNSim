@@ -129,9 +129,11 @@ std::vector<SKSNSimFileSet> GenerateOutputFileListNoRuntime(const SKSNSimUserCon
   int nfile = conf.GetNumEvents() / conf.GetNumEventsPerFile();
   int nfile_rem = conf.GetNumEvents() % conf.GetNumEventsPerFile();
 
-  auto genFileName = [](const SKSNSimUserConfiguration &c, int i){
+  const std::string suffix = ( conf.GetOFileMode() == SKSNSimUserConfiguration::MODEOFILE::kSKROOT ? "root" : "txt");
+
+  auto genFileName = [](const SKSNSimUserConfiguration &c, int i, const std::string suffix){
     char buf[1000];
-    snprintf(buf, 999, "%s/%s_%06d.root", c.GetOutputDirectory().c_str(), c.GetOutputPrefix().c_str(), i);
+    snprintf(buf, 999, "%s/%s_%06d.%s", c.GetOutputDirectory().c_str(), c.GetOutputPrefix().c_str(), i, suffix.c_str());
     if( c.GetOutputNameTemplate() != SKSNSimUserConfiguration::GetDefaultOutputNameTemplate() ){
       auto pos = c.GetOutputNameTemplate().find("RUNNUM");
       auto pref = c.GetOutputNameTemplate().substr(0,pos);
@@ -142,11 +144,11 @@ std::vector<SKSNSimFileSet> GenerateOutputFileListNoRuntime(const SKSNSimUserCon
   };
 
   for(int i = 0; i < nfile; i++){
-    auto fn = genFileName(conf, i);
+    auto fn = genFileName(conf, i, suffix);
     flist.push_back(SKSNSimFileSet(fn, conf.GetRunnum(), conf.GetSubRunnum(), conf.GetNumEventsPerFile()));
   }
   if( nfile_rem != 0){
-    auto fn = genFileName(conf, nfile);
+    auto fn = genFileName(conf, nfile, suffix);
     flist.push_back(SKSNSimFileSet(fn, conf.GetRunnum(), conf.GetSubRunnum(), nfile_rem));
   }
   return flist;
@@ -175,7 +177,8 @@ std::vector<SKSNSimFileSet> GenerateOutputFileListRuntime(SKSNSimUserConfigurati
       ss << conf.GetOutputDirectory() << "/" << pref << std::setfill('0') << std::setw(6) << run << suf;
 
     } else {
-      ss << conf.GetOutputDirectory() << "/" << conf.GetOutputPrefix() << "." << std::setfill('0') << std::setw(6) << run << ".root";
+      std::string suffix = (conf.GetOFileMode() == SKSNSimUserConfiguration::MODEOFILE::kSKROOT ? "root" : "txt");
+      ss << conf.GetOutputDirectory() << "/" << conf.GetOutputPrefix() << "." << std::setfill('0') << std::setw(6) << run << "." << suffix;
     }
     const std::string fname(ss.str());
 

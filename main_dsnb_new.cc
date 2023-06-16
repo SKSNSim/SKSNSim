@@ -51,7 +51,13 @@ int main(int argc, char **argv){
 
   for(auto it = flist.begin(); it != flist.end(); it++){
     /* Open file IO and then generate events from file configuration */
-    auto vectio = std::make_unique<SKSNSimFileOutNuance>(it->GetFileName());
+    std::unique_ptr<SKSNSimFileOutput> vectio;
+    if( config->GetOFileMode() == SKSNSimUserConfiguration::MODEOFILE::kNUANCE ) vectio.reset(new SKSNSimFileOutNuance(it->GetFileName()));
+    else if( config->GetOFileMode() == SKSNSimUserConfiguration::MODEOFILE::kSKROOT ) vectio.reset(new SKSNSimFileOutTFile(it->GetFileName()));
+    else { 
+      std::cout << "ERR: strange output format " << std::endl;
+      exit(EXIT_FAILURE);
+    }
     vectgen->SetRUNNUM( it->GetRun() );
     vectgen->SetSubRUNNUM( it->GetSubrun() );
     auto evt_buffer = vectgen->GenerateEvents(it->GetNumEvents());

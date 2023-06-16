@@ -62,8 +62,15 @@ int main( int argc, char ** argv )
 
   auto flist = GenerateOutputFileList(*config);
   for(auto it = flist.begin(); it != flist.end(); it++){
-    auto vectio = std::make_unique<SKSNSimFileOutNuance>();
-    vectio->Open(it->GetFileName());
+    std::unique_ptr<SKSNSimFileOutput> vectio;
+    if( config->GetOFileMode() == SKSNSimUserConfiguration::MODEOFILE::kNUANCE ) {
+      vectio.reset( new SKSNSimFileOutNuance());
+      vectio->Open(it->GetFileName());
+    } else if( config->GetOFileMode() == SKSNSimUserConfiguration::MODEOFILE::kSKROOT ) {
+      auto vectio_tmp = new SKSNSimFileOutTFile();
+      vectio_tmp->Open(it->GetFileName(), true);
+      vectio.reset( vectio_tmp );
+    }
     vectio->Write(buffer);
     vectio->Close();
   }
