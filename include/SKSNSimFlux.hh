@@ -14,7 +14,10 @@
 #include <iostream>
 #include <string>
 #include <set>
+#include <cstdlib>
 #include "SKSNSimTools.hh"
+
+constexpr char DATADIRVARIABLENAME[] = "SKSNSIMDIR";
 
 class SKSNSimFluxModel {
   public:
@@ -120,14 +123,29 @@ class SKSNSimSNFluxNakazatoFormat : public SKSNSimBinnedFluxModel {
 
   public:
     SKSNSimSNFluxNakazatoFormat(){
-      flux = std::make_unique<SKSNSimSNFluxCustom>( "/home/sklowe/supernova/data/nakazato/intp2002.data" );
+      if( const char * env_p = std::getenv(DATADIRVARIABLENAME) )
+        flux = std::make_unique<SKSNSimSNFluxCustom>( std::string(env_p) + "/data/nakazato/intp2002.data" );
+      else {
+        std::cout << "The environmental variable \"" << DATADIRVARIABLENAME << "\" is not defined. Please set it..." << std::endl;
+        exit(EXIT_FAILURE);
+      }
     }
     SKSNSimSNFluxNakazatoFormat(std::string mname){
-      flux = std::make_unique<SKSNSimSNFluxCustom>( "/home/sklowe/supernova/data/" + mname );
+      if( const char * env_p = std::getenv(DATADIRVARIABLENAME) )
+        flux = std::make_unique<SKSNSimSNFluxCustom>( std::string(env_p) + "/data/" + mname );
+      else {
+        std::cout << "The environmental variable \"" << DATADIRVARIABLENAME << "\" is not defined. Please set it..." << std::endl;
+        exit(EXIT_FAILURE);
+      }
     }
     ~SKSNSimSNFluxNakazatoFormat(){}
     void SetModel(std::string mname) {
-      flux.reset(new SKSNSimSNFluxCustom("/home/sklowe/supernova/data/" + mname));
+      if( const char * env_p = std::getenv(DATADIRVARIABLENAME) )
+        flux.reset(new SKSNSimSNFluxCustom( std::string(env_p) + "/data/" + mname));
+      else {
+        std::cout << "The environmental variable \"" << DATADIRVARIABLENAME << "\" is not defined. Please set it..." << std::endl;
+        exit(EXIT_FAILURE);
+      }
     }
     double GetFlux(const double e, const double t, const FLUXNUTYPE type) const { return flux->GetFlux(e,t,type); }
     double GetEnergyLimitMax() const { return flux->GetEnergyLimitMax(); }
@@ -147,7 +165,12 @@ class SKSNSimSNFluxNakazato : public SKSNSimBinnedFluxModel {
     std::unique_ptr<SKSNSimSNFluxCustom> flux;; // TODO modify to changeable file name (model)
   public:
     SKSNSimSNFluxNakazato(){
-      flux = std::make_unique<SKSNSimSNFluxCustom>( "/home/sklowe/supernova/data/nakazato/intp2002.data" );
+      if( const char * env_p = std::getenv(DATADIRVARIABLENAME) )
+        flux = std::make_unique<SKSNSimSNFluxCustom>( std::string(env_p) + "/data/nakazato/intp2002.data" );
+      else {
+        std::cout << "The environmental variable \"" << DATADIRVARIABLENAME << "\" is not defined. Please set it..." << std::endl;
+        exit(EXIT_FAILURE);
+      }
     }
     ~SKSNSimSNFluxNakazato(){}
     double GetFlux(const double e, const double t, const FLUXNUTYPE type) const { return flux->GetFlux(e,t,type); }
@@ -168,7 +191,12 @@ class SKSNSimFluxDSNBHoriuchi : SKSNSimFluxModel {
     std::unique_ptr<SKSNSimDSNBFluxCustom> customflux;
   public:
     SKSNSimFluxDSNBHoriuchi(){
-      customflux = std::make_unique<SKSNSimDSNBFluxCustom>("./dsnb_flux/horiuchi/8MeV_Nominal.dat");
+      if( const char * env_p = std::getenv(DATADIRVARIABLENAME) )
+        customflux = std::make_unique<SKSNSimDSNBFluxCustom>( std::string(env_p) +"/dsnb/horiuchi/8MeV_Nominal.dat");
+      else {
+        std::cout << "The environmental variable \"" << DATADIRVARIABLENAME << "\" is not defined. Please set it..." << std::endl;
+        exit(EXIT_FAILURE);
+      }
       customflux->AddSupoortedNuTypes(std::set<FLUXNUTYPE>({FLUXNUEB}));
     }
     ~SKSNSimFluxDSNBHoriuchi (){}
