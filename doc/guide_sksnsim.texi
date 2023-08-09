@@ -74,6 +74,12 @@ $ make clean &&  make
 
 Compiled binaries and shared library are put into @file{bin} and @file{lib} directory.
 
+@section Input data
+
+The flux data are distributed other way.
+After the extraction of the tar.gz file, please specify the data directory via the environmental variable, @code{SKSNSIMDIR}.
+
+
 @section Binaries
 @subsection For SN burst
 

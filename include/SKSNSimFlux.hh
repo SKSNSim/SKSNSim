@@ -124,7 +124,7 @@ class SKSNSimSNFluxNakazatoFormat : public SKSNSimBinnedFluxModel {
   public:
     SKSNSimSNFluxNakazatoFormat(){
       if( const char * env_p = std::getenv(DATADIRVARIABLENAME) )
-        flux = std::make_unique<SKSNSimSNFluxCustom>( std::string(env_p) + "/data/nakazato/intp2002.data" );
+        flux = std::make_unique<SKSNSimSNFluxCustom>( std::string(env_p) + "/snburst/nakazato/intp2002.data" );
       else {
         std::cout << "The environmental variable \"" << DATADIRVARIABLENAME << "\" is not defined. Please set it..." << std::endl;
         exit(EXIT_FAILURE);
@@ -132,7 +132,7 @@ class SKSNSimSNFluxNakazatoFormat : public SKSNSimBinnedFluxModel {
     }
     SKSNSimSNFluxNakazatoFormat(std::string mname){
       if( const char * env_p = std::getenv(DATADIRVARIABLENAME) )
-        flux = std::make_unique<SKSNSimSNFluxCustom>( std::string(env_p) + "/data/" + mname );
+        flux = std::make_unique<SKSNSimSNFluxCustom>( std::string(env_p) + "/snburst/" + mname );
       else {
         std::cout << "The environmental variable \"" << DATADIRVARIABLENAME << "\" is not defined. Please set it..." << std::endl;
         exit(EXIT_FAILURE);
@@ -141,7 +141,7 @@ class SKSNSimSNFluxNakazatoFormat : public SKSNSimBinnedFluxModel {
     ~SKSNSimSNFluxNakazatoFormat(){}
     void SetModel(std::string mname) {
       if( const char * env_p = std::getenv(DATADIRVARIABLENAME) )
-        flux.reset(new SKSNSimSNFluxCustom( std::string(env_p) + "/data/" + mname));
+        flux.reset(new SKSNSimSNFluxCustom( std::string(env_p) + "/snburst/" + mname));
       else {
         std::cout << "The environmental variable \"" << DATADIRVARIABLENAME << "\" is not defined. Please set it..." << std::endl;
         exit(EXIT_FAILURE);
@@ -166,7 +166,7 @@ class SKSNSimSNFluxNakazato : public SKSNSimBinnedFluxModel {
   public:
     SKSNSimSNFluxNakazato(){
       if( const char * env_p = std::getenv(DATADIRVARIABLENAME) )
-        flux = std::make_unique<SKSNSimSNFluxCustom>( std::string(env_p) + "/data/nakazato/intp2002.data" );
+        flux = std::make_unique<SKSNSimSNFluxCustom>( std::string(env_p) + "/snburst/nakazato/intp2002.data" );
       else {
         std::cout << "The environmental variable \"" << DATADIRVARIABLENAME << "\" is not defined. Please set it..." << std::endl;
         exit(EXIT_FAILURE);
