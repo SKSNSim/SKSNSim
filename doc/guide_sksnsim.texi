@@ -77,7 +77,8 @@ Compiled binaries and shared library are put into @file{bin} and @file{lib} dire
 @section Input data
 
 The flux data are distributed other way.
-After the extraction of the tar.gz file, please specify the data directory via the environmental variable, @code{SKSNSIMDIR}.
+After the extraction of the tar.gz file, please specify the data directory via the environmental variable, @code{SKSNSIMFLUXDIR}.
+The flux data for the SN burst and DSNB should be in the @code{$@{SKSNSIMFLUXDIR@}/snburst} and @code{$@{SKSNSIMFLUXDIR@}/dsnb} respectively.
 
 
 @section Binaries

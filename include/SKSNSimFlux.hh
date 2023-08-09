@@ -17,7 +17,7 @@
 #include <cstdlib>
 #include "SKSNSimTools.hh"
 
-constexpr char DATADIRVARIABLENAME[] = "SKSNSIMDIR";
+constexpr char DATADIRVARIABLENAME[] = "SKSNSIMFLUXDIR";
 
 class SKSNSimFluxModel {
   public:
