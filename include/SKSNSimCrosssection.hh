@@ -98,7 +98,6 @@ class SKSNSimXSecNuElastic : public SKSNSimCrosssectionModel {
 
     constexpr static double eEneThr = 5.0;// MeV, electron total energy threshold
 
-    const std::string CSELAFILENAME {"/usr/local/sklib_gcc8/skofl-trunk/const/lowe/sn_elastic.root"};
     std::unique_ptr<TFile> fCsElaFile;
     TTree *fCsElaTree;
     double NuElaEnergy, CsElaNue, CsElaNux, CsElaNeb, CsElaNxb;
