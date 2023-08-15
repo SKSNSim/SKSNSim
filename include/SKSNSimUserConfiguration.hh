@@ -161,7 +161,7 @@ class SKSNSimUserConfiguration{
     const static bool GetDefaultRuntimeNormalization() { return false; }
     const static double GetDefaultRuntimeNormFactor() { return 24.0; }
     const static std::string GetDefaultSNBurstFluxModel () { return "nakazato/intp2002.data";}
-    const static std::string GetDefaultDSNBFluxModel () { return "expect/horiuchi/8MeV_Nominal.dat";}
+    const static std::string GetDefaultDSNBFluxModel () { return "horiuchi/8MeV_Nominal.dat";}
     const static bool GetDefaultDSNBFlatFlux () { return false;}
     const static int GetDefaultRunnum () { return (int) SKSNSIMENUM::SKPERIODRUN::SKMC; }
     const static int GetDefaultSubRunnum () { return 0; }
