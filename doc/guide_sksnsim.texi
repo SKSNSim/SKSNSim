@@ -190,6 +190,26 @@ class SKSNSimFluxModel @{
 If you want to implement new model, please implement your class with inheriting this interface class.
 If you have flux model as CSV file, you might be able to use the @code{SKSNSimDSNBFluxCustom} with only loading your CSV file.
 
+@node Data
+@chapter Distributed flux data
+
+The distributed data consists of the SN burst flux of some models and the DSNB spectrum.
+The SN burst flux includes following models:
+@itemize
+@item Nakazato model
+@item Mori model
+@item Wilson model
+@item Tamborra model
+@item Hudelphole model
+@item Fischer model
+@item Liebendorfer model
+@end itemize
+The DSNB flux includes only Horiuchi model:
+@itemize
+@item Horiuch model
+@end itemize
+
+
 
 
 @bye
