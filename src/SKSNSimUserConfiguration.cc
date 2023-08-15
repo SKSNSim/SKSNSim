@@ -87,6 +87,7 @@ bool SKSNSimUserConfiguration::CheckRuntimeFactor() const {
 void SKSNSimUserConfiguration::ShowHelpDSNB(const char *argv0){
   std::cout << argv0
     << " [-c,--customflux {flux_filename}]"
+    << " [--outputformat {\"skroot\" or \"nuance\"}]"
     << " [--energy_min {energy_MeV}]"
     << " [--energy_max {energy_MeV}]"
     << " [--runtimefactor {float}]"
@@ -114,6 +115,7 @@ void SKSNSimUserConfiguration::ShowHelpDSNB(const char *argv0){
     << " --runtimefactor {float}: number of events per day for runtime normalization ( default = " << SKSNSimUserConfiguration::GetDefaultRuntimeNormFactor() << " evt/day )" << std::endl
     << " -n,--nevents {int}: number of events to be generated (exclusive with --runtime and --runtimefactor) ( default = " << SKSNSimUserConfiguration::GetDefaultNumEvents() << " )" << std::endl
     << " -o,--outdir {directory}: output directory. The generator fill events in the filename: {outdir}/{outprefix}_000000.root... ( default = " << SKSNSimUserConfiguration::GetDefaultOutputDirectory() << " )"  << std::endl
+    << " --outputformat {\"skroot\" or \"nuance\"}: output format. (default = " << convOFileModeString(GetDefaultOFileMode()) << ")" << std::endl
     << " --runtime: this option enebles runtime normalization. ( default = " << SKSNSimUserConfiguration::GetDefaultRuntimeNormalization() << " )"  << std::endl
     << " --runtime_begin {runnum}: begging run-number of runtime normalization ( default = " << SKSNSimUserConfiguration::GetDefaultRuntimeBegin() << " )"  << std::endl
     << " --runtime_end {runnum}: end run-nummber of runtime normalization ( default = " << SKSNSimUserConfiguration::GetDefaultRuntimeEnd() << " )" << std::endl
@@ -134,6 +136,7 @@ void SKSNSimUserConfiguration::ShowHelpSN(const char *argv0){
   std::cout << argv0
     << " [-h,--help]"
     << " [-o,--outdir outputdirectory]"
+    << " [--outputformat {\"skroot\" or \"nuance\"}]"
     << " [-m,--snmodel model_name]"
     << " [--nuosc 0(NONE)/1(NORMAL)/2(INVERTED)]"
     << " [-d,--distance distance_in_kpc]"
@@ -179,6 +182,7 @@ void SKSNSimUserConfiguration::ShowHelpSN(const char *argv0){
     << " --time_min {time_sec}: time lower limit in second (default = " << SKSNSimUserConfiguration::GetDefaultFluxTimeMin() << " sec )" << std::endl
     << " --time_max {time_sec}: time upper limit in second (default = " << SKSNSimUserConfiguration::GetDefaultFluxTimeMax() << " sec )" << std::endl
     << " --time_nbins {nbins}: number of bins for time (default = " << SKSNSimUserConfiguration::GetDefaultTimeNBins() << " )" << std::endl
+    << " --outputformat {\"skroot\" or \"nuance\"}: output format. (default = " << (GetDefaultOFileMode() == MODEOFILE::kSKROOT ? "skroot" : "nuance") << ")" << std::endl
     << " --outprefix {prefix}: prefix of output file name (default = " << SKSNSimUserConfiguration::GetDefaultOutputPrefix() << " )" << std::endl
     << std::endl;
   std::cout << "Arguments for old format"  << std::endl
@@ -214,6 +218,7 @@ void SKSNSimUserConfiguration::LoadFromArgsDSNB(int argc, char *argv[]){
       {"seed",          required_argument, 0, 's'},
       {"flatposflux",         no_argument, 0,   0},
       {"outname_template", required_argument, 0,0}, // 15
+      {"outputformat",  required_argument, 0,   0}, // 16
       {0,                               0, 0,   0}
     };
 
@@ -245,6 +250,7 @@ void SKSNSimUserConfiguration::LoadFromArgsDSNB(int argc, char *argv[]){
           case 11: SetOutputPrefix(optarg); break;
           case 14: SetDSNBFlatFlux(true); break;
           case 15: SetOutputNameTemplate(optarg); break;
+          case 16: SetOFileMode( std::string(optarg) ); break;
           default:
             ShowHelpDSNB(argv[0]);
             exit(EXIT_FAILURE);
@@ -287,6 +293,7 @@ void SKSNSimUserConfiguration::LoadFromArgsSN(int argc, char *argv[]){
       {"neventsperfile",required_argument, 0,   0},
       {"runnum",        required_argument, 0,   0},
       {"subrunnum",     required_argument, 0,   0},
+      {"outputformat",  required_argument, 0,   0}, // 17
       {0,                               0, 0,   0}
     };
 
@@ -320,6 +327,7 @@ void SKSNSimUserConfiguration::LoadFromArgsSN(int argc, char *argv[]){
           case 14: SetNumEventsPerFile(std::atoi(optarg)); break;
           case 15: SetRunnum(std::atoi(optarg)); break;
           case 16: SetSubRunnum(std::atoi(optarg)); break;
+          case 17: SetOFileMode( std::string(optarg) ); break;
           default:
             ShowHelpSN(argv[0]);
             exit(EXIT_FAILURE);
@@ -358,6 +366,7 @@ bool SKSNSimUserConfiguration::CheckHealth () const {
   health &= CheckNormRuntime();
   health &= CheckNumEvents();
   health &= CheckRuntimeFactor();
+  health &= CheckOFileMode();
   std::cout << "Config ==> good? " << health << std::endl;
   return health;
 }
@@ -373,6 +382,7 @@ void SKSNSimUserConfiguration::Dump() const {
   std::cout << "OutputDirecotry = " << GetOutputDirectory() << std::endl;
   std::cout << "OutputPrefix = " << GetOutputPrefix() << std::endl;
   std::cout << "OutputNameTemplate = " << GetOutputNameTemplate() << std::endl;
+  std::cout << "Output Format = " << GetOFileModeString() << std::endl;
   std::cout << "NumEventsPerFile = " << GetNumEventsPerFile() << std::endl;
   std::cout << "EventVectorGeneration = " << GetEventVectorGeneration() << std::endl;
   std::cout << "EventgenVolume = " << (int)GetEventgenVolume() << std::endl;
@@ -436,4 +446,29 @@ SKSNSimUserConfiguration::MODERUNTIME SKSNSimUserConfiguration::CheckMODERuntime
 
   return SKSNSimUserConfiguration::MODERUNTIME::kEVNUM;
 
+}
+
+SKSNSimUserConfiguration &SKSNSimUserConfiguration::SetOFileMode ( std::string s, bool exit_if_wrong ) {
+  if( s == "skroot" ) return SetOFileMode( MODEOFILE::kSKROOT );
+  else if( s == "nuance" ) return SetOFileMode( MODEOFILE::kNUANCE );
+
+  std::cout << "ERR: Unsupported outputformat (supoorting skroot and nuance" << std::endl;
+
+  if( exit_if_wrong ) {
+    exit(EXIT_FAILURE);
+  }
+  return SetOFileMode( MODEOFILE::kNMODEOFILE );
+}
+
+std::string SKSNSimUserConfiguration::convOFileModeString(MODEOFILE m) {
+  const static std::map<MODEOFILE, std::string> map_str {
+    { MODEOFILE::kSKROOT, "skroot"},
+    { MODEOFILE::kNUANCE, "nuance"},
+    { MODEOFILE::kNMODEOFILE, "undefined"}
+  };
+  return map_str.at( m );
+}
+
+std::string SKSNSimUserConfiguration::GetOFileModeString() const {
+  return convOFileModeString( GetOFileMode() );
 }

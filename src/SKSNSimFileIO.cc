@@ -10,6 +10,7 @@
 #include <TFile.h>
 #include <TFileCacheWrite.h>
 #include <TTree.h>
+#include <TMath.h>
 #include <mcinfo.h>
 #include "SKSNSimFileIO.hh"
 #include "skrun.h"
@@ -128,9 +129,11 @@ std::vector<SKSNSimFileSet> GenerateOutputFileListNoRuntime(const SKSNSimUserCon
   int nfile = conf.GetNumEvents() / conf.GetNumEventsPerFile();
   int nfile_rem = conf.GetNumEvents() % conf.GetNumEventsPerFile();
 
-  auto genFileName = [](const SKSNSimUserConfiguration &c, int i){
+  const std::string suffix = ( conf.GetOFileMode() == SKSNSimUserConfiguration::MODEOFILE::kSKROOT ? "root" : "txt");
+
+  auto genFileName = [](const SKSNSimUserConfiguration &c, int i, const std::string suffix){
     char buf[1000];
-    snprintf(buf, 999, "%s/%s_%06d.root", c.GetOutputDirectory().c_str(), c.GetOutputPrefix().c_str(), i);
+    snprintf(buf, 999, "%s/%s_%06d.%s", c.GetOutputDirectory().c_str(), c.GetOutputPrefix().c_str(), i, suffix.c_str());
     if( c.GetOutputNameTemplate() != SKSNSimUserConfiguration::GetDefaultOutputNameTemplate() ){
       auto pos = c.GetOutputNameTemplate().find("RUNNUM");
       auto pref = c.GetOutputNameTemplate().substr(0,pos);
@@ -141,11 +144,11 @@ std::vector<SKSNSimFileSet> GenerateOutputFileListNoRuntime(const SKSNSimUserCon
   };
 
   for(int i = 0; i < nfile; i++){
-    auto fn = genFileName(conf, i);
+    auto fn = genFileName(conf, i, suffix);
     flist.push_back(SKSNSimFileSet(fn, conf.GetRunnum(), conf.GetSubRunnum(), conf.GetNumEventsPerFile()));
   }
   if( nfile_rem != 0){
-    auto fn = genFileName(conf, nfile);
+    auto fn = genFileName(conf, nfile, suffix);
     flist.push_back(SKSNSimFileSet(fn, conf.GetRunnum(), conf.GetSubRunnum(), nfile_rem));
   }
   return flist;
@@ -174,7 +177,8 @@ std::vector<SKSNSimFileSet> GenerateOutputFileListRuntime(SKSNSimUserConfigurati
       ss << conf.GetOutputDirectory() << "/" << pref << std::setfill('0') << std::setw(6) << run << suf;
 
     } else {
-      ss << conf.GetOutputDirectory() << "/" << conf.GetOutputPrefix() << "." << std::setfill('0') << std::setw(6) << run << ".root";
+      std::string suffix = (conf.GetOFileMode() == SKSNSimUserConfiguration::MODEOFILE::kSKROOT ? "root" : "txt");
+      ss << conf.GetOutputDirectory() << "/" << conf.GetOutputPrefix() << "." << std::setfill('0') << std::setw(6) << run << "." << suffix;
     }
     const std::string fname(ss.str());
 
@@ -316,3 +320,66 @@ std::vector<std::tuple<int,int,int>> ReadTimeEventFile(TRandom &rndgen, int runB
 
   return runev;
 }
+
+void SKSNSimFileOutNuance::Open ( const std::string fname) {
+  ofs.reset(new std::ofstream( fname ));
+  if( !ofs->good() ) { 
+    std::cout << "ERRROR: failed to open output file ( " << fname << std::endl;
+    return;
+  }
+  std::cout << "Opened output file: " << fname << std::endl;
+}
+
+void SKSNSimFileOutNuance::Close() {
+  *ofs << "stop" << std::endl;
+  ofs->close();
+}
+
+void SKSNSimFileOutNuance::Write(const SKSNSimSNEventVector &ev) {
+
+  auto convReactionMode = [](const SKSNSimSNEventVector &ev) {
+    return "nuance " + std::to_string(ev.GetSNEvtInfoRType());};
+  auto convVertex = [] (const SKSNSimSNEventVector &ev) {
+    return ( "vertex "
+        //+ std::to_string(ev.GetSNEvtInfoRVtx(0)) + " "
+        //+ std::to_string(ev.GetSNEvtInfoRVtx(1)) + " "
+        //+ std::to_string(ev.GetSNEvtInfoRVtx(2)) + " " 
+        + std::to_string(ev.GetVertexPositionX(0)) + " "
+        + std::to_string(ev.GetVertexPositionY(0)) + " "
+        + std::to_string(ev.GetVertexPositionZ(0)) + " "
+        + std::to_string(ev.GetSNEvtInfoRTime())
+          );
+  };
+  auto convTrack = [] (const SKSNSimSNEventVector &ev, int i) {
+    double dir[3];
+    double totmon = ev.GetTrackMomentumX(i)*ev.GetTrackMomentumX(i);
+    totmon += ev.GetTrackMomentumY(i)*ev.GetTrackMomentumY(i);
+    totmon += ev.GetTrackMomentumZ(i)*ev.GetTrackMomentumZ(i);
+    totmon = TMath::Sqrt(totmon);
+    if( totmon <= 0.0){
+      dir[0] = 0.0; dir[1] = 0.0; dir[2] = 0.0;
+    } else {
+      dir[0] = ev.GetTrackMomentumX(i) / totmon;
+      dir[1] = ev.GetTrackMomentumY(i) / totmon;
+      dir[2] = ev.GetTrackMomentumZ(i) / totmon;
+    }
+    int mode = -9999;
+    if( ev.GetTrackICRNVC(i) != 0 ) mode = 0;
+    else if ( ev.GetTrackIFLGVC(i) != 0 ) mode = -1;
+    else mode = -2;
+    return "track "
+      + std::to_string(ev.GetTrackPID(i)) + " "
+      + std::to_string(ev.GetTrackEnergy(i)) + " "
+      + std::to_string(dir[0]) + " " + std::to_string(dir[1]) + " " + std::to_string(dir[2]) + " "
+      + std::to_string(mode);
+  };
+
+
+  *ofs << "begin" << std::endl
+    << convReactionMode(ev) << std::endl
+    << convVertex(ev) << std::endl;
+  for(int i = 0; i < ev.GetNTrack(); i++) *ofs << convTrack(ev, i) << std::endl;
+  *ofs << "end" << std::endl;
+
+}
+

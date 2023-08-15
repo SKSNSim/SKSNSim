@@ -23,6 +23,7 @@ class SKSNSimUserConfiguration{
   public:
     enum struct MODERUNTIME   { kEVNUM = 0, kRUNTIMERUNNUM, kRUNTIMEPERIOD, kNMODERUNTIME };
     enum struct MODEGENERATOR { kSNBURST = 0, kDSNB, kNMODEGENERATOR };
+    enum struct MODEOFILE { kSKROOT = 0, kNUANCE, kNMODEOFILE };
 
   private:
     /* mode */
@@ -43,6 +44,7 @@ class SKSNSimUserConfiguration{
     size_t m_num_per_file;
     bool m_eventvector_generation;
     SKSNSIMENUM::TANKVOLUME m_eventgen_volume;
+    MODEOFILE m_mode_ofile;
 
     /* DSNB runtime normalization related */
     size_t m_num_events;
@@ -77,6 +79,9 @@ class SKSNSimUserConfiguration{
     bool CheckNumEvents() const;
     bool CheckNormRuntime() const;
     bool CheckRuntimeFactor() const;
+    bool CheckOFileMode() const { return m_mode_ofile != MODEOFILE::kNMODEOFILE; }
+
+    static std::string convOFileModeString(MODEOFILE m);
 
   public:
     void SetDefaultConfiguation() {
@@ -93,6 +98,7 @@ class SKSNSimUserConfiguration{
       m_num_per_file = GetDefaultNumEventsPerFile();
       m_eventvector_generation = GetDefaultVectorGeneration();
       m_eventgen_volume = GetDefaultEventVolume();
+      m_mode_ofile = GetDefaultOFileMode();
 
       m_num_events = GetDefaultNumEvents();
       m_runtime_normalization = GetDefaultRuntimeNormalization();
@@ -148,6 +154,7 @@ class SKSNSimUserConfiguration{
     const static size_t GetDefaultNumEvents () { return 1000;}
     const static size_t GetDefaultNumEventsPerFile () { return 1000; }
     const static unsigned GetDefaultRandomSeed () { return 42;}
+    const static MODEOFILE GetDefaultOFileMode () { return MODEOFILE::kSKROOT; }
     const static int GetDefaultRuntimeBegin () { return (int) SKSNSIMENUM::SKPERIODRUN::SKVIBEGIN;}
     const static int GetDefaultRuntimeEnd () { return (int) SKSNSIMENUM::SKPERIODRUN::SKVIEND;}
     const static int GetDefaultRuntimePeriod() { return -1; /* using RuntimeBegin/End */}
@@ -192,6 +199,8 @@ class SKSNSimUserConfiguration{
     SKSNSimUserConfiguration &SetNeutrinoOscType( int t) { m_nuosc_type = (SKSNSIMENUM::NEUTRINOOSCILLATION)t; return *this; }
     SKSNSimUserConfiguration &SetRunnum(int r) { m_runnum = r; return *this; }
     SKSNSimUserConfiguration &SetSubRunnum(int r) { m_subrunnum = r; return *this; }
+    SKSNSimUserConfiguration &SetOFileMode ( MODEOFILE m ) { m_mode_ofile = m; return *this; }
+    SKSNSimUserConfiguration &SetOFileMode ( std::string s, bool exit_if_wrong = true );
 
     /* Event range related */
     double GetFluxEnergyMin() const { return m_energy_min;}
@@ -208,6 +217,8 @@ class SKSNSimUserConfiguration{
     size_t GetNumEventsPerFile() const {return m_num_per_file;}
     bool   GetEventVectorGeneration() const { return m_eventvector_generation; }
     SKSNSIMENUM::TANKVOLUME GetEventgenVolume() const { return m_eventgen_volume; }
+    MODEOFILE GetOFileMode() const { return m_mode_ofile; }
+    std::string GetOFileModeString() const;
 
     /* DSNB runtime normalization related */
     bool   GetNormRuntime() const { return m_runtime_normalization;}

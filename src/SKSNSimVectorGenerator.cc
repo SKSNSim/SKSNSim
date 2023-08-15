@@ -222,6 +222,9 @@ SKSNSimSNEventVector SKSNSimVectorGenerator::GenerateEventIBD() {
 
   ev.SetRunnum(m_runnum);
   ev.SetSubRunnum(m_subrunnum);
+  const double rvtx[3] = {xyz.x, xyz.y, xyz.z };
+  const double rdir[3] = {-nuDir.x, -nuDir.y, -nuDir.z };
+  ev.SetSNEvtInfo( 0 /* IBD */, 0.0, - PDG_ELECTRON_NEUTRINO, nuEne, rdir, rvtx );
 
   return ev;
 }
@@ -354,6 +357,9 @@ SKSNSimSNEventVector SKSNSimVectorGenerator::GenerateEventIBDFlat() {
 
   ev.SetRunnum(m_runnum);
   ev.SetSubRunnum(m_subrunnum);
+  const double rvtx[3] = {xyz.x, xyz.y, xyz.z };
+  const double rdir[3] = {-nuDir.x, -nuDir.y, -nuDir.z };
+  ev.SetSNEvtInfo( 0 /* IBD */, 0.0, - PDG_ELECTRON_NEUTRINO, nuEne, rdir, rvtx );
 
   return ev;
 }
