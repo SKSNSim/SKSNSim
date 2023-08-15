@@ -13,6 +13,7 @@
 #include <pdg_codes.h>
 #include <TFile.h>
 #include <TTree.h>
+#include "SKSNSimConstant.hh"
 
 
 extern "C" {
@@ -71,6 +72,19 @@ class SKSNSimXSecIBDSV : public SKSNSimCrosssectionModel {
     SKSNSimXSecIBDSV(){}
     ~SKSNSimXSecIBDSV(){}
     double GetCrosssection(double) const;
+    std::pair<double,double> GetDiffCrosssection(double, double) const;
+};
+
+class SKSNSimXSecIBDRVV : public SKSNSimCrosssectionModel {
+  // Cross section model of IBD by Ricciardi-Vignaroli-Vissani (DOI: https://doi.org/10.1007/JHEP08(2022)212)
+  // Reference [2] IBD calculatoin of Strumia-Vissani (Phys.Lett.B564:42-54,2003, DOI: https://doi.org/10.1016/S0370-2693(03)00616-6)
+  // Error is systematic uncertainty cased by (Vud, axial coupling) and axial_radii. This is implemented as simple approximation with constant and power-law, respectively.
+  private:
+  public:
+    SKSNSimXSecIBDRVV(){}
+    virtual ~SKSNSimXSecIBDRVV(){}
+    double GetCrosssection(double) const;
+    double GetCrosssectionError(double) const; /* arbitary unit. If we want to convert to unit of %, multiply 100.0. */
     std::pair<double,double> GetDiffCrosssection(double, double) const;
 };
 

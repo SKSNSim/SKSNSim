@@ -17,6 +17,7 @@ namespace SKSNSimPhysConst {
   constexpr double costheta_cabibo = 0.974; // cabibo angle
   constexpr double Gf = 0.04541638e-5; // fermi constant(fm**2), G_F/(hbarc)^3 * (hbarc)^2 in PDG 2022
   constexpr double HBARC = 197.3269804; // (MeV fm)
+  constexpr double ALPHA = 7.2973525693e-3; // fine structure constant (PDG 2022)
 
   constexpr double PI = M_PI /*3.14159265358979833*/;
   constexpr double ERG2MEV = 1.0e0/1.60217733e-6;
