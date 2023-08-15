@@ -13,6 +13,7 @@
 #include "SKSNSimConstant.hh"
 
 using namespace SKSNSimPhysConst;
+constexpr char INSTALLDIRVARIABLENAME[] = "SKSNSIMINSTALLDIR";
 
 // This enable precise calculation of cross section of RVV model
 // #define RVVMODEL_INCLUDE_SECONDCURRENT  // Default: commented out
@@ -624,7 +625,12 @@ void SKSNSimXSecNuOxygen::LoadFile(INISTATE ini){
   const static std::string rctn[NTYPE] = {"nue", "neb"};
   if (!isOpened[ini]) {
     std::cout << "new file open (num, ix, isOpen): " << std::get<0>(ini) << " " << std::get<1>(ini) << " " << isOpened[ini] << std::endl;
-    const std::string target = Form("/disk1/disk02/usr6/nakanisi/SuperNova/time-vect300/oscillation/oxygen/crsox%s%dstate.dat",rctn[std::get<0>(ini)].c_str(),std::get<1>(ini));
+    const char * env_p = std::getenv(INSTALLDIRVARIABLENAME);
+    if( env_p == nullptr ){
+        std::cerr << "The environmental variable \"" << INSTALLDIRVARIABLENAME << "\" is not defined. Please set it..." << std::endl;
+    }
+
+    const std::string target = std::string(env_p) + Form("/table/crsox%s%dstate.dat",rctn[std::get<0>(ini)].c_str(),std::get<1>(ini));
     std::ifstream ifs(target);
 
     if(!ifs){
@@ -741,11 +747,18 @@ double SKSNSimXSecNuOxygen::OxigFuncAngleRecCC(int num, int ix, int ex, int ch, 
   std::ifstream ifs[2][5];
   std::string rctn[2] = {"nue", "neb"};
 
-  ifs[num][ix].open(Form("/disk1/disk02/usr6/nakanisi/SuperNova/time-vect300/oscillation/oxygen/crsox%s%dstate.dat",rctn[num].c_str(),ix));
+  const char * env_p = std::getenv(INSTALLDIRVARIABLENAME);
+  if( env_p == nullptr ){
+    std::cerr << "The environmental variable \"" << INSTALLDIRVARIABLENAME << "\" is not defined. Please set it..." << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  const std::string target_fname = std::string(env_p) + Form("/table/crsox%s%dstate.dat",rctn[num].c_str(),ix);
+  ifs[num][ix].open(target_fname);
 
   if(!ifs[num][ix]){
     std::cerr << "file does not exist" << std::endl;
-    std::cerr << "file name is" << " " << Form("/disk1/disk02/usr6/nakanisi/SuperNova/time-vect300/oscillation/oxygen/crsox%s%dstate.dat",rctn[num].c_str(),ix) << std::endl;
+    std::cerr << "file name is " << target_fname << std::endl;
     exit(EXIT_FAILURE);
   }
 
@@ -826,11 +839,18 @@ double SKSNSimXSecNuOxygen::OxigFuncRecEneCC(int num, int ix, int ex, int ch, do
     std::ifstream ifs[2][5];
     std::string rctn[2] = {"nue", "neb"};
 
-    ifs[num][ix].open(Form("/disk1/disk02/usr6/nakanisi/SuperNova/time-vect300/oscillation/oxygen/crsox%s%dstate.dat",rctn[num].c_str(),ix));
+    const char * env_p = std::getenv(INSTALLDIRVARIABLENAME);
+    if( env_p == nullptr ){
+      std::cerr << "The environmental variable \"" << INSTALLDIRVARIABLENAME << "\" is not defined. Please set it..." << std::endl;
+      exit(EXIT_FAILURE);
+    }
+
+    const std::string target_fname =std::string( env_p) + Form("/table/crsox%s%dstate.dat",rctn[num].c_str(),ix);
+    ifs[num][ix].open( target_fname );
 
     if(!ifs[num][ix]){
       std::cerr << "file does not exist" << std::endl;
-      std::cerr << "file name is" << " " << Form("/disk1/disk02/usr6/nakanisi/SuperNova/time-vect300/oscillation/oxygen/crsox%s%dstate.dat",rctn[num].c_str(), ix) << std::endl;
+      std::cerr << "file name is " << target_fname << std::endl;
       exit(EXIT_FAILURE);
     }
 
@@ -896,7 +916,14 @@ void SKSNSimXSecNuOxygenNC::LoadFile(INISTATE ini){
   const static std::string rctn[NTYPE] = {"N", "O"};
   if (!isOpened[ini]) {
     std::cout << "new file open (num, isOpen): " << std::get<0>(ini) << " " << isOpened[ini] << std::endl;
-    const std::string target = Form("/disk1/disk02/usr6/nakanisi/SuperNova/time-vect300/oscillation/oxygen/crossNC_ex%s.dat",rctn[std::get<0>(ini)].c_str());
+
+    const char * env_p = std::getenv(INSTALLDIRVARIABLENAME);
+    if( env_p == nullptr ){
+      std::cerr << "The environmental variable \"" << INSTALLDIRVARIABLENAME << "\" is not defined. Please set it..." << std::endl;
+      exit(EXIT_FAILURE);
+    }
+
+    const std::string target = std::string(env_p) + Form("/table/crossNC_ex%s.dat",rctn[std::get<0>(ini)].c_str());
     std::ifstream ifs(target);
 
     if(!ifs){
@@ -982,7 +1009,14 @@ void SKSNSimXSecNuOxygenSub::LoadFile(INISTATE ini){
   const static std::string rctn[NTYPE] = {"nue", "neb"};
   if (!isOpened[ini]) {
     std::cout << "new file open (num, ix, isOpen): " << std::get<0>(ini) << " " << std::get<1>(ini) << " " << isOpened[ini] << std::endl;
-    const std::string target = Form("/disk1/disk02/usr6/nakanisi/SuperNova/time-vect300/oscillation/oxygen/sub3-1/dat/sub%s%dstate.dat",rctn[std::get<0>(ini)].c_str(),std::get<1>(ini));
+
+    const char * env_p = std::getenv(INSTALLDIRVARIABLENAME);
+    if( env_p == nullptr ){
+      std::cerr << "The environmental variable \"" << INSTALLDIRVARIABLENAME << "\" is not defined. Please set it..." << std::endl;
+      exit(EXIT_FAILURE);
+    }
+
+    const std::string target = std::string(env_p) + Form("/table/sub%s%dstate.dat",rctn[std::get<0>(ini)].c_str(),std::get<1>(ini));
     std::ifstream ifs(target);
 
     if(!ifs){
