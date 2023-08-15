@@ -13,7 +13,6 @@
 #include "SKSNSimConstant.hh"
 
 using namespace SKSNSimPhysConst;
-constexpr char INSTALLDIRVARIABLENAME[] = "SKSNSIMINSTALLDIR";
 
 // This enable precise calculation of cross section of RVV model
 // #define RVVMODEL_INCLUDE_SECONDCURRENT  // Default: commented out
@@ -560,7 +559,15 @@ double SKSNSimXSecNuElastic::GetCrosssection(double enu, int ipart, FLAGETHR fla
 }
 
 void SKSNSimXSecNuElastic::OpenCsElaFile(){
-  fCsElaFile.reset(new TFile(CSELAFILENAME.c_str(), "READ"));
+
+  const char * env_p = std::getenv(INSTALLDIRVARIABLENAME);
+  if( env_p == nullptr ){
+    std::cerr << "The environmental variable \"" << INSTALLDIRVARIABLENAME << "\" is not defined. Please set it..." << std::endl;
+    exit(EXIT_FAILURE);
+  }
+  const std::string cselafilename = std::string(env_p) + "/table/sn_elastic.root";
+
+  fCsElaFile.reset(new TFile(cselafilename.c_str(), "READ"));
   fCsElaTree = (TTree*)fCsElaFile->Get("nuela");
   fCsElaTree->SetBranchAddress("nuene", &NuElaEnergy);
   fCsElaTree->SetBranchAddress("cnue", &CsElaNue);
@@ -628,6 +635,7 @@ void SKSNSimXSecNuOxygen::LoadFile(INISTATE ini){
     const char * env_p = std::getenv(INSTALLDIRVARIABLENAME);
     if( env_p == nullptr ){
         std::cerr << "The environmental variable \"" << INSTALLDIRVARIABLENAME << "\" is not defined. Please set it..." << std::endl;
+        exit(EXIT_FAILURE);
     }
 
     const std::string target = std::string(env_p) + Form("/table/crsox%s%dstate.dat",rctn[std::get<0>(ini)].c_str(),std::get<1>(ini));

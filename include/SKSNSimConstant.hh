@@ -8,6 +8,8 @@
 #include <map>
 #include "SKSNSimEnum.hh"
 
+constexpr char INSTALLDIRVARIABLENAME[] = "SKSNSIMINSTALLDIR";
+
 namespace SKSNSimPhysConst {
   constexpr double Me = 0.510998950e0 /* MeV */;// electron mass(from PDG 2022) // TODO this is different against with Me in sl_nue_dif_rad.F in sollib
   constexpr double Mp = 938.272088e0 /* MeV */; // proton mass
