@@ -84,33 +84,18 @@ The flux data for the SN burst and DSNB should be in the @code{$@{SKSNSIMFLUXDIR
 @section Binaries
 @subsection For SN burst
 
-For previous version, main_snburst, the basic usage is @code{main_snburst @{model@} @{nuosc@} @{distance@} @{generatormode@} @{outputdirectory@} @{randomseed@}}.
-List of arguments are below:
-@itemize
-@item
-1st: model name (e.g. nakazato/intp2001.data)
-@item
-2nd: neutrino-oscillation (0:no, 1:normal, 2:inverted)
-@item
-3rd: Distance (normalized to 10kpc)
-@item
-4th: Generate event or not (0: No just calculate expected, 1: Yes for detector simulation)
-@item
-5th: Output directory, default: ./data/(SN model)
-@item
-6th: Random seed (not supported yet)
-@end itemize
-For new version, you can see detail usage via executing @command{main_snburst_new --help}.
-Basically, a format of the previous version is available.
-But we recommend to use new format which can be specified via options starting @code{--} (e.g. @option{--seed}).
+@command{main_snburst [-m,--snmodel model_name] [--nuosc 0(NONE)/1(NORMAL)/2(INVERTED)] [-d,--distance distance_in_kpc] [-g,--fillevent @{0(no: just calculate expected num of evt)/1(yes: fill  kinematics for detector sim.)@}] [-s,--seed randomseed] @{outputdirectory@}}
+
+You can see detail usage via executing @command{main_snburst --help}.
+There are many option for detailed configuration.
 All options have default value, and you do not have to specify all of them.
-Detail can be dumped by executing @command{main_dsnb(_new) --help}.
-Basically, you can run by just executing @command{main_dsnb(_new)} with wanted options you would like to change.
+Detail can be dumped by executing @command{main_snburst --help}.
+Basically, you can run by just executing @command{main_snburst} with wanted options you would like to change.
 
 @subsection For DSNB
 
-Detail can be dumped by executing @command{main_dsnb(_new) --help}.
-Basically, you can run by just executing @command{main_dsnb(_new)} with wanted options you would like to change.
+Detail can be dumped by executing @command{main_dsnb --help}.
+Basically, you can run by just executing @command{main_dsnb} with wanted options you would like to change.
 
 @section Output format
 
@@ -132,11 +117,11 @@ In the NUANCE format, there are records of @command{nuance __interaction_mode__}
 SKSNSim uses several parameters such as neutrino oscillation parameters. If you want to modify them, you need to check following files:
 @itemize
 @item
-Neutrino oscillation parameters: @file{include/VectGenSnConst.hh} (L:14) for previous version (@command{main_snburst}), @file{include/SKSNSimConstant.hh} (L:37) for @command{main_snburst_new}.
+Neutrino oscillation parameters: @file{include/SKSNSimConstant.hh} (L:37) for @command{main_snburst}.
 If you want to use latest parameter of @code{sin2theta12=0.307} (PDG2022) instead of original configuration (@code{0.28}), please modify @file{GNUMakefile} (L:22) to exclude @option{-DORIGINAL_NUOSCPARAMETERS}.
 
 @item
-Number of proton, oxygen or electron: @file{include/VectGenSnConst.hh} (L:23) for @command{main_snburst}, @file{include/SKSNSimConstant.hh} (L:24).
+Number of proton, oxygen or electron: @file{include/SKSNSimConstant.hh} (L:24).
 @end itemize
 
 
@@ -223,8 +208,6 @@ The DSNB flux includes only Horiuchi model:
 @itemize
 @item Horiuch model
 @end itemize
-
-
 
 
 @bye
