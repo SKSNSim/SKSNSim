@@ -21,4 +21,4 @@ Basically, you can run by just executing ``main\_dsnb`` with wanted options you 
 
 ## More detail:
 
-The guide for users and developpers are available on https://www-sk1.icrr.u-tokyo.ac.jp/~sizu/sk/guide_sksnsim/ (SuperK internal only), which is output of doc/guide_sksnsim.texi (Texinfo file). If you want to see the PDF version, please do ``make doc``.
+The guide for users and developpers are available on https://github.com/SKSNSim/SKSNSim/releases/download/v1.2.0/guide_sksnsim.pdf , which is output of doc/guide_sksnsim.texi (Texinfo file). If you want to see the PDF version, please do ``make doc``.
