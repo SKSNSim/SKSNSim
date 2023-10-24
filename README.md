@@ -1,6 +1,6 @@
 # SKSNSim: vector generator of Supernova burst and Diffuse Supernova Neutrino Background
 ## Usage
-There are two binaries, "main\_snburst" and "main\_dsnb" in this package. They are for Supernova burst (SN burst) and for Diffuse Supernova Neutrino Backgroud (DSNB) individually.
+There are two binaries, ``main_snburst`` and ``main_dsnb`` in this package. They are for Supernova burst (SN burst) and for Diffuse Supernova Neutrino Backgroud (DSNB) individually.
 
 ### Compile
 It is based on GNUMake. Just executing ``make`` command. However, it requires SK offline software packages.
@@ -12,12 +12,12 @@ Compiled binaries are places into ``bin`` directory.
 
 ### main\_snburst
 
-You can see detail usage via executing ``main\_snburst --help``. All options have default value, and you do not have to specify all of them.
+You can see detail usage via executing ``main_snburst --help``. All options have default value, and you do not have to specify all of them.
 
 
 ### main\_dsnb
-Detail can be dumped by executing ``main\_dsnb --help``.
-Basically, you can run by just executing ``main\_dsnb`` with wanted options you would like to change.
+Detail can be dumped by executing ``main_dsnb --help``.
+Basically, you can run by just executing ``main_dsnb`` with wanted options you would like to change.
 
 ## More detail:
 
