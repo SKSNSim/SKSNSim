@@ -160,8 +160,26 @@ class SKSNSimUserConfiguration{
     const static int GetDefaultRuntimePeriod() { return -1; /* using RuntimeBegin/End */}
     const static bool GetDefaultRuntimeNormalization() { return false; }
     const static double GetDefaultRuntimeNormFactor() { return 24.0; }
-    const static std::string GetDefaultSNBurstFluxModel () { return "nakazato/intp2002.data";}
-    const static std::string GetDefaultDSNBFluxModel () { return "horiuchi/8MeV_Nominal.dat";}
+    const static std::string GetDefaultSNBurstFluxModel () {
+      std::string dir;
+      if( const char * env_p = std::getenv(DATADIRVARIABLENAME) )
+        dir = std::string(env_p);
+      else {
+        std::cout << "The environmental variable \"" << DATADIRVARIABLENAME << "\" is not defined. Please set it..." << std::endl;
+        exit(EXIT_FAILURE);
+      }
+      return dir + "/nakazato/intp2002.data";
+    }
+    const static std::string GetDefaultDSNBFluxModel () {
+      std::string dir;
+      if( const char * env_p = std::getenv(DATADIRVARIABLENAME) )
+        dir = std::string(env_p);
+      else {
+        std::cout << "The environmental variable \"" << DATADIRVARIABLENAME << "\" is not defined. Please set it..." << std::endl;
+        exit(EXIT_FAILURE);
+      }
+      return dir + "/horiuchi/8MeV_Nominal.dat";
+    }
     const static bool GetDefaultDSNBFlatFlux () { return false;}
     const static int GetDefaultRunnum () { return (int) SKSNSIMENUM::SKPERIODRUN::SKMC; }
     const static int GetDefaultSubRunnum () { return 0; }
