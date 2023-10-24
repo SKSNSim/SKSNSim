@@ -30,9 +30,11 @@ int main(int argc, char **argv){
   vectgen->SetRandomGenerator(config->GetRandomGenerator());
 
   /* Setup of flux model and xsec model */
-  auto flux = std::make_unique<SKSNSimDSNBFluxCustom>( config->GetDSNBFluxModel() );
+  if( ! config->GetDSNBFlatFlux() ) {
+    auto flux = std::make_unique<SKSNSimDSNBFluxCustom>( config->GetDSNBFluxModel() );
+    vectgen->AddFluxModel((SKSNSimFluxModel*)flux.release());
+  }
   auto xsec = std::make_unique<SKSNSimXSecIBDRVV>();
-  vectgen->AddFluxModel((SKSNSimFluxModel*)flux.release());
   vectgen->AddXSecModel((SKSNSimCrosssectionModel*)xsec.release());
 
   /*  Tempolary variables to define integration of dN/dE spectrum */
