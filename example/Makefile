@@ -27,7 +27,7 @@ FCFLAGS += -w -fPIC -lstdc++
 
 LOCAL_INC	+= -I$(SKSNSIM_ROOTDIR)/include
 
-LOCAL_LIBS	= -L$(SKOFL_LIBDIR) -lsnlib_1.0 -lsnevtinfo -lsollib_4.0 -lsklowe_7.0 -lwtlib_5.1 -llibrary -L$(SKSNSIM_ROOTDIR)/lib -lSKSNSim
+LOCAL_LIBS	= -L$(SKOFL_LIBDIR) -lsnlib_1.0 -lsnevtinfo -lsollib_4.0 -lsklowe_7.0 -lwtlib_5.1 -llibrary -L$(SKSNSIM_ROOTDIR)/lib -lSKSNSim -lboost_system -lboost_filesystem
 
 LDFLAGS = $(LOCAL_LIBS) $(LOCAL_INC)
 #INCROOT=-I$(ROOTSYS)/include/

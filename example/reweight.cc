@@ -14,6 +14,8 @@
 #include <memory>
 #include <getopt.h>
 #include <cstdlib>
+#define BOOST_FILESYSTEM_NO_DEPRECATED
+#include <boost/filesystem.hpp>
 #include <TFile.h>
 #include <TTree.h>
 #include <TVector3.h>
@@ -22,40 +24,101 @@
 #include <SKSNSimCrosssection.hh>
 #include <SKSNSimFlux.hh>
 
+using namespace boost::filesystem;
+using std::cout;
+
+namespace PID {
+  constexpr int NUE = 12;
+  constexpr int ELECTRON = 11;
+}
+
 
 void showUsage( const char *argv0){
   std::cout << "Usage: " << argv0 << " [options] {output.root} {input.root}" << std::endl;
   std::cout << std::endl;
-  std::cout << "Options: -h,--help" << std::endl
+  std::cout << "Options: -h,--help,-d,--fluxdir, --fluxpositrondir" << std::endl
     << "-h,--help: show this help" << std::endl
+    << "-d {directory}, --fluxdir {directory}: search for flux file (.txt) in directory {directory}" << std::endl
+    << "--fluxpositrondir {directory}: search for flux file for positron spectrum (.txt) in directory {directory} for Li9" << std::endl
     << std::endl;
 }
+
+typedef std::pair<std::string, std::string> MODEL;
+std::vector<MODEL> findModelFile(std::string directory) {
+  std::vector<MODEL> buffer;
+
+  if( ! is_directory(directory)) return buffer;
+  for( directory_entry&x : directory_iterator(directory) ){
+    if( ! is_regular_file(x) ) continue;
+    if( x.path().extension() == ".txt" ) {
+      std::string mname = x.path().stem().string();
+      buffer.push_back( std::make_pair( mname, x.path().string()));
+    }
+  }
+  return buffer;
+}
+
+class FLUXGENERATOR {
+  public:
+    std::string name;
+    TBranch *br;
+    Double_t flux;
+    std::unique_ptr<SKSNSimDSNBFluxCustom> generator;
+    FLUXGENERATOR(): br(nullptr) {
+      //generator = std::make_unique<SKSNSimDSNBFluxCustom>();
+    }
+    FLUXGENERATOR(std::string n, std::string fname, TTree &tr): name(n) {
+      TString brname = Form("flux_%s", name.c_str());
+      br = tr.Branch( brname, &flux, brname+"/D");
+      generator = std::make_unique<SKSNSimDSNBFluxCustom>(fname, " ");
+      //cout << "Cnstr' " << name << " " << generator->GetFlux(15.0)<<std::endl;
+    }
+    void fill( double energy){
+      flux = generator->GetFlux( energy);
+      //cout << name << " " << flux << std::endl;
+      br->Fill();
+    }
+};
 
 
 int main( int argc, char **argv){
 
+  std::vector<MODEL> flux_models;
+  std::vector<MODEL> flux_models_positron;
+
   while (1) {
     int option_index = 0;
     static struct option long_options[] = {
-      {"help",     no_argument,      0, 'h'},
-      {0,         0,                 0,  0 }
+      {"help",                  no_argument,      0, 'h'},
+      {"fluxdir",         required_argument,      0, 'd'},
+      {"fluxpositrondir", required_argument,      0,  0 },
+      {0,                 0,                      0,  0 }
     };
 
-    const int c = getopt_long(argc, argv, "h",
+    const int c = getopt_long(argc, argv, "d:h",
         long_options, &option_index);
     if (c == -1)
       break;
 
     switch (c) {
       case 0:
-        printf("option %s", long_options[option_index].name);
-        if (optarg)
-          printf(" with arg %s", optarg);
-        printf("\n");
+        switch( option_index) {
+          case 2: // fluxpositrondir
+            flux_models_positron = findModelFile( optarg);
+            cout << "Loaded flux files (positron): " << flux_models_positron.size() << " files -> ";
+            for( auto it : flux_models_positron ) cout << it.first << " ";
+            cout << std::endl;
+            break;
+          default:
+            break;
+        }
         break;
-
-      case '0':
-      case '1':
+      case 'd':
+        flux_models = findModelFile( optarg);
+        cout << "Loaded flux files: " << flux_models.size() << " files -> ";
+        for( auto it : flux_models ) cout << it.first << " ";
+        cout << std::endl;
+        break;
       case 'h':
         showUsage(argv[0]);
         break;
@@ -81,11 +144,9 @@ int main( int argc, char **argv){
 
   MCInfo *MC = nullptr;
   double ibd_xsec;
-  double flux_horiuchi_8mev;
 
   tr->SetBranchAddress("MC", &MC);
   auto newBrIBDXsec = tr->Branch("ibd_xsec", &ibd_xsec, "ibd_xsec/D");
-  auto newBrFluxHoriuchi8MeV = tr->Branch("flux_horiuchi_8mev", &flux_horiuchi_8mev, "flux_horiuchi_8mev/D");
 
   const int ntotal = tr->GetEntries();
 
@@ -94,22 +155,37 @@ int main( int argc, char **argv){
   std::unique_ptr<SKSNSimXSecIBDRVV> xsec_rvv = std::make_unique<SKSNSimXSecIBDRVV>();
 
   // For flux
-  std::unique_ptr<SKSNSimFluxDSNBHoriuchi> fluxcal_horiuchi_8mev = std::make_unique<SKSNSimFluxDSNBHoriuchi>();
+  std::vector<std::unique_ptr<FLUXGENERATOR>> flux_container;
+  for( auto it : flux_models)
+    flux_container.push_back( std::make_unique<FLUXGENERATOR>( it.first, it.second, *tr));
+
+  std::vector<std::unique_ptr<FLUXGENERATOR>> flux_container_positron;
+  for( auto it : flux_models_positron)
+    flux_container_positron.push_back( std::make_unique<FLUXGENERATOR>( it.first, it.second, *tr));
+
+
 
   for( int e = 0; e < ntotal; e++){
     tr->GetEntry(e);
 
-    const double nue_energy = MC->energy[0];
-    const TVector3 nue_p ( MC->pvc[0][0], MC->pvc[0][1], MC->pvc[0][2]);
-    const TVector3 pos_p ( MC->pvc[2][0], MC->pvc[2][1], MC->pvc[2][2]);
+    int positronID = -1;
+    int nuebarID = -1;
+    for( int i = 0; i < MC->nvc; i++){
+      if( MC->ipvc[i] == -PID::NUE) nuebarID = i;
+      else if( MC->ipvc[i] == -PID::ELECTRON) positronID = i;
+    }
+    const double nue_energy = nuebarID >= 0 ? MC->energy[nuebarID]: 0.0;
+    const double positron_energy = positronID >= 0 ? MC->energy[positronID]: 0.0;
+    const TVector3 nue_p = nuebarID >= 0 ? TVector3( MC->pvc[nuebarID][0], MC->pvc[nuebarID][1], MC->pvc[nuebarID][2]) : TVector3();
+    const TVector3 pos_p = positronID >= 0 ? TVector3( MC->pvc[positronID][0], MC->pvc[positronID][1], MC->pvc[positronID][2]): TVector3();
 
     ibd_xsec = xsec_rvv->GetDiffCrosssection( nue_energy, TMath::Cos(nue_p.Angle(pos_p))).first;
-    flux_horiuchi_8mev = fluxcal_horiuchi_8mev->GetFlux(nue_energy, 0, SKSNSimFluxModel::FLUXNUTYPE::FLUXNUEB);
-
 
     newBrIBDXsec->Fill();
-    newBrFluxHoriuchi8MeV->Fill();
-
+    for( auto &it : flux_container) 
+      it->fill( nue_energy);
+    for( auto &it : flux_container_positron) 
+      it->fill( positron_energy);
   }
 
   tr->Write(nullptr, TObject::kWriteDelete);
