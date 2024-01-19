@@ -165,10 +165,11 @@ class SKSNSimUserConfiguration{
       if( const char * env_p = std::getenv(DATADIRVARIABLENAME) )
         dir = std::string(env_p);
       else {
-        std::cout << "The environmental variable \"" << DATADIRVARIABLENAME << "\" is not defined. Please set it..." << std::endl;
+        std::cout << "The environmental variable default flux model\"" << DATADIRVARIABLENAME << "\" is not defined. Please set it..." << std::endl;
         exit(EXIT_FAILURE);
       }
-      return dir + "/nakazato/intp2002.data";
+      //return dir + "/nakazato/intp2002.data";
+      return "/nakazato/intp2002.data";
     }
     const static std::string GetDefaultDSNBFluxModel () {
       std::string dir;
