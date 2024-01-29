@@ -17,7 +17,11 @@
 #include <pdg_codes.h>
 #else
 constexpr int PDG_ELECTRON_NEUTRINO = 12;
+constexpr int PDG_ELECTRON = 11;
 constexpr int PDG_MUON_NEUTRINO = 14;
+constexpr int PDG_GAMMA = 22;
+constexpr int PDG_PROTON = 2212;
+constexpr int PDG_NEUTRON = 2112;
 #endif
 
 
