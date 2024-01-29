@@ -9,9 +9,11 @@
 #define SKSNSIMVECTORGENERATOR_H_INCLUDED
 
 #include <memory>
-#include <mcinfo.h>
 #include <TRandom3.h>
 #include <algorithm>
+#ifdef SKINTERNAL
+#include <mcinfo.h>
+#endif
 #include "SKSNSimFlux.hh"
 #include "SKSNSimCrosssection.hh"
 #include "SKSNSimEnum.hh"

@@ -4,7 +4,6 @@
 #include <functional>
 #include <algorithm>
 #include <TRandom3.h>
-#include <geotnkC.h>
 #include "SKSNSimVectorGenerator.hh"
 #include "SKSNSimConstant.hh"
 #include "SKSNSimCrosssection.hh"

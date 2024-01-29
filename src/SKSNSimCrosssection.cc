@@ -8,7 +8,6 @@
 #include <limits>
 #include <iostream>
 #include <fstream>
-#include <pdg_codes.h>
 #include "SKSNSimCrosssection.hh"
 #include "SKSNSimConstant.hh"
 

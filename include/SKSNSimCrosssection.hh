@@ -10,10 +10,15 @@
 #include <utility>
 #include <memory>
 #include <set>
-#include <pdg_codes.h>
 #include <TFile.h>
 #include <TTree.h>
 #include "SKSNSimConstant.hh"
+#ifdef SKINTERNAL
+#include <pdg_codes.h>
+#else
+constexpr int PDG_ELECTRON_NEUTRINO = 12;
+constexpr int PDG_MUON_NEUTRINO = 14;
+#endif
 
 
 extern "C" {

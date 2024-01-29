@@ -11,7 +11,6 @@
 #include <TFileCacheWrite.h>
 #include <TTree.h>
 #include <TMath.h>
-#include <mcinfo.h>
 #include "SKSNSimFileIO.hh"
 #include "skrun.h"
 #include "SKSNSimTools.hh"
@@ -35,6 +34,7 @@ void SKSNSimFileOutTFile::Open(const std::string fname, const bool including_sne
 	//------------------------------------------------------------------------
 
 	/*-----define class-----*/
+#ifdef SKINTERNAL
 	m_MC = new MCInfo;
 	m_MC->Clear();
 	m_MC->SetName("MC");
@@ -44,11 +44,14 @@ void SKSNSimFileOutTFile::Open(const std::string fname, const bool including_sne
     m_SN->Clear();
     m_SN->SetName("SN");
   }
+#endif
 
 	/*-----define branch-----*/
 	TList *TopBranch = new TList;
+#ifdef SKINTERNAL
 	TopBranch->Add(m_MC);
   if(including_snevtinfo) TopBranch->Add(m_SN);
+#endif
 
 	// define tree
 	m_OutTree = new TTree("data", "SK 5 tree");

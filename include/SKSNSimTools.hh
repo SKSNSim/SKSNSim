@@ -9,13 +9,19 @@
 #include <map>
 #include "SKSNSimEnum.hh"
 #include "SKSNSimConstant.hh"
+#ifdef SKINTERNAL
 #include <geotnkC.h>
+#endif
 
 using namespace SKSNSimPhysConst;
 constexpr double VOL[(size_t)SKSNSIMENUM::TANKVOLUME::kNTANKVOLUME] = { 
+#ifdef SKINTERNAL
   /* kIDFV */ (RINTK-FVCUT)*(RINTK-FVCUT)*PI*(ZPINTK-FVCUT)*2.,
   /* kIDFULL */ RINTK*RINTK*PI*ZPINTK*2.,
   /* kTANKFULL */ RTKTK*RTKTK*PI*ZPTKTK*2.
+#else
+      1.0, 1.0, 1.0
+#endif
 };
 namespace SKSNSimTools{
   auto DumpDebugMessage = [] (TString str) {
