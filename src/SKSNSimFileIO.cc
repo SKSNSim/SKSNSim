@@ -76,6 +76,7 @@ void SKSNSimFileOutTFile::Close(){
 
 void SKSNSimFileOutTFile::Write(const SKSNSimSNEventVector &ev){
 
+#ifdef SKINTERNAL
   if(ev.GetSNEvtInfoIEvt() != -1 && m_SN != NULL){
     m_SN->iEvt  = ev.GetSNEvtInfoIEvt();
     m_SN->rType = ev.GetSNEvtInfoRType();
@@ -89,7 +90,9 @@ void SKSNSimFileOutTFile::Write(const SKSNSimSNEventVector &ev){
     m_SN->rVtx[1] = ev.GetSNEvtInfoRVtx(1);
     m_SN->rVtx[2] = ev.GetSNEvtInfoRVtx(2);
   }
+#endif
 
+#ifdef SKINTERNAL
   m_MC->mcrun = ev.GetRunnum();
   m_MC->mcninfo = 2;
   m_MC->mcinfo[1] = ev.GetSubRunnum();
@@ -119,6 +122,7 @@ void SKSNSimFileOutTFile::Write(const SKSNSimSNEventVector &ev){
     m_MC->iflgvc[i] = ev.GetTrackIFLGVC(i);
     m_MC->icrnvc[i] = ev.GetTrackICRNVC(i);
   }
+#endif
 
   m_OutTree->Fill();
 

@@ -1,8 +1,8 @@
-#include "SKSNSimVectorGenerator.hh"
 #include <memory>
 #include <TRandom3.h>
 #include "SKSNSimTools.hh"
 #include "SKSNSimFileIO.hh"
+#include "SKSNSimVectorGenerator.hh"
 #include "SKSNSimUserConfiguration.hh"
 
 int main( int argc, char ** argv )

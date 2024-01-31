@@ -11,6 +11,11 @@
 #include "SKSNSimConstant.hh"
 #ifdef SKINTERNAL
 #include <geotnkC.h>
+#else
+constexpr double RINTK = 5000;
+constexpr double ZPINTK = 5000;
+constexpr double RTKTK = 5000;
+constexpr double ZPTKTK = 5000;
 #endif
 
 using namespace SKSNSimPhysConst;

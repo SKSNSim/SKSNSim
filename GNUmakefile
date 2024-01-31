@@ -12,7 +12,7 @@ all: main library
 
 
 ifndef SKOFL_ROOT
-	SKOFL_ROOT = ../..
+	SKOFL_ROOT = ./
 else
 	include $(SKOFL_ROOT)/config.gmk
 	SKINTERNAL=1
@@ -21,7 +21,7 @@ endif
 LOCAL_INC	+= -I./include/
 
 CXX=g++
-CXXFLAGS=$(root-config --cflags --libs)
+CXXFLAGS=$(shell root-config --cflags --libs)
 CXXFLAGS += -DNO_EXTERN_COMMON_POINTERS #-DDEBUG
 CXXFLAGS += $(LOCAL_INC)
 # if you want to use lates neutrino oscillation parameter, please comment out next line
@@ -29,6 +29,7 @@ CXXFLAGS += $(LOCAL_INC)
 FC=gfortran
 FCFLAGS += -w -fPIC -lstdc++
 
+LDLIBS=$(shell root-config --libs)
 
 ifdef SKINTERNAL
 LDFLAGS = $(LOCAL_LIBS) $(LOCAL_INC)
@@ -46,9 +47,13 @@ LN = ln -sf
 #
 
 SRCS = $(wildcard src/*.cc)
+ifdef SKINTERNAL
 SRCS += $(wildcard src/*.F)
+endif
 OBJS = $(patsubst src/%.cc, obj/%.o, $(filter %.cc, $(SRCS)))
-OBJS += $(patsubst src/%.F, obj/%.o, $(filter %.F, $(SRCS)))
+ifdef SKINTERNAL
+	OBJS += $(patsubst src/%.F, obj/%.o, $(filter %.F, $(SRCS)))
+endif
 
 MAINSRCS = $(wildcard *.cc)
 MAINSRCS += $(wildcard *.F)
