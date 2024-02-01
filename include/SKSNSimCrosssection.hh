@@ -25,12 +25,19 @@ constexpr int PDG_NEUTRON = 2112;
 #endif
 
 
+#ifdef SKINTERNAL
 extern "C" {
-	double sl_nue_dif_rad_( double *, double * );
-	double sl_neb_dif_rad_( double *, double * );
-	double sl_num_dif_rad_( double *, double * );
-	double sl_nmb_dif_rad_( double *, double * );
+    double sl_nue_dif_rad_( double *, double * );
+    double sl_neb_dif_rad_( double *, double * );
+    double sl_num_dif_rad_( double *, double * );
+    double sl_nmb_dif_rad_( double *, double * );
 } // TODO to avoid dependency of fortran library
+#else
+inline double sl_nue_dif_rad_( double *, double *){ return 1.0;}
+inline double sl_neb_dif_rad_( double *, double *){ return 1.0;}
+inline double sl_num_dif_rad_( double *, double *){ return 1.0;}
+inline double sl_nmb_dif_rad_( double *, double *){ return 1.0;}
+#endif
 
 enum struct XSECTYPE { mXSECIBD = 0, mXSECELASTIC, mXSECOXYGEN, mXSECOXYGENSUB, mXSECOXYGENNC, mNXSECTYPE};
 enum struct NUREACTTYPE { kNUEBARP = 0,

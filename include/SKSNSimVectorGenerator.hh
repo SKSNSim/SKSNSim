@@ -19,10 +19,12 @@
 #include "SKSNSimEnum.hh"
 #include "SKSNSimTools.hh"
 
+#ifdef SKINTERNAL
 extern "C" {
-  // From SKOFL
+  // From SKOFL available only in Supar-K
 	void sn_sundir_( int *, int *, float *, float *, float *);
 }
+#endif
 
 //======================
 // Useful tempolary container for Linear Algebra

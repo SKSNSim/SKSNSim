@@ -108,6 +108,9 @@ double SKSNSimDSNBFluxCustom::CalcIntegratedFlux() const {
 }
 
 
+const std::set<SKSNSimFluxModel::FLUXNUTYPE> SKSNSimSNFluxCustom::supportedType = {};
+SKSNSimSNFluxCustom::SKSNSimSNFluxCustom() {};
+
 void SKSNSimSNFluxCustom::LoadFluxFile(std::string fname){
   std::cout <<"SN model data in SnLoading :  "<<fname << std::endl;
 
@@ -232,6 +235,9 @@ double SKSNSimSNFluxCustom::GetFlux(const double e, const double t, const FLUXNU
   return nspc;
 
 }
+
+SKSNSimDSNBFluxMonthlyCustom::SKSNSimDSNBFluxMonthlyCustom(){}
+const std::set<SKSNSimFluxModel::FLUXNUTYPE> SKSNSimDSNBFluxMonthlyCustom::supportedType = {FLUXNUEB};
 
 void SKSNSimDSNBFluxMonthlyCustom::AddMonthlyFlux( const int elapsday, std::unique_ptr<SKSNSimDSNBFluxCustom> flux_ptr) {
   custommonthlyflux.push_back( std::make_pair( elapsday, std::move(flux_ptr) ));

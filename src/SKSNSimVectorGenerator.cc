@@ -438,7 +438,14 @@ std::vector<SKSNSimSNEventVector> SKSNSimVectorSNGenerator::GenerateEvents(){
 	/*-----determine SN direction-----*/
   {
     float sdir[3], ra, dec;
+#ifdef SKITERNAL
     sn_sundir_( m_sn_date, m_sn_time, sdir, & ra, & dec);
+#else
+    sdir[0] = 0.0;
+    sdir[1] = 0.0;
+    sdir[2] = -1.0;
+#endif
+
     m_sn_dir[0] = sdir[0];
     m_sn_dir[1] = sdir[1];
     m_sn_dir[2] = sdir[2];

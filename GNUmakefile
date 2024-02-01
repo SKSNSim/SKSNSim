@@ -11,9 +11,7 @@ all: main library
 	@echo "[SKSNSim] Done!"
 
 
-ifndef SKOFL_ROOT
-	SKOFL_ROOT = ./
-else
+ifdef SKOFL_ROOT
 	include $(SKOFL_ROOT)/config.gmk
 	SKINTERNAL=1
 endif
@@ -21,9 +19,12 @@ endif
 LOCAL_INC	+= -I./include/
 
 CXX=g++
-CXXFLAGS=$(shell root-config --cflags --libs)
+CXXFLAGS=$(shell root-config --cflags --libs) -fPIC
 CXXFLAGS += -DNO_EXTERN_COMMON_POINTERS #-DDEBUG
 CXXFLAGS += $(LOCAL_INC)
+ifdef SKOFL_ROOT
+	CXXFLAGS += -DSKINTERNAL
+endif
 # if you want to use lates neutrino oscillation parameter, please comment out next line
 #CXXFLAGS += -DORIGINAL_NUOSCPARAMETER
 FC=gfortran

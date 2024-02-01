@@ -29,7 +29,7 @@ constexpr double VOL[(size_t)SKSNSIMENUM::TANKVOLUME::kNTANKVOLUME] = {
 #endif
 };
 namespace SKSNSimTools{
-  auto DumpDebugMessage = [] (TString str) {
+  inline auto DumpDebugMessage = [] (TString str) {
 #ifdef DEBUG
     std::cout << "[IZU:DEBUG] " << str << std::endl;
 #endif
@@ -37,10 +37,10 @@ namespace SKSNSimTools{
 
   SKSNSIMENUM::SKPERIOD FindSKPeriod(int /* run */);
 
-  double GetVolume(SKSNSIMENUM::TANKVOLUME t){
+  inline double GetVolume(SKSNSIMENUM::TANKVOLUME t){
     return VOL[(size_t)t];
   }
-  double GetNTargetP(SKSNSIMENUM::TANKVOLUME t){
+  inline double GetNTargetP(SKSNSIMENUM::TANKVOLUME t){
     constexpr double NTGT[(size_t)SKSNSIMENUM::TANKVOLUME::kNTANKVOLUME] = {
       /* kIDFV */      Ntarget_p * VOL[(size_t)SKSNSIMENUM::TANKVOLUME::kIDFV]/VOL[(size_t)SKSNSIMENUM::TANKVOLUME::kIDFULL],
       /* kIDFULL */    Ntarget_p,
