@@ -29,11 +29,7 @@ constexpr double VOL[(size_t)SKSNSIMENUM::TANKVOLUME::kNTANKVOLUME] = {
 #endif
 };
 namespace SKSNSimTools{
-  inline auto DumpDebugMessage = [] (TString str) {
-#ifdef DEBUG
-    std::cout << "[IZU:DEBUG] " << str << std::endl;
-#endif
-  };
+  void DumpDebugMessage(TString );
 
   SKSNSIMENUM::SKPERIOD FindSKPeriod(int /* run */);
 
