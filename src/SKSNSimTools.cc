@@ -15,6 +15,11 @@ extern "C" {
 #endif
 
 namespace SKSNSimTools {
+  void DumpDebugMessage(TString str) {
+#ifdef DEBUG
+    std::cout << "[IZU:DEBUG] " << str << std::endl;
+#endif
+  };
   SKSNSIMENUM::SKPERIOD FindSKPeriod(int rn /* run_number */) {
     auto checkRange = [] (int t, int b, int e) {
       return ( t >= b && t < e );

@@ -12,27 +12,28 @@ all: main library
 
 
 ifdef SKOFL_ROOT
-	include $(SKOFL_ROOT)/config.gmk
-	SKINTERNAL=1
+include $(SKOFL_ROOT)/config.gmk
 endif
 
 LOCAL_INC	+= -I./include/
 
 CXX=g++
-CXXFLAGS=$(shell root-config --cflags --libs) -fPIC -lstdc++
+CXXFLAGS +=$(shell root-config --cflags --libs) -fPIC -lstdc++
 CXXFLAGS += -DNO_EXTERN_COMMON_POINTERS #-DDEBUG
 CXXFLAGS += $(LOCAL_INC)
 ifdef SKOFL_ROOT
-	CXXFLAGS += -DSKINTERNAL
+CXXFLAGS += -DSKINTERNAL
 endif
 # if you want to use lates neutrino oscillation parameter, please comment out next line
 #CXXFLAGS += -DORIGINAL_NUOSCPARAMETER
 FC=gfortran
 FCFLAGS += -w -fPIC -lstdc++
 
+ifndef SKOFL_ROOT
 LDLIBS=$(shell root-config --libs)
+endif
 
-ifdef SKINTERNAL
+ifdef SKOFL_ROOT
 LDFLAGS = $(LOCAL_LIBS) $(LOCAL_INC)
 LOCAL_LIBS	= -L$(SKOFL_LIBDIR) -lsnlib_1.0 -lsnevtinfo -lsollib_4.0 -lsklowe_7.0 -lwtlib_5.1 -llibrary 
 endif
@@ -48,12 +49,12 @@ LN = ln -sf
 #
 
 SRCS = $(wildcard src/*.cc)
-ifdef SKINTERNAL
+ifdef SKOFL_ROOT
 SRCS += $(wildcard src/*.F)
 endif
 OBJS = $(patsubst src/%.cc, obj/%.o, $(filter %.cc, $(SRCS)))
-ifdef SKINTERNAL
-	OBJS += $(patsubst src/%.F, obj/%.o, $(filter %.F, $(SRCS)))
+ifdef SKOFL_ROOT
+OBJS += $(patsubst src/%.F, obj/%.o, $(filter %.F, $(SRCS)))
 endif
 
 MAINSRCS = $(wildcard *.cc)
@@ -97,11 +98,11 @@ obj/%.o: src/%.F
 
 bin/main_dsnb: obj/main_dsnb.o $(OBJS)
 	@echo "[SKSNSim] Building executable:	$@..."
-	@LD_RUN_PATH=$(SKOFL) $(CXX) $(CXXFLAGS) -o $@ $^ $(LDLIBS)
+	LD_RUN_PATH=$(SKOFL) $(CXX) $(CXXFLAGS) -o $@ $^ $(LDLIBS)
 
 bin/main_snburst: obj/main_snburst.o $(OBJS)
 	@echo "[SKSNSim] Building executable:	$@..."
-	@LD_RUN_PATH=$(SKOFL) $(CXX) $(CXXFLAGS) -o $@ $^ $(LDLIBS)
+	LD_RUN_PATH=$(SKOFL) $(CXX) $(CXXFLAGS) -o $@ $^ $(LDLIBS)
 
 
 lib/libSKSNSim.so: $(SKSNSIMLIBOBJS)
