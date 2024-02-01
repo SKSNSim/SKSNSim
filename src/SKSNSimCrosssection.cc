@@ -25,6 +25,7 @@ double nuelastic_xsec_bahcall95(double enu /* MeV */, double ee /* MeV */, int p
     // Neutriono - electron scattering cross section
     // Reference: Bahcall et al. PRD 51 (1995) 6146-6158
     // Return: differential xsec [ cm^{2} ]
+    // TODO: nubar modes are not impelemented correctly
     double xsec = 0.0;
     auto square = [](double x){ return x * x;};
     constexpr double Me = SKSNSimPhysConst::Me;
