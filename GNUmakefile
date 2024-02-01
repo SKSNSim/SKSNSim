@@ -19,7 +19,7 @@ endif
 LOCAL_INC	+= -I./include/
 
 CXX=g++
-CXXFLAGS=$(shell root-config --cflags --libs) -fPIC
+CXXFLAGS=$(shell root-config --cflags --libs) -fPIC -lstdc++
 CXXFLAGS += -DNO_EXTERN_COMMON_POINTERS #-DDEBUG
 CXXFLAGS += $(LOCAL_INC)
 ifdef SKOFL_ROOT
