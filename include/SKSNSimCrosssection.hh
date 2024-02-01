@@ -25,19 +25,6 @@ constexpr int PDG_NEUTRON = 2112;
 #endif
 
 
-#ifdef SKINTERNAL
-extern "C" {
-    double sl_nue_dif_rad_( double *, double * );
-    double sl_neb_dif_rad_( double *, double * );
-    double sl_num_dif_rad_( double *, double * );
-    double sl_nmb_dif_rad_( double *, double * );
-} // TODO to avoid dependency of fortran library
-#else
-inline double sl_nue_dif_rad_( double *, double *){ return 1.0;}
-inline double sl_neb_dif_rad_( double *, double *){ return 1.0;}
-inline double sl_num_dif_rad_( double *, double *){ return 1.0;}
-inline double sl_nmb_dif_rad_( double *, double *){ return 1.0;}
-#endif
 
 enum struct XSECTYPE { mXSECIBD = 0, mXSECELASTIC, mXSECOXYGEN, mXSECOXYGENSUB, mXSECOXYGENNC, mNXSECTYPE};
 enum struct NUREACTTYPE { kNUEBARP = 0,
@@ -55,7 +42,7 @@ class SKSNSimCrosssectionModel {
     enum XSECNUTYPE { XSECNUE = 0, XSECNUEB, XSECNUX, NXSECNUTYPE};
     virtual ~SKSNSimCrosssectionModel() {}
     virtual double /* cm^2 */                          GetCrosssection(double /* MeV */) const = 0; // energy -> xsec
-    virtual std::pair<double,double> /* <cm^2, MeV> */ GetDiffCrosssection(double /* MeV */, double /* a.u. */) const = 0; // energy -> angle -> (xsec, scattered energy)
+    virtual std::pair<double,double> /* <cm^2, MeV> */ GetDiffCrosssection(double /* MeV */, double /* a.u. */) const = 0; // energy -> angle (cosTheta) -> (xsec, scattered energy)
     //virtual const std::set<XSECNUTYPE> &GetSupportedNuType () const = 0;
 
 };
@@ -128,6 +115,7 @@ class SKSNSimXSecNuElastic : public SKSNSimCrosssectionModel {
     double GetCrosssection(double e, int pid = -PDG_ELECTRON_NEUTRINO, FLAGETHR flag = ETHRON) const;
     double GetCrosssection(double e) const { return GetCrosssection(e, -PDG_ELECTRON_NEUTRINO, ETHRON);} ;
     std::pair<double,double> GetDiffCrosssection(double e, double r) const;
+    std::pair<double,double> GetDiffCrosssection(double e, double r, int pid) const;
     static double GetNuEneMin() {return nuElaEneMin;}
     static double GetNuEneMax() {return nuElaEneMax;}
     static double CalcElectronTotEnergy( const double , const double );

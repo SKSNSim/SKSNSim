@@ -1635,10 +1635,10 @@ void SKSNSimVectorSNGenerator::determineAngleElastic( TRandom &rng, const SKSNSi
 
   //SKSNSimTools::DumpDebugMessage(Form("nReact %d nuEnergy %.5g eEnergy %.5g cost %.5g", nReact, nuEnergy, eEnergy, cost));
 	double maxP = 0.;
-	if( nReact == 1 ) maxP = sl_nue_dif_rad_( & nuEnergy, & eEnergy);
-	if( nReact == 2 ) maxP = sl_neb_dif_rad_( & nuEnergy, & eEnergy);
-	if( nReact == 3 ) maxP = sl_num_dif_rad_( & nuEnergy, & eEnergy);
-	if( nReact == 4 ) maxP = sl_nmb_dif_rad_( & nuEnergy, & eEnergy);
+	if( nReact == 1 ) maxP = xsec.GetDiffCrosssection( nuEnergy, cost,  PDG_ELECTRON_NEUTRINO).first;
+	if( nReact == 2 ) maxP = xsec.GetDiffCrosssection( nuEnergy, cost, -PDG_ELECTRON_NEUTRINO).first;
+	if( nReact == 3 ) maxP = xsec.GetDiffCrosssection( nuEnergy, cost,  PDG_MUON_NEUTRINO).first;
+	if( nReact == 4 ) maxP = xsec.GetDiffCrosssection( nuEnergy, cost, -PDG_MUON_NEUTRINO).first;
 	maxP *= SKSNSimXSecNuElastic::CalcDeEneDCost( nuEnergy, cost );
 
 	/*
@@ -1661,10 +1661,10 @@ void SKSNSimVectorSNGenerator::determineAngleElastic( TRandom &rng, const SKSNSi
 		cost = getRandomReal( costTh, 1., rng);
     eEnergy = SKSNSimXSecNuElastic::CalcElectronTotEnergy( nuEnergy, cost );
 
-		if( nReact == 1 ) p = sl_nue_dif_rad_( & nuEnergy, & eEnergy);
-		if( nReact == 2 ) p = sl_neb_dif_rad_( & nuEnergy, & eEnergy);
-		if( nReact == 3 ) p = sl_num_dif_rad_( & nuEnergy, & eEnergy);
-		if( nReact == 4 ) p = sl_nmb_dif_rad_( & nuEnergy, & eEnergy);
+		if( nReact == 1 ) p = xsec.GetDiffCrosssection( nuEnergy, cost,  PDG_ELECTRON_NEUTRINO).first;
+		if( nReact == 2 ) p = xsec.GetDiffCrosssection( nuEnergy, cost, -PDG_ELECTRON_NEUTRINO).first;
+		if( nReact == 3 ) p = xsec.GetDiffCrosssection( nuEnergy, cost,  PDG_MUON_NEUTRINO).first;
+		if( nReact == 4 ) p = xsec.GetDiffCrosssection( nuEnergy, cost, -PDG_MUON_NEUTRINO).first;
     p *= SKSNSimXSecNuElastic::CalcDeEneDCost( nuEnergy, cost );
 
 		x = getRandomReal( 0., maxP, rng );

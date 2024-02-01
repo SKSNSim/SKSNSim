@@ -8,8 +8,116 @@
 #include <limits>
 #include <iostream>
 #include <fstream>
+#include <gsl/gsl_sf_dilog.h>
 #include "SKSNSimCrosssection.hh"
 #include "SKSNSimConstant.hh"
+
+#ifdef SKINTERNAL
+extern "C" {
+    double sl_nue_dif_rad_( double *, double * );
+    double sl_neb_dif_rad_( double *, double * );
+    double sl_num_dif_rad_( double *, double * );
+    double sl_nmb_dif_rad_( double *, double * );
+} // TODO to avoid dependency of fortran library
+#endif
+
+double nuelastic_xsec_bahcall95(double enu /* MeV */, double ee /* MeV */, int pid){
+    // Neutriono - electron scattering cross section
+    // Reference: Bahcall et al. PRD 51 (1995) 6146-6158
+    // Return: differential xsec [ cm^{2} ]
+    double xsec = 0.0;
+    auto square = [](double x){ return x * x;};
+    constexpr double Me2 = square(SKSNSimPhysConst::Me);
+    constexpr double Me = SKSNSimPhysConst::Me;
+    constexpr double rho = 1.0126;
+    constexpr double sin2ThetaW = 0.2317; /* from paper */
+    constexpr double alphaPi = SKSNSimPhysConst::ALPHA / SKSNSimPhysConst::PI;
+
+    const double ee2 = square(ee);
+    const double T = ee - Me;
+    const double q = enu;
+    const double z = T / q;
+    const double omz /* 1 - z */ = 1.0 - z;
+    const double omz2 /* (1 - z)^2 */ = square(omz);
+    const double lnomz /* ln(1-z) */ = std::log(omz);
+    const double mom = std::sqrt( ee2 - Me2);
+    const double beta /* l / ee */ = mom / ee;
+    auto L = [](double x){ return - gsl_sf_dilog(x);};
+
+    const double Elm /* (E+l)/m */ = (ee + mom) / Me;
+    const double x = std::sqrt( 1.0 + 2.0 * Me / T);
+
+
+    const double fp_with_factor /* f+(z) (1-z)^2 */ = 
+        ( ee / mom * std::log( Elm ) - 1.0) *
+        ( omz2 * ( 2.0 * std::log(omz - 1.0 / Elm) - lnomz - std::log(z) * 0.5 - 2.0 / 3.0) - ( square(z) * std::log(z) + omz) * 0.5)
+        - omz2 * 0.5 * ( square(lnomz) + beta * ( L(omz) - std::log(z) * lnomz) )
+        + lnomz * ( z * z * 0.5 * std::log(z) + omz / 3.0 * (2.0 * z - 0.5))
+        - z * z * 0.5 * L(omz) - z * (1.0 - 2.0 * z)/3.0 * std::log(z) - z * omz / 6.0
+        - beta / 12.0 * (std::log(z) + omz * (115.0 - 109.0 * z) / 6.0)
+        ;
+    const double fm /* f-(z) */ = 
+        ( ee / mom * std::log( Elm) - 1.0 ) * ( 2.0 * std::log( omz - Elm) - lnomz - 0.5 * std::log(z) - 5.0 / 12.0)
+        + 0.5 * ( L(z) - L(beta) ) - 0.5 * square(lnomz) - ( 11.0 / 12.0 + 0.5 * z) * lnomz
+        + z * ( std::log(z) + 0.5 * std::log( 2.0 * q / Me ))
+        - ( 31.0 / 18.0 + std::log(z) / 12.0 ) * beta - 11.0 / 12.0 * z + z*z / 24.0
+        ;
+
+    const double fpm /* f+-(z) */ = 
+        ( ee / mom * std::log( Elm) - 1.0 ) * 2.0 * std::log( omz - 1.0 / Elm)
+        ;
+
+    const double IT /* I(T) */ = 
+        1.0 / 6.0 * (1.0 / 3.0 + (3.0 - x*x) * (0.5 * x * std::log( (x+1.0) / (x-1.0)) - 1.0));
+
+    const double kappa = []( double it, int pid) { 
+        if( std::abs(pid) == PDG_ELECTRON_NEUTRINO) return 0.9791 + 0.0097 * it;
+        else if( std::abs(pid) == PDG_MUON_NEUTRINO)     return 0.9970 - 0.00037 * it;
+        return 0.0;}( IT, pid);
+
+    const double gL = rho * (0.5  - kappa * sin2ThetaW)
+        - ( std::abs(pid) == PDG_ELECTRON_NEUTRINO ? -1.0 : 0.0);
+    const double gR = - rho * kappa * sin2ThetaW;
+
+    constexpr double factor = 2.0 * square(SKSNSimPhysConst::Gf) * Me / SKSNSimPhysConst::PI;
+
+    xsec = factor * (
+            square(gL)* ( 1.0 + alphaPi * fm)
+            + square(gR) * ( omz2 + alphaPi * fp_with_factor )
+            - gR * gL * Me / q * z * (1.0 + alphaPi * fpm));
+
+    return xsec;
+}
+
+double skofl_sollib_nuelastic_xsec_wrapper(double enu, double ee, int pid){
+    // Wrapper of SKOFL sl_nue_dif_rad_ etc. interface
+    // Under sukap environment, this calls SKOFL sl_*_dif_rad_ functions. Otherwise, this calculate nuelastic cross section.
+    // This behavior is switched by predefined macro "SKINTERNAL"
+    // ===================================
+    if(!((pid == PDG_ELECTRON_NEUTRINO) || (pid == - PDG_ELECTRON_NEUTRINO) || (pid == PDG_MUON_NEUTRINO) || (pid == -PDG_MUON_NEUTRINO))){
+        std::cerr << "Not support particle code in nu-elastic xsec: " << pid << std::endl;
+        exit(1);
+    }
+#ifdef SKINTERNAL
+    double x = 0.0;
+    double enu_local = enu;
+    double ee_local = ee;
+    {
+        switch (pid)
+        {
+            case  PDG_ELECTRON_NEUTRINO: x += sl_nue_dif_rad_(&enu_local, &ee_local); break;
+            case -PDG_ELECTRON_NEUTRINO: x += sl_neb_dif_rad_(&enu_local, &ee_local); break;
+            case  PDG_MUON_NEUTRINO:     x += sl_num_dif_rad_(&enu_local, &ee_local); break;
+            case -PDG_MUON_NEUTRINO:     x += sl_nmb_dif_rad_(&enu_local, &ee_local); break;
+            default: std::cerr << "Should not appear this message:" << __FILE__ << " L:" << __LINE__ << std::endl; break;
+        }
+    }
+    return x;
+#else
+    return nuelastic_xsec_bahcall95( enu, ee, pid);
+#endif
+}
+
 
 using namespace SKSNSimPhysConst;
 
@@ -520,15 +628,8 @@ double SKSNSimXSecNuElastic::GetCrosssection(double enu, int ipart, FLAGETHR fla
     const double dstep = (t_max - t_min) / double(istep);
     x=0.;
     for (int i = 0; i<istep; i++){
-      double E = (t_min + dstep/2.) + dstep * double(i) + Me;
-      switch (ipart)
-      {
-        case  PDG_ELECTRON_NEUTRINO: x += sl_nue_dif_rad_(&enu, &E) * dstep; break;
-        case -PDG_ELECTRON_NEUTRINO: x += sl_neb_dif_rad_(&enu, &E) * dstep; break;
-        case  PDG_MUON_NEUTRINO:     x += sl_num_dif_rad_(&enu, &E) * dstep; break;
-        case -PDG_MUON_NEUTRINO:     x += sl_nmb_dif_rad_(&enu, &E) * dstep; break;
-        default: std::cerr << "Should not appear this message: " << __FILE__ << " L:" << __LINE__ << std::endl; break;
-      }
+        double E = (t_min + dstep/2.) + dstep * double(i) + Me;
+        x += skofl_sollib_nuelastic_xsec_wrapper(enu, E, ipart) * dstep;
     }
   }
   else if(flag == ETHROFF) { // should not apply Eth
@@ -585,6 +686,17 @@ void SKSNSimXSecNuElastic::CloseCsElaFile(){
 std::pair<double,double> SKSNSimXSecNuElastic::GetDiffCrosssection(double e, double r) const{
   std::cerr << "Not supported: " << __FILE__ << " GetDiffCrosssection(...) for NuElastic XSec model" << std::endl;
   return std::make_pair(0.0,0.0);
+}
+
+std::pair<double,double> SKSNSimXSecNuElastic::GetDiffCrosssection(double e, double r, int pid) const{
+    if(!((pid == PDG_ELECTRON_NEUTRINO) || (pid == - PDG_ELECTRON_NEUTRINO) || (pid == PDG_MUON_NEUTRINO) || (pid == -PDG_MUON_NEUTRINO))){
+        std::cerr << "Not support particle code in NuElastic XSec model: " << pid << std::endl;
+        exit(1);
+    }
+    double enu = e;
+    double E = CalcElectronTotEnergy(enu, r);
+    double x = skofl_sollib_nuelastic_xsec_wrapper( enu, E, pid);
+    return std::make_pair( x, E);
 }
 
 double SKSNSimXSecNuElastic::CalcElectronTotEnergy(const double nuEne, const double cost)
