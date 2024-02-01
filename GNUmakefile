@@ -5,7 +5,7 @@
 # SKOFL_ROOT = /skofl
 #
 
-.PHONY: all clean obj bin lib doc
+.PHONY: all clean obj bin lib doc test
 
 all: main library
 	@echo "[SKSNSim] Done!"
@@ -79,6 +79,7 @@ test:
 	@echo "SRCS:         "$(SRCS)
 	@echo "OBJS:         "$(OBJS)
 	@echo "INC:          "$(INC)
+	@echo "CXXFLAGS:     "$(CXXFLAGS)
 	@echo "LDFLAGS:      "$(LDFLAGS)
 	@echo "LDLIBS:       "$(LDLIBS)
 
