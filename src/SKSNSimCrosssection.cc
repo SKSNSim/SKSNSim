@@ -27,11 +27,12 @@ double nuelastic_xsec_bahcall95(double enu /* MeV */, double ee /* MeV */, int p
     // Return: differential xsec [ cm^{2} ]
     double xsec = 0.0;
     auto square = [](double x){ return x * x;};
-    constexpr double Me2 = square(SKSNSimPhysConst::Me);
     constexpr double Me = SKSNSimPhysConst::Me;
+    constexpr double Me2 = Me * Me;
     constexpr double rho = 1.0126;
     constexpr double sin2ThetaW = 0.2317; /* from paper */
     constexpr double alphaPi = SKSNSimPhysConst::ALPHA / SKSNSimPhysConst::PI;
+    constexpr double factor = 2.0 * SKSNSimPhysConst::Gf * SKSNSimPhysConst::Gf * Me / SKSNSimPhysConst::PI;
 
     const double ee2 = square(ee);
     const double T = ee - Me;
@@ -79,7 +80,6 @@ double nuelastic_xsec_bahcall95(double enu /* MeV */, double ee /* MeV */, int p
         - ( std::abs(pid) == PDG_ELECTRON_NEUTRINO ? -1.0 : 0.0);
     const double gR = - rho * kappa * sin2ThetaW;
 
-    constexpr double factor = 2.0 * square(SKSNSimPhysConst::Gf) * Me / SKSNSimPhysConst::PI;
 
     xsec = factor * (
             square(gL)* ( 1.0 + alphaPi * fm)

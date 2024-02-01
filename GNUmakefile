@@ -20,7 +20,7 @@ CXX=g++
 FC=gfortran
 LN = ln -sf
 
-CXXFLAGS +=$(shell root-config --cflags --libs) -fPIC -lstdc++ -lgsl
+CXXFLAGS +=$(shell root-config --cflags --libs) -fPIC -lstdc++ -lgsl -lgslcblas -lm
 CXXFLAGS += -DNO_EXTERN_COMMON_POINTERS #-DDEBUG
 CXXFLAGS += $(LOCAL_INC)
 ifdef SKOFL_ROOT
