@@ -21,65 +21,68 @@ extern "C" {
 } // TODO to avoid dependency of fortran library
 #endif
 
-double nuelastic_xsec_bahcall95(double enu /* MeV */, double ee /* MeV */, int pid){
+template<typename Tprec>
+Tprec nuelastic_xsec_bahcall95(Tprec enu /* MeV */, Tprec ee /* MeV */, int pid){
     // Neutriono - electron scattering cross section
     // Reference: Bahcall et al. PRD 51 (1995) 6146-6158
     // Return: differential xsec [ cm^{2} ]
     // TODO: nubar modes are not impelemented correctly
-    double xsec = 0.0;
-    auto square = [](double x){ return x * x;};
-    constexpr double Me = SKSNSimPhysConst::Me;
-    constexpr double Me2 = Me * Me;
-    constexpr double rho = 1.0126;
-    constexpr double sin2ThetaW = 0.2317; /* from paper */
-    constexpr double alphaPi = SKSNSimPhysConst::ALPHA / SKSNSimPhysConst::PI;
-    constexpr double factor = 2.0 * SKSNSimPhysConst::Gf * SKSNSimPhysConst::Gf * Me / SKSNSimPhysConst::PI;
+    Tprec xsec = 0.0;
+    auto square = [](Tprec x){ return x * x;};
+    constexpr Tprec Me = SKSNSimPhysConst::Me;
+    constexpr Tprec Me2 = Me * Me;
+    constexpr Tprec rho = 1.0126;
+    constexpr Tprec sin2ThetaW = 0.2317; /* from paper */
+    constexpr Tprec alphaPi = SKSNSimPhysConst::ALPHA / SKSNSimPhysConst::PI;
+    constexpr Tprec factor = 2.0 * SKSNSimPhysConst::Gf * SKSNSimPhysConst::Gf * Me / SKSNSimPhysConst::PI;
 
-    const double ee2 = square(ee);
-    const double T = ee - Me;
-    const double q = enu;
-    const double z = T / q;
-    const double omz /* 1 - z */ = 1.0 - z;
-    const double omz2 /* (1 - z)^2 */ = square(omz);
-    const double lnomz /* ln(1-z) */ = std::log(omz);
-    const double mom = std::sqrt( ee2 - Me2);
-    const double beta /* l / ee */ = mom / ee;
-    auto L = [](double x){ return - gsl_sf_dilog(x);};
+    const Tprec ee2 = square(ee);
+    const Tprec T = ee - Me;
+    const Tprec q = enu;
+    const Tprec z = T / q;
+    const Tprec lnz /* ln(z) */ = std::log(z);
+    const Tprec omz /* 1 - z */ = 1.0 - z;
+    const Tprec omz2 /* (1 - z)^2 */ = square(omz);
+    const Tprec lnomz /* ln(1-z) */ = std::log(omz);
+    const Tprec mom = std::sqrt( ee2 - Me2);
+    const Tprec beta /* l / ee */ = mom / ee;
+    auto L = [](Tprec x){ return - gsl_sf_dilog(x);};
 
-    const double Elm /* (E+l)/m */ = (ee + mom) / Me;
-    const double x = std::sqrt( 1.0 + 2.0 * Me / T);
+    const Tprec Elm /* (E+l)/m */ = (ee + mom) / Me;
+    const Tprec x = std::sqrt( 1.0 + 2.0 * Me / T);
 
 
-    const double fp_with_factor /* f+(z) (1-z)^2 */ = 
+    const Tprec fp_with_factor /* f+(z) (1-z)^2 */ = 
         ( ee / mom * std::log( Elm ) - 1.0) *
-        ( omz2 * ( 2.0 * std::log(omz - 1.0 / Elm) - lnomz - std::log(z) * 0.5 - 2.0 / 3.0) - ( square(z) * std::log(z) + omz) * 0.5)
-        - omz2 * 0.5 * ( square(lnomz) + beta * ( L(omz) - std::log(z) * lnomz) )
-        + lnomz * ( z * z * 0.5 * std::log(z) + omz / 3.0 * (2.0 * z - 0.5))
-        - z * z * 0.5 * L(omz) - z * (1.0 - 2.0 * z)/3.0 * std::log(z) - z * omz / 6.0
-        - beta / 12.0 * (std::log(z) + omz * (115.0 - 109.0 * z) / 6.0)
+        ( omz2 * ( 2.0 * std::log(omz - 1.0 / Elm) - lnomz - lnz * 0.5 - 2.0 / 3.0) - ( square(z) * lnz + omz) * 0.5)
+        - omz2 * 0.5 * ( square(lnomz) + beta * ( L(omz) - lnz * lnomz) )
+        + lnomz * ( z * z * 0.5 * lnz + omz / 3.0 * (2.0 * z - 0.5))
+        - z * z * 0.5 * L(omz) - z * (1.0 - 2.0 * z)/3.0 * lnz - z * omz / 6.0
+        - beta / 12.0 * (lnz + omz * (115.0 - 109.0 * z) / 6.0)
         ;
-    const double fm /* f-(z) */ = 
-        ( ee / mom * std::log( Elm) - 1.0 ) * ( 2.0 * std::log( omz - Elm) - lnomz - 0.5 * std::log(z) - 5.0 / 12.0)
+    const Tprec fm /* f-(z) */ = 
+        ( ee / mom * std::log( Elm) - 1.0 ) * ( 2.0 * std::log( omz - Elm) - lnomz - 0.5 * lnz - 5.0 / 12.0)
         + 0.5 * ( L(z) - L(beta) ) - 0.5 * square(lnomz) - ( 11.0 / 12.0 + 0.5 * z) * lnomz
-        + z * ( std::log(z) + 0.5 * std::log( 2.0 * q / Me ))
-        - ( 31.0 / 18.0 + std::log(z) / 12.0 ) * beta - 11.0 / 12.0 * z + z*z / 24.0
+        + z * ( lnz + 0.5 * std::log( 2.0 * q / Me ))
+        - ( 31.0 / 18.0 + lnz / 12.0 ) * beta - 11.0 / 12.0 * z + z*z / 24.0
         ;
 
-    const double fpm /* f+-(z) */ = 
+    const Tprec fpm /* f+-(z) */ = 
         ( ee / mom * std::log( Elm) - 1.0 ) * 2.0 * std::log( omz - 1.0 / Elm)
         ;
 
-    const double IT /* I(T) */ = 
+    const Tprec IT /* I(T) */ = 
         1.0 / 6.0 * (1.0 / 3.0 + (3.0 - x*x) * (0.5 * x * std::log( (x+1.0) / (x-1.0)) - 1.0));
 
-    const double kappa = []( double it, int pid) { 
+    const Tprec kappa = []( Tprec it, int pid) { 
+        Tprec zero = 0.0;
         if( std::abs(pid) == PDG_ELECTRON_NEUTRINO) return 0.9791 + 0.0097 * it;
         else if( std::abs(pid) == PDG_MUON_NEUTRINO)     return 0.9970 - 0.00037 * it;
-        return 0.0;}( IT, pid);
+        return zero;}( IT, pid);
 
-    const double gL = rho * (0.5  - kappa * sin2ThetaW)
+    const Tprec gL = rho * (0.5  - kappa * sin2ThetaW)
         - ( std::abs(pid) == PDG_ELECTRON_NEUTRINO ? -1.0 : 0.0);
-    const double gR = - rho * kappa * sin2ThetaW;
+    const Tprec gR = - rho * kappa * sin2ThetaW;
 
 
     xsec = factor * (
@@ -115,7 +118,7 @@ double skofl_sollib_nuelastic_xsec_wrapper(double enu, double ee, int pid){
     }
     return x;
 #else
-    return nuelastic_xsec_bahcall95( enu, ee, pid);
+    return nuelastic_xsec_bahcall95( (long double)enu, (long double)ee, pid);
 #endif
 }
 
