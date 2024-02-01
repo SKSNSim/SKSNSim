@@ -12,10 +12,9 @@ all: $(TARGET)
 	@echo "[SKSNSim] Done!"
 
 
-ifndef SKOFL_ROOT
-  SKOFL_ROOT = ../..
+ifdef SKOFL_ROOT
+	include $(SKOFL_ROOT)/config.gmk
 endif
-include $(SKOFL_ROOT)/config.gmk
 
 
 CXX=g++

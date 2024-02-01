@@ -1,9 +1,8 @@
 #
-# In case of building locally, set SKOFL_ROOT variable 
-#      setenv SKOFL_ROOT   ... 
-#  or directly set in this makefile 
-# SKOFL_ROOT = /skofl
+# GNUmakefile
 #
+# Note for sukap users: please load SKOFL at first. Otherwise, external version is generated.
+#==========================================================
 
 .PHONY: all clean obj bin lib doc
 
@@ -19,6 +18,9 @@ endif
 LOCAL_INC	+= -I./include/
 
 CXX=g++
+FC=gfortran
+LN = ln -sf
+
 CXXFLAGS=$(shell root-config --cflags --libs) -fPIC -lstdc++
 CXXFLAGS += -DNO_EXTERN_COMMON_POINTERS #-DDEBUG
 CXXFLAGS += $(LOCAL_INC)
@@ -27,7 +29,7 @@ ifdef SKOFL_ROOT
 endif
 # if you want to use lates neutrino oscillation parameter, please comment out next line
 #CXXFLAGS += -DORIGINAL_NUOSCPARAMETER
-FC=gfortran
+
 FCFLAGS += -w -fPIC -lstdc++
 
 LDLIBS=$(shell root-config --libs)
@@ -36,10 +38,7 @@ ifdef SKINTERNAL
 LDFLAGS = $(LOCAL_LIBS) $(LOCAL_INC)
 LOCAL_LIBS	= -L$(SKOFL_LIBDIR) -lsnlib_1.0 -lsnevtinfo -lsollib_4.0 -lsklowe_7.0 -lwtlib_5.1 -llibrary 
 endif
-#INCROOT=-I$(ROOTSYS)/include/
-#LIBSROOT=-L$(ROOTSYS)/lib/ -lCint -lCore -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -lGui
 
-LN = ln -sf
 
 
 

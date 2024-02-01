@@ -20,7 +20,6 @@
 #include <TTree.h>
 #include <TVector3.h>
 #include <TMath.h>
-#include <mcinfo.h>
 #include <SKSNSimCrosssection.hh>
 #include <SKSNSimFlux.hh>
 
