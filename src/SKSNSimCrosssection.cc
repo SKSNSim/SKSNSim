@@ -25,8 +25,7 @@ template<typename Tprec>
 Tprec nuelastic_xsec_bahcall95(Tprec enu /* MeV */, Tprec ee /* MeV */, int pid){
     // Neutriono - electron scattering cross section
     // Reference: Bahcall et al. PRD 51 (1995) 6146-6158
-    // Return: differential xsec [ cm^{2} ]
-    // TODO: nubar modes are not impelemented correctly
+    // Return: differential xsec [ cm^{3} ]
     Tprec xsec = 0.0;
     auto square = [](Tprec x){ return x * x;};
     constexpr Tprec Me = SKSNSimPhysConst::Me;
@@ -34,7 +33,7 @@ Tprec nuelastic_xsec_bahcall95(Tprec enu /* MeV */, Tprec ee /* MeV */, int pid)
     constexpr Tprec rho = 1.0126;
     constexpr Tprec sin2ThetaW = 0.2317; /* from paper */
     constexpr Tprec alphaPi = SKSNSimPhysConst::ALPHA / SKSNSimPhysConst::PI;
-    constexpr Tprec factor = 2.0 * SKSNSimPhysConst::Gf * SKSNSimPhysConst::Gf * Me / SKSNSimPhysConst::PI;
+    constexpr Tprec factor /* cm^3 */ = 2.0 * SKSNSimPhysConst::Gf * SKSNSimPhysConst::Gf /* fm^{4} */ * Me /* MeV */ / SKSNSimPhysConst::PI / SKSNSimPhysConst::HBARC /* MeV fm */ * 1e-39 /* cm^{3} / fm^{3}*/;
 
     const Tprec ee2 = square(ee);
     const Tprec T = ee - Me;
@@ -50,6 +49,7 @@ Tprec nuelastic_xsec_bahcall95(Tprec enu /* MeV */, Tprec ee /* MeV */, int pid)
 
     const Tprec Elm /* (E+l)/m */ = (ee + mom) / Me;
     const Tprec x = std::sqrt( 1.0 + 2.0 * Me / T);
+    const bool is_anti_nu = ( pid < 0 );
 
 
     const Tprec fp_with_factor /* f+(z) (1-z)^2 */ = 
@@ -80,9 +80,11 @@ Tprec nuelastic_xsec_bahcall95(Tprec enu /* MeV */, Tprec ee /* MeV */, int pid)
         else if( std::abs(pid) == PDG_MUON_NEUTRINO)     return 0.9970 - 0.00037 * it;
         return zero;}( IT, pid);
 
-    const Tprec gL = rho * (0.5  - kappa * sin2ThetaW)
+    const Tprec gL_normal = rho * (0.5  - kappa * sin2ThetaW)
         - ( std::abs(pid) == PDG_ELECTRON_NEUTRINO ? -1.0 : 0.0);
-    const Tprec gR = - rho * kappa * sin2ThetaW;
+    const Tprec gR_normal = - rho * kappa * sin2ThetaW;
+    const Tprec gL = (is_anti_nu? gR_normal : gL_normal);
+    const Tprec gR = (is_anti_nu? gL_normal : gR_normal);
 
 
     xsec = factor * (
@@ -122,7 +124,7 @@ double skofl_sollib_nuelastic_xsec_wrapper(double enu, double ee, int pid){
     }
     return x;
 #else
-    return nuelastic_xsec_bahcall95( (long double)enu, (long double)ee, pid);
+    return nuelastic_xsec_bahcall95( (long double)enu, (long double)ee, pid) /* cm^3 */ / SKSNSimPhysConst::HBARC /* MeV fm */ * 1e13 /* fm / cm */;
 #endif
 }
 
