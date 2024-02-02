@@ -61,7 +61,7 @@ Tprec nuelastic_xsec_bahcall95(Tprec enu /* MeV */, Tprec ee /* MeV */, int pid)
         - beta / 12.0 * (lnz + omz * (115.0 - 109.0 * z) / 6.0)
         ;
     const Tprec fm /* f-(z) */ = 
-        ( ee / mom * std::log( Elm) - 1.0 ) * ( 2.0 * std::log( omz - Elm) - lnomz - 0.5 * lnz - 5.0 / 12.0)
+        ( ee / mom * std::log( Elm) - 1.0 ) * ( 2.0 * std::log( omz - 1.0 / Elm) - lnomz - 0.5 * lnz - 5.0 / 12.0)
         + 0.5 * ( L(z) - L(beta) ) - 0.5 * square(lnomz) - ( 11.0 / 12.0 + 0.5 * z) * lnomz
         + z * ( lnz + 0.5 * std::log( 2.0 * q / Me ))
         - ( 31.0 / 18.0 + lnz / 12.0 ) * beta - 11.0 / 12.0 * z + z*z / 24.0
@@ -89,6 +89,10 @@ Tprec nuelastic_xsec_bahcall95(Tprec enu /* MeV */, Tprec ee /* MeV */, int pid)
             square(gL)* ( 1.0 + alphaPi * fm)
             + square(gR) * ( omz2 + alphaPi * fp_with_factor )
             - gR * gL * Me / q * z * (1.0 + alphaPi * fpm));
+
+#ifdef DEBUG
+    std::cout << "Ela: " << enu << " " << xsec << " " << std::log(Elm) << " " << std::log(omz - 1.0/ Elm)  << std::endl;
+#endif
 
     return xsec;
 }
