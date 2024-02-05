@@ -20,9 +20,11 @@
 #include <TTree.h>
 #include <TVector3.h>
 #include <TMath.h>
-#include <mcinfo.h>
 #include <SKSNSimCrosssection.hh>
 #include <SKSNSimFlux.hh>
+#ifdef SKINTERNAL
+#include <mcinfo.h>
+#endif
 
 using namespace boost::filesystem;
 using std::cout;

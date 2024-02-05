@@ -2,8 +2,17 @@
 ## Usage
 There are two binaries, ``main_snburst`` and ``main_dsnb`` in this package. They are for Supernova burst (SN burst) and for Diffuse Supernova Neutrino Backgroud (DSNB) individually.
 
+### Depedency
+* GSL (GNU Scientific Library)
+* CERN ROOT
+
 ### Compile
-It is based on GNUMake. Just executing ``make`` command. However, it requires SK offline software packages.
+
+It is based on GNUMake. Just executing ``make`` command. 
+For the SK users, some functions are implemented for MC production.
+However, it requires SK offline software packages.
+To enable these features, a ``SKINTERNAL`` flag shoud be defined in environmental variables on your shell.
+
 ```SHELL
 $ make clean # for clean-up
 $ make # for compiling

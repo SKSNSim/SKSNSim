@@ -9,18 +9,22 @@
 #define SKSNSIMVECTORGENERATOR_H_INCLUDED
 
 #include <memory>
-#include <mcinfo.h>
 #include <TRandom3.h>
 #include <algorithm>
+#ifdef SKINTERNAL
+#include <mcinfo.h>
+#endif
 #include "SKSNSimFlux.hh"
 #include "SKSNSimCrosssection.hh"
 #include "SKSNSimEnum.hh"
 #include "SKSNSimTools.hh"
 
+#ifdef SKINTERNAL
 extern "C" {
-  // From SKOFL
+  // From SKOFL available only in Supar-K
 	void sn_sundir_( int *, int *, float *, float *, float *);
 }
+#endif
 
 //======================
 // Useful tempolary container for Linear Algebra

@@ -9,27 +9,34 @@
 #include <map>
 #include "SKSNSimEnum.hh"
 #include "SKSNSimConstant.hh"
+#ifdef SKINTERNAL
 #include <geotnkC.h>
+#else
+constexpr double RINTK = 5000;
+constexpr double ZPINTK = 5000;
+constexpr double RTKTK = 5000;
+constexpr double ZPTKTK = 5000;
+#endif
 
 using namespace SKSNSimPhysConst;
 constexpr double VOL[(size_t)SKSNSIMENUM::TANKVOLUME::kNTANKVOLUME] = { 
+#ifdef SKINTERNAL
   /* kIDFV */ (RINTK-FVCUT)*(RINTK-FVCUT)*PI*(ZPINTK-FVCUT)*2.,
   /* kIDFULL */ RINTK*RINTK*PI*ZPINTK*2.,
   /* kTANKFULL */ RTKTK*RTKTK*PI*ZPTKTK*2.
+#else
+      1.0, 1.0, 1.0
+#endif
 };
 namespace SKSNSimTools{
-  auto DumpDebugMessage = [] (TString str) {
-#ifdef DEBUG
-    std::cout << "[IZU:DEBUG] " << str << std::endl;
-#endif
-  };
+  void DumpDebugMessage(TString );
 
   SKSNSIMENUM::SKPERIOD FindSKPeriod(int /* run */);
 
-  double GetVolume(SKSNSIMENUM::TANKVOLUME t){
+  inline double GetVolume(SKSNSIMENUM::TANKVOLUME t){
     return VOL[(size_t)t];
   }
-  double GetNTargetP(SKSNSIMENUM::TANKVOLUME t){
+  inline double GetNTargetP(SKSNSIMENUM::TANKVOLUME t){
     constexpr double NTGT[(size_t)SKSNSIMENUM::TANKVOLUME::kNTANKVOLUME] = {
       /* kIDFV */      Ntarget_p * VOL[(size_t)SKSNSIMENUM::TANKVOLUME::kIDFV]/VOL[(size_t)SKSNSIMENUM::TANKVOLUME::kIDFULL],
       /* kIDFULL */    Ntarget_p,

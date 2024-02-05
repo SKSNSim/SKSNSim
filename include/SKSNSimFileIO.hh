@@ -9,8 +9,10 @@
 #include <fstream>
 #include <TFile.h>
 #include <TTree.h>
+#ifdef SKINTERNAL
 #include <mcinfo.h>
 #include <snevtinfo.h>
+#endif
 #include "SKSNSimVectorGenerator.hh"
 #include "SKSNSimUserConfiguration.hh"
 
@@ -44,8 +46,13 @@ std::vector<SKSNSimFileSet> GenerateOutputFileList(SKSNSimUserConfiguration &con
 class SKSNSimFileOutTFile : public SKSNSimFileOutput {
   private:
     TFile *m_fileptr;
+#ifdef SKINTERNAL
     MCInfo *m_MC;
     SNEvtInfo *m_SN;
+#else
+    void *m_MC;
+    void *m_SN;
+#endif
     TTree *m_OutTree;
 
     Double_t weight;

@@ -56,14 +56,14 @@ namespace SKSNSimPhysConst {
     {SKSNSIMENUM::NEUTRINOOSCILLATION::kINVERTED, { PMNSSinSqTheta12, PMNSCosSqTheta12, 0., 1., 1.+PMNSSinSqTheta12, PMNSCosSqTheta12, 1., 1.}}
   };
   // Acsessing Functions
-  double GetNuOscNue1(SKSNSIMENUM::NEUTRINOOSCILLATION t){ return std::get<0>(NuOscProbCollection.at(t));}
-  double GetNuOscNue2(SKSNSIMENUM::NEUTRINOOSCILLATION t){ return std::get<1>(NuOscProbCollection.at(t));}
-  double GetNuOscNueb1(SKSNSIMENUM::NEUTRINOOSCILLATION t){return std::get<2>(NuOscProbCollection.at(t));}
-  double GetNuOscNueb2(SKSNSIMENUM::NEUTRINOOSCILLATION t){return std::get<3>(NuOscProbCollection.at(t));}
-  double GetNuOscNux1(SKSNSIMENUM::NEUTRINOOSCILLATION t){ return std::get<4>(NuOscProbCollection.at(t));}
-  double GetNuOscNux2(SKSNSIMENUM::NEUTRINOOSCILLATION t){ return std::get<5>(NuOscProbCollection.at(t));}
-  double GetNuOscNuxb1(SKSNSIMENUM::NEUTRINOOSCILLATION t){return std::get<6>(NuOscProbCollection.at(t));}
-  double GetNuOscNuxb2(SKSNSIMENUM::NEUTRINOOSCILLATION t){return std::get<7>(NuOscProbCollection.at(t));}
+  inline double GetNuOscNue1(SKSNSIMENUM::NEUTRINOOSCILLATION t){ return std::get<0>(NuOscProbCollection.at(t));}
+  inline double GetNuOscNue2(SKSNSIMENUM::NEUTRINOOSCILLATION t){ return std::get<1>(NuOscProbCollection.at(t));}
+  inline double GetNuOscNueb1(SKSNSIMENUM::NEUTRINOOSCILLATION t){return std::get<2>(NuOscProbCollection.at(t));}
+  inline double GetNuOscNueb2(SKSNSIMENUM::NEUTRINOOSCILLATION t){return std::get<3>(NuOscProbCollection.at(t));}
+  inline double GetNuOscNux1(SKSNSIMENUM::NEUTRINOOSCILLATION t){ return std::get<4>(NuOscProbCollection.at(t));}
+  inline double GetNuOscNux2(SKSNSIMENUM::NEUTRINOOSCILLATION t){ return std::get<5>(NuOscProbCollection.at(t));}
+  inline double GetNuOscNuxb1(SKSNSIMENUM::NEUTRINOOSCILLATION t){return std::get<6>(NuOscProbCollection.at(t));}
+  inline double GetNuOscNuxb2(SKSNSIMENUM::NEUTRINOOSCILLATION t){return std::get<7>(NuOscProbCollection.at(t));}
 
 }
 #endif

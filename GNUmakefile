@@ -1,37 +1,45 @@
 #
-# In case of building locally, set SKOFL_ROOT variable 
-#      setenv SKOFL_ROOT   ... 
-#  or directly set in this makefile 
-# SKOFL_ROOT = /skofl
+# GNUmakefile
 #
+# Note for sukap users: please load SKOFL at first. Otherwise, external version is generated.
+#==========================================================
 
-.PHONY: all clean obj bin lib doc
+.PHONY: all clean obj bin lib doc test
 
 all: main library
 	@echo "[SKSNSim] Done!"
 
 
-ifndef SKOFL_ROOT
-  SKOFL_ROOT = ../..
-endif
+ifdef SKOFL_ROOT
 include $(SKOFL_ROOT)/config.gmk
-
-CXX=g++
-CXXFLAGS += -DNO_EXTERN_COMMON_POINTERS #-DDEBUG
-# if you want to use lates neutrino oscillation parameter, please comment out next line
-#CXXFLAGS += -DORIGINAL_NUOSCPARAMETER
-FC=gfortran
-FCFLAGS += -w -fPIC -lstdc++
+endif
 
 LOCAL_INC	+= -I./include/
 
-LOCAL_LIBS	= -L$(SKOFL_LIBDIR) -lsnlib_1.0 -lsnevtinfo -lsollib_4.0 -lsklowe_7.0 -lwtlib_5.1 -llibrary 
-
-LDFLAGS = $(LOCAL_LIBS) $(LOCAL_INC)
-#INCROOT=-I$(ROOTSYS)/include/
-#LIBSROOT=-L$(ROOTSYS)/lib/ -lCint -lCore -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -lGui
-
+CXX=g++
+FC=gfortran
 LN = ln -sf
+
+CXXFLAGS +=$(shell root-config --cflags --libs) -fPIC -lstdc++ -lgsl -lgslcblas -lm
+CXXFLAGS += -DNO_EXTERN_COMMON_POINTERS #-DDEBUG
+CXXFLAGS += $(LOCAL_INC)
+ifdef SKOFL_ROOT
+CXXFLAGS += -DSKINTERNAL
+endif
+# if you want to use lates neutrino oscillation parameter, please comment out next line
+#CXXFLAGS += -DORIGINAL_NUOSCPARAMETER
+
+FCFLAGS += -w -fPIC -lstdc++
+
+ifndef SKOFL_ROOT
+LDLIBS=$(shell root-config --libs)
+endif
+
+ifdef SKOFL_ROOT
+LDFLAGS = $(LOCAL_LIBS) $(LOCAL_INC)
+LOCAL_LIBS	= -L$(SKOFL_LIBDIR) -lsnlib_1.0 -lsnevtinfo -lsollib_4.0 -lsklowe_7.0 -lwtlib_5.1 -llibrary 
+endif
+
 
 
 
@@ -40,9 +48,13 @@ LN = ln -sf
 #
 
 SRCS = $(wildcard src/*.cc)
+ifdef SKOFL_ROOT
 SRCS += $(wildcard src/*.F)
+endif
 OBJS = $(patsubst src/%.cc, obj/%.o, $(filter %.cc, $(SRCS)))
+ifdef SKOFL_ROOT
 OBJS += $(patsubst src/%.F, obj/%.o, $(filter %.F, $(SRCS)))
+endif
 
 MAINSRCS = $(wildcard *.cc)
 MAINSRCS += $(wildcard *.F)
@@ -67,6 +79,7 @@ test:
 	@echo "SRCS:         "$(SRCS)
 	@echo "OBJS:         "$(OBJS)
 	@echo "INC:          "$(INC)
+	@echo "CXXFLAGS:     "$(CXXFLAGS)
 	@echo "LDFLAGS:      "$(LDFLAGS)
 	@echo "LDLIBS:       "$(LDLIBS)
 

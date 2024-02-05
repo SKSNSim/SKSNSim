@@ -3,15 +3,23 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <array>
 #include <algorithm>
 #include "SKSNSimTools.hh"
 
+#ifdef SKINTERNAL
 extern "C" {
   void elapseday_date_(int *, int *, int *, int *);
   void elapseday_run_(int *, int *);
 }
+#endif
 
 namespace SKSNSimTools {
+  void DumpDebugMessage(TString str) {
+#ifdef DEBUG
+    std::cout << "[IZU:DEBUG] " << str << std::endl;
+#endif
+  };
   SKSNSIMENUM::SKPERIOD FindSKPeriod(int rn /* run_number */) {
     auto checkRange = [] (int t, int b, int e) {
       return ( t >= b && t < e );
@@ -37,12 +45,20 @@ namespace SKSNSimTools {
 
   int elapseday(int yy, int mm, int dd){
     int eladay = -1;
+#ifdef SKINTERNAL
     elapseday_date_(&yy, &mm, &dd, &eladay);
+#else
+    eladay = 1.0;
+#endif
     return eladay;
   }
   int elapseday(int run){
     int eladay = -1;
+#ifdef SKINTERNAL
     elapseday_run_(&run, &eladay);
+#else
+    eladay = 1.0;
+#endif
     return eladay;
   }
 }

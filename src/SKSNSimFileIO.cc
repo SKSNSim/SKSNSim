@@ -11,7 +11,6 @@
 #include <TFileCacheWrite.h>
 #include <TTree.h>
 #include <TMath.h>
-#include <mcinfo.h>
 #include "SKSNSimFileIO.hh"
 #include "skrun.h"
 #include "SKSNSimTools.hh"
@@ -35,6 +34,7 @@ void SKSNSimFileOutTFile::Open(const std::string fname, const bool including_sne
 	//------------------------------------------------------------------------
 
 	/*-----define class-----*/
+#ifdef SKINTERNAL
 	m_MC = new MCInfo;
 	m_MC->Clear();
 	m_MC->SetName("MC");
@@ -44,11 +44,14 @@ void SKSNSimFileOutTFile::Open(const std::string fname, const bool including_sne
     m_SN->Clear();
     m_SN->SetName("SN");
   }
+#endif
 
 	/*-----define branch-----*/
 	TList *TopBranch = new TList;
+#ifdef SKINTERNAL
 	TopBranch->Add(m_MC);
   if(including_snevtinfo) TopBranch->Add(m_SN);
+#endif
 
 	// define tree
 	m_OutTree = new TTree("data", "SK 5 tree");
@@ -73,6 +76,7 @@ void SKSNSimFileOutTFile::Close(){
 
 void SKSNSimFileOutTFile::Write(const SKSNSimSNEventVector &ev){
 
+#ifdef SKINTERNAL
   if(ev.GetSNEvtInfoIEvt() != -1 && m_SN != NULL){
     m_SN->iEvt  = ev.GetSNEvtInfoIEvt();
     m_SN->rType = ev.GetSNEvtInfoRType();
@@ -86,7 +90,9 @@ void SKSNSimFileOutTFile::Write(const SKSNSimSNEventVector &ev){
     m_SN->rVtx[1] = ev.GetSNEvtInfoRVtx(1);
     m_SN->rVtx[2] = ev.GetSNEvtInfoRVtx(2);
   }
+#endif
 
+#ifdef SKINTERNAL
   m_MC->mcrun = ev.GetRunnum();
   m_MC->mcninfo = 2;
   m_MC->mcinfo[1] = ev.GetSubRunnum();
@@ -116,6 +122,7 @@ void SKSNSimFileOutTFile::Write(const SKSNSimSNEventVector &ev){
     m_MC->iflgvc[i] = ev.GetTrackIFLGVC(i);
     m_MC->icrnvc[i] = ev.GetTrackICRNVC(i);
   }
+#endif
 
   m_OutTree->Fill();
 

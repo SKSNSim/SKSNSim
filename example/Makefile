@@ -7,35 +7,42 @@
 
 .PHONY: all clean obj bin lib doc
 
-TARGET = reweight
+TARGET = reweight validate_nuelastic_xsec
 all: $(TARGET)
 	@echo "[SKSNSim] Done!"
 
-
-ifndef SKOFL_ROOT
-  SKOFL_ROOT = ../..
-endif
+ifdef SKOFL_ROOT
 include $(SKOFL_ROOT)/config.gmk
+endif
 
+LOCAL_INC	+=  -I$(SKSNSIMINSTALLDIR)/include
 
 CXX=g++
-CXXFLAGS += -DNO_EXTERN_COMMON_POINTERS #-DDEBUG
-# if you want to use lates neutrino oscillation parameter, please comment out next line
-#CXXFLAGS += -DORIGINAL_NUOSCPARAMETER
 FC=gfortran
-FCFLAGS += -w -fPIC -lstdc++
-
-LOCAL_INC	+= -I$(SKSNSIM_ROOTDIR)/include
-
-LOCAL_LIBS	= -L$(SKOFL_LIBDIR) -lsnlib_1.0 -lsnevtinfo -lsollib_4.0 -lsklowe_7.0 -lwtlib_5.1 -llibrary -L$(SKSNSIM_ROOTDIR)/lib -lSKSNSim -lboost_system -lboost_filesystem
-
-LDFLAGS = $(LOCAL_LIBS) $(LOCAL_INC)
-#INCROOT=-I$(ROOTSYS)/include/
-#LIBSROOT=-L$(ROOTSYS)/lib/ -lCint -lCore -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -lGui
-
 LN = ln -sf
 
+CXXFLAGS +=$(shell root-config --cflags --libs) -fPIC -lstdc++ -lgsl -lgslcblas -lm -lboost_filesystem
+CXXFLAGS += -DNO_EXTERN_COMMON_POINTERS #-DDEBUG
+CXXFLAGS += $(LOCAL_INC)
+ifdef SKOFL_ROOT
+CXXFLAGS += -DSKINTERNAL
+endif
+# if you want to use lates neutrino oscillation parameter, please comment out next line
+#CXXFLAGS += -DORIGINAL_NUOSCPARAMETER
 
+FCFLAGS += -w -fPIC -lstdc++
+
+ifndef SKOFL_ROOT
+LDLIBS=$(shell root-config --libs)
+endif
+
+ifdef SKOFL_ROOT
+LDFLAGS = $(LOCAL_LIBS) $(LOCAL_INC)
+LOCAL_LIBS	= -L$(SKOFL_LIBDIR) -lsnlib_1.0 -lsnevtinfo -lsollib_4.0 -lsklowe_7.0 -lwtlib_5.1 -llibrary 
+endif
+
+LOCAL_LIBS += -lSKSNSim
+LDLIBS += -L$(SKSNSIMINSTALLDIR)/lib $(LOCAL_LIBS)
 
 #
 #  Objects
@@ -50,13 +57,14 @@ test:
 	@echo "INC:          "$(INC)
 	@echo "LDFLAGS:      "$(LDFLAGS)
 	@echo "LDLIBS:       "$(LDLIBS)
+	@echo "CXXFLAGS:     "$(CXXFLAGS)
 
 %.o: %.cc 
 	@echo "[SKSNSim] Building $* ..."
 	@$(CXX) $(CXXFLAGS) -c $< -o $@
 
 
-reweight: reweight.o 
+%: %.o 
 	@echo "[SKSNSim] Building executable:	$@..."
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDLIBS)
 
