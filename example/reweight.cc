@@ -22,6 +22,9 @@
 #include <TMath.h>
 #include <SKSNSimCrosssection.hh>
 #include <SKSNSimFlux.hh>
+#ifdef SKINTERNAL
+#include <mcinfo.h>
+#endif
 
 using namespace boost::filesystem;
 using std::cout;

@@ -21,7 +21,7 @@ CXX=g++
 FC=gfortran
 LN = ln -sf
 
-CXXFLAGS +=$(shell root-config --cflags --libs) -fPIC -lstdc++ -lgsl -lgslcblas -lm
+CXXFLAGS +=$(shell root-config --cflags --libs) -fPIC -lstdc++ -lgsl -lgslcblas -lm -lboost_filesystem
 CXXFLAGS += -DNO_EXTERN_COMMON_POINTERS #-DDEBUG
 CXXFLAGS += $(LOCAL_INC)
 ifdef SKOFL_ROOT
@@ -57,6 +57,7 @@ test:
 	@echo "INC:          "$(INC)
 	@echo "LDFLAGS:      "$(LDFLAGS)
 	@echo "LDLIBS:       "$(LDLIBS)
+	@echo "CXXFLAGS:     "$(CXXFLAGS)
 
 %.o: %.cc 
 	@echo "[SKSNSim] Building $* ..."

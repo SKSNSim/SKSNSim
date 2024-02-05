@@ -76,12 +76,12 @@ Tprec nuelastic_xsec_bahcall95(Tprec enu /* MeV */, Tprec ee /* MeV */, int pid)
 
     const Tprec kappa = []( Tprec it, int pid) { 
         Tprec zero = 0.0;
-        if( std::abs(pid) == PDG_ELECTRON_NEUTRINO) return 0.9791 + 0.0097 * it;
-        else if( std::abs(pid) == PDG_MUON_NEUTRINO)     return 0.9970 - 0.00037 * it;
+        if( std::abs(pid) == PDG_ELECTRON_NEUTRINO)   return 0.9791 + 0.0097  * it;
+        else if( std::abs(pid) == PDG_MUON_NEUTRINO)  return 0.9970 - 0.00037 * it;
         return zero;}( IT, pid);
 
     const Tprec gL_normal = rho * (0.5  - kappa * sin2ThetaW)
-        - ( std::abs(pid) == PDG_ELECTRON_NEUTRINO ? -1.0 : 0.0);
+        + ( std::abs(pid) == PDG_ELECTRON_NEUTRINO ? -1.0 : 0.0);
     const Tprec gR_normal = - rho * kappa * sin2ThetaW;
     const Tprec gL = (is_anti_nu? gR_normal : gL_normal);
     const Tprec gR = (is_anti_nu? gL_normal : gR_normal);
@@ -125,6 +125,7 @@ double skofl_sollib_nuelastic_xsec_wrapper(double enu, double ee, int pid){
     return x;
 #else
     return nuelastic_xsec_bahcall95( (long double)enu, (long double)ee, pid) /* cm^3 */ / SKSNSimPhysConst::HBARC /* MeV fm */ * 1e13 /* fm / cm */;
+   
 #endif
 }
 
