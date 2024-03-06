@@ -9,7 +9,9 @@ enum SKRUN
     SK_V_END  = 84999,
     SK_VI_BEGIN  = 85000,
     SK_VI_END  = 87999,
-    SK_VII_BEGIN  = 88000
+    SK_VII_BEGIN  = 88000,
+    SK_VII_END  = 92999,
+    SK_VIII_BEGIN  = 93000
 };
 
 #endif

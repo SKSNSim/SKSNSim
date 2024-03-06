@@ -30,6 +30,8 @@ namespace SKSNSimTools {
       return SKSNSIMENUM::SKPERIOD::SKVI;
     else if( checkRange(rn, (int)SKSNSIMENUM::SKPERIODRUN::SKVIIBEGIN, (int)SKSNSIMENUM::SKPERIODRUN::SKVIIEND) )
       return SKSNSIMENUM::SKPERIOD::SKVII;
+    else if( checkRange(rn, (int)SKSNSIMENUM::SKPERIODRUN::SKVIIIBEGIN, (int)SKSNSIMENUM::SKPERIODRUN::SKVIIIEND) )
+      return SKSNSIMENUM::SKPERIOD::SKVIII;
 
     /* default */
     return SKSNSIMENUM::SKPERIOD::NSKPERIOD;
@@ -50,7 +52,7 @@ namespace SKSNSimTools {
 namespace SKSNSimLiveTime {
   const static std::map<SKSNSIMENUM::SKPERIOD, std::string> FNAMEMAP = {
     { SKSNSIMENUM::SKPERIOD::SKV, "/home/sklowe/realtime_sk5_rep/solar_oct19/livetime/livetime5.r080539.r082086.txt" },
-    { SKSNSIMENUM::SKPERIOD::SKVI, "/home/sklowe/realtime_sk6_rep/solar_oct22/livetime/livetime5.r085220.r087220.txt" }
+    { SKSNSIMENUM::SKPERIOD::SKVI, "/home/sklowe/realtime_sk6_rep/solar_oct22/livetime/livetime5.r085220.r087220.txt" },
     { SKSNSIMENUM::SKPERIOD::SKVII, "/home/sklowe/realtime_sk7_rep/solar_nov23/livetime/livetime5.r080000.r091985.txt" }
   };
 

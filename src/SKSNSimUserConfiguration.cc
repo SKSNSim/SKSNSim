@@ -96,7 +96,7 @@ void SKSNSimUserConfiguration::ShowHelpDSNB(const char *argv0){
     << " [--runtime]"
     << " [--runtime_begin {runnum}]"
     << " [--runtime_end {runnum}]"
-    << " [--runtime_period {5/6}]"
+    << " [--runtime_period {5/6/7}]"
     << " [--neventsperfile {int}]"
     << " [--outprefix {pref}]"
     << " [--outname_template {template.RUNNUM.root}]"
@@ -119,7 +119,7 @@ void SKSNSimUserConfiguration::ShowHelpDSNB(const char *argv0){
     << " --runtime: this option enebles runtime normalization. ( default = " << SKSNSimUserConfiguration::GetDefaultRuntimeNormalization() << " )"  << std::endl
     << " --runtime_begin {runnum}: begging run-number of runtime normalization ( default = " << SKSNSimUserConfiguration::GetDefaultRuntimeBegin() << " )"  << std::endl
     << " --runtime_end {runnum}: end run-nummber of runtime normalization ( default = " << SKSNSimUserConfiguration::GetDefaultRuntimeEnd() << " )" << std::endl
-    << " --runtime_period {5/6}: SK period for runtime normalization: SK-IV = 3, SK-V = 4, SK-VI = 5 ( default = " << SKSNSimUserConfiguration::GetDefaultRuntimePeriod() << " , -1 means that period is specified by runnnumber. see --runtime_{begin/end}.)" << std::endl
+    << " --runtime_period {5/6/7}: SK period for runtime normalization: SK-IV = 3, SK-V = 4, SK-VI = 5, SK-VII = 6 ( default = " << SKSNSimUserConfiguration::GetDefaultRuntimePeriod() << " , -1 means that period is specified by runnnumber. see --runtime_{begin/end}.)" << std::endl
     << " --neventsperfile {int}: number of events per one file ( default = " << SKSNSimUserConfiguration::GetDefaultNumEventsPerFile() << " )" << std::endl
     << " --outprefix {pref}: prefix of output file name ( default = " << SKSNSimUserConfiguration::GetDefaultOutputPrefix() << " )" << std::endl
     << " --outname_template {template.RUNNUM.root}: format of output filename in run-by-run mode ( default = " << SKSNSimUserConfiguration::GetDefaultOutputNameTemplate() << " )" << std::endl
