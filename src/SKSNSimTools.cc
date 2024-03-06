@@ -3,8 +3,11 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <tuple>
 #include <algorithm>
+#include <functional>
 #include "SKSNSimTools.hh"
+
 
 extern "C" {
   void elapseday_date_(int *, int *, int *, int *);
@@ -81,8 +84,43 @@ namespace SKSNSimLiveTime {
     }
 
     const std::string fname = FNAMEMAP.at(p);
+    int run_begin = (int)SKSNSIMENUM::SKPERIODRUN::SKIBEGIN;
+    int run_end = (int)SKSNSIMENUM::SKPERIODRUN::SKMC;
+    if( p == SKSNSIMENUM::SKPERIOD::SKI ) {
+      run_begin = (int)SKSNSIMENUM::SKPERIODRUN::SKIBEGIN;
+      run_end = (int)SKSNSIMENUM::SKPERIODRUN::SKIEND;
+    } else if( p == SKSNSIMENUM::SKPERIOD::SKII ) {
+      run_begin = (int)SKSNSIMENUM::SKPERIODRUN::SKIIBEGIN;
+      run_end = (int)SKSNSIMENUM::SKPERIODRUN::SKIIEND;
+    } else if( p == SKSNSIMENUM::SKPERIOD::SKIII ) {
+      run_begin = (int)SKSNSIMENUM::SKPERIODRUN::SKIIIBEGIN;
+      run_end = (int)SKSNSIMENUM::SKPERIODRUN::SKIIIEND;
+    } else if( p == SKSNSIMENUM::SKPERIOD::SKIV ) {
+      run_begin = (int)SKSNSIMENUM::SKPERIODRUN::SKIVBEGIN;
+      run_end = (int)SKSNSIMENUM::SKPERIODRUN::SKIVEND;
+    } else if( p == SKSNSIMENUM::SKPERIOD::SKV ) {
+      run_begin = (int)SKSNSIMENUM::SKPERIODRUN::SKVBEGIN;
+      run_end = (int)SKSNSIMENUM::SKPERIODRUN::SKVEND;
+    } else if( p == SKSNSIMENUM::SKPERIOD::SKVI ) {
+      run_begin = (int)SKSNSIMENUM::SKPERIODRUN::SKVIBEGIN;
+      run_end = (int)SKSNSIMENUM::SKPERIODRUN::SKVIEND;
+    } else if( p == SKSNSIMENUM::SKPERIOD::SKVII ) {
+      run_begin = (int)SKSNSIMENUM::SKPERIODRUN::SKVIIBEGIN;
+      run_end = (int)SKSNSIMENUM::SKPERIODRUN::SKVIIEND;
+    } else if( p == SKSNSIMENUM::SKPERIOD::SKVIII ) {
+      run_begin = (int)SKSNSIMENUM::SKPERIODRUN::SKVIIIBEGIN;
+      run_end = (int)SKSNSIMENUM::SKPERIODRUN::SKVIIIEND;
+    }
 
     std::vector<std::tuple<int, double>> buf = LoadLiveTime(fname);
+    buf.erase(
+        std::remove_if( buf.begin(), buf.end(),
+          std::bind([](std::tuple<int, double> x, int rb, int re) {
+            return ( (std::get<0>(x) < rb) || (std::get<0>(x) >= re));
+            }, std::placeholders::_1, run_begin, run_end)
+          ),
+          buf.end());
+    std::cout << "Erased: IZUDEB " << run_begin << " " << run_end << std::endl;
 
     return buf;
   }
