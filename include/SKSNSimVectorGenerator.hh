@@ -358,7 +358,7 @@ class SKSNSimVectorSNGenerator {
     double GetEnergyBinWidth() const { return (GetEnergyMax() - GetEnergyMin())/(double)GetEnergyNBins(); } 
     double SetTimeMin(const double e){ m_generator_time_min = e; return m_generator_time_min;}
     double SetTimeMax(const double e){ m_generator_time_max = e; return m_generator_time_max;}
-    size_t SetTimeNBins(const size_t n) { m_nu_energy_nbins = n; return GetTimeNBins(); }
+    size_t SetTimeNBins(const size_t n) { m_time_nbins = n; return GetTimeNBins(); }
     double GetTimeMin() const {return m_generator_time_min;}
     double GetTimeMax() const {return m_generator_time_max;}
     size_t GetTimeNBins() const {return m_time_nbins;}
