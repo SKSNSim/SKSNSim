@@ -22,3 +22,5 @@ Basically, you can run by just executing ``main_dsnb`` with wanted options you w
 ## More detail:
 
 The guide for users and developpers are available on https://github.com/SKSNSim/SKSNSim/releases/download/v1.2.0/guide_sksnsim.pdf , which is output of doc/guide_sksnsim.texi (Texinfo file). If you want to see the PDF version, please do ``make doc``.
+
+You can also see the SKSNSim paper from https://iopscience.iop.org/article/10.3847/1538-4357/ad344e.
