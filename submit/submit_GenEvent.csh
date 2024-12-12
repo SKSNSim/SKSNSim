@@ -11,27 +11,42 @@ if ($1 == "") then
     exit
 endif
 
+set OUTDIR = "/disk2/disk03/lowe11/nakanisi/SKSNSim_241122/"
+set LOGDIR = "/disk2/disk03/lowe11/nakanisi/SKSNSim_241122/"
 #set num_simulation = 1000
-set num_simulation = 1
+set QUEUE = lowe
+set JOBLIMIT = 250
+set num_simulation = 10000
 
-if(! -d ./script/$1) then
-    mkdir -p ./script/$1;
+
+if(! -d /disk2/disk03/lowe11/nakanisi/SKSNSim_241122) then
+    mkdir -p /disk2/disk03/lowe11/nakanisi/SKSNSim_241122;
+    echo $OUTDIR;
 endif
 
-if(! -d ./data) then
-    mkdir -p ./data;
+if(! -d $LOGDIR/script) then
+    mkdir -p $LOGDIR/script;
+    echo $LOGDIR/script;
 endif
 
-if(! -d ./data/$1) then
-    mkdir -p ./data/$1;
+if(! -d $LOGDIR/script/$1) then
+    mkdir -p $LOGDIR/script/$1;
+    echo $LOGDIR/script/$1;
 endif
 
-if(! -d ./out/$1) then
-    mkdir -p ./out/$1
+if(! -d $OUTDIR/data/$1) then
+    mkdir -p $OUTDIR/data/$1;
+    echo $OUTDIR/data/$1;
 endif
 
-if(! -d ./err/$1) then
-    mkdir -p ./err/$1
+if(! -d $LOGDIR/out/$1) then
+    mkdir -p $LOGDIR/out/$1;
+    echo $LOGDIR/out/$1;
+endif
+
+if(! -d $LOGDIR/err/$1) then
+    mkdir -p $LOGDIR/err/$1;
+    echo $LOGDIR/err/$1;
 endif
 
 @ cur_num = 0
@@ -54,25 +69,43 @@ while ($cur_num < $num_simulation)
        exit
     endif
 
-    set odir = "./data/"$1"/"$fnum
-    if(! -d ../$odir/event) then
-	mkdir -p ../$odir/event
+    #set odir = $OUTDIR"/data/"$1"/784kpc_NO_"$fnum
+    set odir = $OUTDIR"/data/"$1"/10kpc_WO_"$fnum
+    if(! -d $odir/event) then
+	mkdir -p $odir/event
     endif
 
-    set ofile = "script/"$1"/"$fnum".csh"
+    set ofile = $LOGDIR"/script/"$1"/"$fnum".csh"
     @ random = $cur_num + 1000
 
     echo $ofile
     echo '#\!/bin/csh -f ' >! $ofile
-    echo 'cd '$PWD >> $ofile
+    #echo 'cd '$PWD >> $ofile
+    #echo 'cd /disk2/disk03/usr8/nakanisi/SKSNSim/submit/' >> $ofile
+    #echo 'cd /disk2/disk03/usr8/nakanisi/test_SKSNSim/submit/' >> $ofile
+    echo 'cd /disk2/disk03/usr8/nakanisi/SKSNSim_241122/submit/' >> $ofile
+    #echo 'cd /disk2/disk03/usr8/nakanisi/SN2023ixf/SKSNSim/submit/' >> $ofile
     echo 'cd ..' >> $ofile
     echo 'source /usr/local/sklib_gcc8/skofl-trunk/env.csh' >> $ofile
+    echo 'source SKSNSimsource.csh' >> $ofile
     echo 'hostname' >> $ofile
-    echo "./bin/main "$1" "$2" "$3" "$4" "$odir" "$random >> $ofile
+    echo 'set SKSNSIMDATADIR = /disk2/disk03/usr8/nakanisi/SKSNSim_241122/data' >> $ofile
+    echo "./bin/main_snburst "$1" "$2" "$3" "$4" "$odir" "$random "--time_min 0. --time_max 300. --time_nbins 300000 --energy_min 0.5 --energy_max 100. --energy_nbins 995">> $ofile
+    #echo "./bin/main_snburst "$1" "$2" "$3" "$4" "$odir" "$random "--time_min 0. --time_max 20. --time_nbins 20000 --energy_min 0.5 --energy_max 100. --energy_nbins 995">> $ofile
+    #echo "./bin/main_snburst_new "$1" "$2" "$3" "$4" "$odir" "$random "--time_min 0. --time_max 150. --time_nbins 150000 --energy_min 0. --energy_max 100. --energy_nbins 1000">> $ofile
+    #echo "./bin/main_snburst "$1" "$2" "$3" "$4" "$odir" "$random >> $ofile
 
     chmod 755 $ofile
 
-    pjsub -o out/$1/$fnum -e err/$1/$fnum $ofile
+    set njobs = `pjstat -v | grep $QUEUE | wc -l` # cont number if running jobs
+    echo "current jobs: $njobs"
+    while ( $njobs > $JOBLIMIT ) # monitor number if running jobs
+        sleep 10
+        set njobs = `pjstat -v | grep $QUEUE | wc -l` # count number of running jobs
+        echo "current jpbs: $njobs"
+    end
+    pjsub -z -o $LOGDIR/out/$1/$fnum.WO.Eth0.5 -e $LOGDIR/err/$1/$fnum.WO.Eth0.5 -L rscgrp=$QUEUE $ofile
+    echo "pjsub -z -o $LOGDIR/out/$1/$fnum.WO.Eth0.5 -e $LOGDIR/err/$1/$fnum.WO.Eth0.5 -L rscgrp=$QUEUE $ofile"
     
     @ cur_num = $cur_num + 1
     

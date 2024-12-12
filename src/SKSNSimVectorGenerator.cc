@@ -1442,7 +1442,7 @@ void SKSNSimVectorSNGenerator::determineKinematics( std::map<XSECTYPE, std::shar
 
     double costh = snDir[0] * eDir[0] + snDir[1] * eDir[1] + snDir[2] * eDir[2];
 
-    if(numNtNueO[channel]!=0 || numNtNuebarO[channel]!=0 || numGmNuebarO[channel]!=0){
+    if(numNtNueO[channel]!=0 || numNtNuebarO[channel]!=0 || numGmNuebarO[channel]!=0 || numPtNuebarO[channel]!=0 || numPtNueO[channel]!=0){
       if(Reaction==0){
         int i_nucre = 0;
         if(Ex_state!=29){
@@ -1453,6 +1453,21 @@ void SKSNSimVectorSNGenerator::determineKinematics( std::map<XSECTYPE, std::shar
             ev.AddTrack(
                 PDG_NEUTRON, 0.5 + Mn,
                 neutronMom.x, neutronMom.y, neutronMom.z,
+                1 /*iorgvc*/,
+                1 /*ivtivc*/,
+                1 /*ivtfvc*/,
+                0 /*iflgvc*/,
+                1 /*icrnvc*/
+                );
+            //std::cout << "neutron information " << nReact << " " << i_nucre << " " << mc->ipvc[2+i_nucre] << " " << x << " " << y << " " << z << std::endl;
+          }
+          for(int i=0;i<numPtNueO[channel];i++){
+            // Proton
+            i_nucre++;
+            const auto protonMom = sqrt(SQ(0.5+Mp) - SQ(Mp)) * generateNormVect(rng);
+            ev.AddTrack(
+                PDG_PROTON, 0.5 + Mp,
+                protonMom.x, protonMom.y, protonMom.z,
                 1 /*iorgvc*/,
                 1 /*ivtivc*/,
                 1 /*ivtfvc*/,
@@ -1498,6 +1513,20 @@ void SKSNSimVectorSNGenerator::determineKinematics( std::map<XSECTYPE, std::shar
                 );
             //std::cout << "gamma emission " << i_nucre << " " << mc->ipvc[mc->nvc] << " " << mc->energy[mc->nvc] << " " << x << " " << y << " " << z << std::endl; // nakanisi
           }
+            for(int i=0;i<numPtNuebarO[channel];i++){
+              // Proton
+              i_nucre++;
+              auto protonMom = sqrt(SQ(0.5+Mp)-SQ(Mp)) * generateNormVect(rng);
+              ev.AddTrack(
+                  PDG_PROTON, 0.5 + Mp,
+                  protonMom.x, protonMom.y, protonMom.z,
+                  1 /*iorgvc*/,
+                  1 /*ivtivc*/,
+                  1 /*ivtfvc*/,
+                  0 /*iflgvc*/,
+                  1 /*icrnvc*/
+                  );
+            }
         }
       }
     }
@@ -1681,31 +1710,50 @@ void SKSNSimVectorSNGenerator::determineAngleNueO(TRandom &rng, SKSNSimXSecNuOxy
 	// find maximum values, which depends on nuEne
 	double maxP = 0.;
 	int rcn = 0;
-  constexpr int costNBins = 1000;
+  constexpr int costNBins = 100;
+  //constexpr int costNBins = 2000;
   constexpr double costMin = -1.;
   constexpr double costMax =  1.;
   constexpr double costBinSize = (costMax - costMin) / (double) costNBins;
 
   eEnergy = xsec.OxigFuncRecEneCC(Reaction, State, Ex_state, channel, nuEne);
+  //std::cout << " test6: " << eEnergy << " / " << nuEne << std::endl;
 
+  //std::vector<double> sumangleprob;
+  //vector<double> diffangle;
+  std::vector<double> totprobangle;
+  double totp = 0.;
   for(int iCost=0;iCost<costNBins;iCost++){
     cost = costMin + costBinSize * (iCost + 0.5);
     p = xsec.OxigFuncAngleRecCC(Reaction, State, Ex_state, channel, nuEne, cost);
+    totp += p;
 
-    if(p>maxP){ maxP = p; }
+    //std::cout << p << " / " << totp << std::endl;
+    totprobangle.push_back(totp);
+    //diffangle.push_back(p);
+    //std::find(vec.begin(),vec.end(),val) != vec.end();
+
+    //if ( find( ) ) {
+    //if ( SKSNSimXSecNuOxygen::sumangleprob.contains( SKSNSimXSecNuOxygen::convToINIFINSTATE( Reaction, State, Ex_state, channel) ) ) {
+    //if ( !SKSNSimXSecNuOxygen::FindStateInAngleProb( Reaction, State, Ex_state, channel) ) {
+    //  SKSNSimXSecNuOxygen::FillToAngleProb( Reaction, State, Ex_state, channel, totp );
+      //SKSNSimXSecNuOxygen::sumangleprob[ SKSNSimXSecNuOxygen::convToINIFINSTATE( Reaction, State, Ex_state, channel) ].push_back(totp);
+    //}
+
+    //if(p>maxP){ maxP = p; }
   }
-  while(1){
-    cost = rng.Uniform(costMin, costMax);
-    //dir_oxigfunc_( & nuEnergy, & cost, & p, & eEnergy );
-    x = rng.Uniform( 0., maxP);
-    //std::cout << maxP << " " << p << " " << x << std::endl; //nakanisi
-    if(x<p){
-      eTheta = acos( cost );
-      ePhi = rng.Uniform(-M_PI, M_PI);
-      eEne = eEnergy;
-      //std::cout << "break" << " " << Reaction << " " << State << " " << Ex_state << " " << channel << " " << eTheta << " " << ePhi << " " << eEnergy << std::endl; //nakanisi
-      break;
-    }
+
+  x = rng.Uniform( 0., totp);
+  for(int iCost=0;iCost<costNBins;iCost++){
+      //if( x < sumangleprobb[ SKSNSimXSecNuOxygen::convToINIFINSTATE( Reaction, State, Ex_state, channel) ][iCost] ){
+      if( x < totprobangle[iCost] ){
+          cost = costMin + costBinSize * (iCost + 0.5);
+          eTheta = acos( cost );
+          ePhi = rng.Uniform(-M_PI, M_PI);
+          eEne = eEnergy;
+          //std::cout << iCost << ", " << x << " : " << totprobangle[iCost] << std::endl;
+          break;
+      }
   }
 	return;
 }

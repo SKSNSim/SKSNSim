@@ -1,0 +1,3 @@
+
+setenv SKSNSIMDATADIR ${PWD}/data
+setenv SKSNSIMINSTALLDIR ${PWD}

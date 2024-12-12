@@ -188,7 +188,8 @@ double SKSNSimSNFluxCustom::GetFlux(const double e, const double t, const FLUXNU
     type == FLUXNUTYPE::FLUXNUE? nnue: (
     type == FLUXNUTYPE::FLUXNUEB? nneb: nnux);
 
-  if(t >= tmesh[0] || t < tmesh[tmesh.size()-1]){
+  //if(t >= tmesh[0] || t < tmesh[tmesh.size()-1]){
+  if(t >= tmesh[0] && t < tmesh[tmesh.size()-1]){
     int i = 0;
     while(tmesh[i] < t) i++;
     i--;
