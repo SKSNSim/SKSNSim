@@ -10,7 +10,13 @@
 #include "SKSNSimEnum.hh"
 #include "SKSNSimConstant.hh"
 #ifdef SKINTERNAL
-#include <geotnkC.h>
+//#include <geotnkC.h>
+//constexpr double RINTK = 3540.; //HK tank size (ID)
+//constexpr double ZPINTK = 2740.; //HK tank size (ID)
+constexpr double RINTK = 3240.; //HK tank size (ID)
+constexpr double ZPINTK = 3287.55; //HK tank size (ID)
+constexpr double RTKTK = 3700.; // HK tank size 
+constexpr double ZPTKTK = 2800.; // HK tank size
 #else
 constexpr double RINTK = 5000;
 constexpr double ZPINTK = 5000;
@@ -19,11 +25,17 @@ constexpr double ZPTKTK = 5000;
 #endif
 
 using namespace SKSNSimPhysConst;
+
+
 constexpr double VOL[(size_t)SKSNSIMENUM::TANKVOLUME::kNTANKVOLUME] = { 
 #ifdef SKINTERNAL
   /* kIDFV */ (RINTK-FVCUT)*(RINTK-FVCUT)*PI*(ZPINTK-FVCUT)*2.,
   /* kIDFULL */ RINTK*RINTK*PI*ZPINTK*2.,
   /* kTANKFULL */ RTKTK*RTKTK*PI*ZPTKTK*2.
+
+  ///* kIDFV */ (RINTK_LOCAL-FVCUT)*(RINTK_LOCAL-FVCUT)*PI*(ZPINTK_LOCAL-FVCUT)*2.,
+  ///* kIDFULL */ RINTK_LOCAL*RINTK_LOCAL*PI*ZPINTK_LOCAL*2.,
+  ///* kTANKFULL */ RTKTK*RTKTK*PI*ZPTKTK*2.
 #else
       1.0, 1.0, 1.0
 #endif
