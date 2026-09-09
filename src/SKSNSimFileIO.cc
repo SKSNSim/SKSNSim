@@ -93,6 +93,7 @@ void SKSNSimFileOutTFile::Write(const SKSNSimSNEventVector &ev){
 #endif
 
 #ifdef SKINTERNAL
+
   m_MC->mcrun = ev.GetRunnum();
   m_MC->mcninfo = 2;
   m_MC->mcinfo[1] = ev.GetSubRunnum();
@@ -122,6 +123,7 @@ void SKSNSimFileOutTFile::Write(const SKSNSimSNEventVector &ev){
     m_MC->iflgvc[i] = ev.GetTrackIFLGVC(i);
     m_MC->icrnvc[i] = ev.GetTrackICRNVC(i);
   }
+  
 #endif
 
   m_OutTree->Fill();
@@ -357,6 +359,13 @@ void SKSNSimFileOutNuance::Write(const SKSNSimSNEventVector &ev) {
         + std::to_string(ev.GetSNEvtInfoRTime())
           );
   };
+
+  auto getMode = [](const SKSNSimSNEventVector &ev, int i) {
+      if (ev.GetTrackICRNVC(i) != 0) return 0;
+      else if (ev.GetTrackIFLGVC(i) != 0) return -1;
+      else return -2;
+  };
+
   auto convTrack = [] (const SKSNSimSNEventVector &ev, int i) {
     double dir[3];
     double totmon = ev.GetTrackMomentumX(i)*ev.GetTrackMomentumX(i);
@@ -385,7 +394,19 @@ void SKSNSimFileOutNuance::Write(const SKSNSimSNEventVector &ev) {
   *ofs << "begin" << std::endl
     << convReactionMode(ev) << std::endl
     << convVertex(ev) << std::endl;
-  for(int i = 0; i < ev.GetNTrack(); i++) *ofs << convTrack(ev, i) << std::endl;
+  for(int i = 0; i < ev.GetNTrack(); i++) {
+      if (getMode(ev, i) == -1) {
+          *ofs << convTrack(ev, i) << std::endl;
+      }
+  }
+  // dummy info line
+  *ofs << "info 0 0 0" << std::endl;
+
+  for(int i = 0; i < ev.GetNTrack(); i++) {
+      if (getMode(ev, i) == 0) {
+          *ofs << convTrack(ev, i) << std::endl;
+      }
+  }
   *ofs << "end" << std::endl;
 
 }
