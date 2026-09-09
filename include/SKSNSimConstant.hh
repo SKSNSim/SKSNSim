@@ -27,7 +27,8 @@ namespace SKSNSimPhysConst {
   constexpr double ZERO_PRECISION = 1e-9;
 
   // Number of target in 32.48 kton of SK total Volume
-  constexpr double Ntarget_p = 2.173e33;
+  //constexpr double Ntarget_p = 2.173e33;
+  constexpr double Ntarget_p = 7.2e34; //Number of tagert in HK ID
   constexpr double Ntarget_e = 1.086e34;
   constexpr double Ntarget_o = 1.086e33;
 
