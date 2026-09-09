@@ -179,7 +179,7 @@ class SKSNSimUserConfiguration{
         std::cout << "The environmental variable \"" << DATADIRVARIABLENAME << "\" is not defined. Please set it..." << std::endl;
         exit(EXIT_FAILURE);
       }
-      return dir + "/horiuchi/8MeV_Nominal.dat";
+      return dir + "/dsnb/horiuchi/8MeV_Nominal.dat";
     }
     const static bool GetDefaultDSNBFlatFlux () { return false;}
     const static int GetDefaultRunnum () { return (int) SKSNSIMENUM::SKPERIODRUN::SKMC; }
