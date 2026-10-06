@@ -1,5 +1,5 @@
 #include <memory>
-#include <TRandom3.h>
+#include "root/TRandom3.h"
 #include "SKSNSimTools.hh"
 #include "SKSNSimFileIO.hh"
 #include "SKSNSimVectorGenerator.hh"

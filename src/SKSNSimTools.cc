@@ -1,3 +1,7 @@
+// Use pure C++ elapseday routine to bypass fortran (patch)
+#ifdef SKINTERNAL
+#undef SKINTERNAL
+#endif
 
 #include <iostream>
 #include <fstream>

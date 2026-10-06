@@ -3,13 +3,15 @@
  * *********************************/
 #include <functional>
 #include <algorithm>
-#include <TRandom3.h>
+#include "root/TRandom3.h" // patch
 #include "SKSNSimVectorGenerator.hh"
 #include "SKSNSimConstant.hh"
 #include "SKSNSimCrosssection.hh"
 #include "SKSNSimTools.hh"
 #include <typeinfo>
 #include <Math/Integrator.h> // For flux x xsec integration via ROOT
+
+#undef SKINTERNAL  // Bypass fortran implemtation of sn_sun_dir_ (patch)
 
 using namespace SKSNSimPhysConst;
 
@@ -714,6 +716,11 @@ std::vector<SKSNSimSNEventVector> SKSNSimVectorSNGenerator::GenerateEvents(){
   double time;
   double nuEne;
   for(Int_t i_time =0; i_time < tNBins; i_time++) {
+
+    // Progress report for long calculation
+    if( tNBins > 0 && i_time % (tNBins/20 > 0 ? tNBins/20 : 1) == 0 )
+      std::cout << "Process loop progress: " << i_time << " / " << tNBins
+                << " (" << (100*i_time/tNBins) << "%)" << std::endl;
     
     double tBinSize = (timeBins[i_time+1] - timeBins[i_time]);
     time = timeBins[i_time] + 0.5 * tBinSize; //center value of each bin[s]
@@ -1230,6 +1237,10 @@ void SKSNSimVectorSNGenerator::FillEvent(std::vector<SKSNSimSNEventVector> &evt_
 
   std::cout << "start event loop in FillEvent" << std::endl; //nakanisi
   for( uint iEvt = 0; iEvt < evt_buffer.size(); iEvt++ ){
+
+    // Patch to provide progress information for long event generation
+    if( iEvt % 100 == 0 )
+      std::cout << "FillEvent progress: " << iEvt << " / " << evt_buffer.size() << std::endl;
 
     iSkip = 0;
 

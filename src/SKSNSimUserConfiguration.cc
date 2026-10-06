@@ -141,6 +141,7 @@ void SKSNSimUserConfiguration::ShowHelpSN(const char *argv0){
     << " [-c,--snmodelPNSC model_name]"
     << " [--nuosc 0(NONE)/1(NORMAL)/2(INVERTED)]"
     << " [-d,--distance distance_in_kpc]"
+    << " [--sndir x,y,z]"  // added for sndir (patch)
     << " [-g,--fillevent {0(no: just calculate expected num of evt)/1(yes: fill kinematics for detector sim.)}]"
     << " [--neventsperfile numberofevents]"
     << " [-s,--seed randomseed]"

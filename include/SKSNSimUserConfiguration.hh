@@ -61,6 +61,8 @@ class SKSNSimUserConfiguration{
 
     /* SN related */
     double m_sndistance_kpc;
+    double m_sn_dir[3];    // added for sndir (patch)
+    bool m_sn_dir_set;    // added for sndir (patch)
 
     /* Physics related */
     SKSNSIMENUM::NEUTRINOOSCILLATION m_nuosc_type;
@@ -120,6 +122,12 @@ class SKSNSimUserConfiguration{
       m_runnum = GetDefaultRunnum();
       m_subrunnum = GetDefaultSubRunnum();
 
+      // Added for sndir (patch)
+      m_sn_dir[0] = GetDefaultSNDirX();
+      m_sn_dir[1] = GetDefaultSNDirY();
+      m_sn_dir[2] = GetDefaultSNDirZ();
+      m_sn_dir_set = false; // by default, the direction is not set.
+
       m_sndistance_kpc = GetDefaultSNDistanceKPC();
       m_snburst_fluxmodel = GetDefaultSNBurstFluxModel();
       m_snburst_pnsc_fluxmodel = "";
@@ -167,6 +175,9 @@ class SKSNSimUserConfiguration{
     const static SKSNSIMENUM::TANKVOLUME GetDefaultEventVolume () { return SKSNSIMENUM::TANKVOLUME::kIDFULL; }
     const static SKSNSIMENUM::NEUTRINOOSCILLATION GetDefaultNeutrinoOscType () { return SKSNSIMENUM::NEUTRINOOSCILLATION::kNONE; }
     const static double GetDefaultSNDistanceKPC () { return 10. /* kpc */;}
+    const static double GetDefaultSNDirX() { return 0.; }  // Added for sndir argvar (patch)
+    const static double GetDefaultSNDirY() { return 0.; }  // Added for sndir argvar (patch)
+    const static double GetDefaultSNDirZ() { return -1.; }  // Added for sndir argvar (patch)
     const static std::string GetDefaultSNModelName () { return "nakazato/intp2002.data" ;}
     const static bool GetDefaultVectorGeneration () { return true; } 
     const static std::string GetDefaultOutputDirectory () { return "./vectout"; }
@@ -238,6 +249,14 @@ class SKSNSimUserConfiguration{
     SKSNSimUserConfiguration &SetRuntimeRunEnd(int r) { m_runtime_runend = r; return *this;}
     SKSNSimUserConfiguration &SetRuntimePeriod(int p) { m_runtime_period = p; return *this;}
     SKSNSimUserConfiguration &SetSNDistanceKpc(double d) { m_sndistance_kpc = d; return *this;}
+    
+    // Added for sndir (patch)
+    SKSNSimUserConfiguration &SetSNDir(double x, double y, double z) { 
+      m_sn_dir[0] = x; m_sn_dir[1] = y; m_sn_dir[2] = z; m_sn_dir_set = true; return *this;
+    }
+    const double* GetSNDir() const { return m_sn_dir; }
+    bool GetSNDirSet() const { return m_sn_dir_set; }
+
     SKSNSimUserConfiguration &SetSNBurstFluxModel(std::string f) { m_snburst_fluxmodel = f; return *this;}
     SKSNSimUserConfiguration &SetSNBurstPNSCFluxModel(std::string f) { m_snburst_pnsc_fluxmodel = f; return *this;}
     SKSNSimUserConfiguration &SetDSNBFluxModel(std::string f) { m_dsnb_fluxmodel = f; return *this;}

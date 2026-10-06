@@ -1,6 +1,5 @@
 #!/bin/sh
 
-#UPSTREAMURL="https://github.com/SKSNSim/SKSNSim/releases/download/v1.2.0-data/supernova_data.tar.gz"
 UPSTREAMURL="https://github.com/SKSNSim/SKSNSim/releases/download/v1.2.0-data/supernova_data_260508.tar.gz"
 
 if [ -z "${SKSNSIMDATADIR}" ]; then
@@ -9,18 +8,19 @@ if [ -z "${SKSNSIMDATADIR}" ]; then
   exit 1
 fi
 
-if [ ! -d ${SKSNSIMDATADIR} ]; then
-  echo "The data directory does not exit."
-  echo "Making directory "$SKSNSIMDATADIR
-  mkdir -p $SKSNSIMDATADIR
+extractdir=$(dirname "${SKSNSIMDATADIR}")
+
+if [ ! -d ${extractdir} ]; then
+  echo "The data directory does not exist."
+  echo "Making directory "${extractdir}
+  mkdir -p ${extractdir}
 fi
 
-target=${SKSNSIMDATADIR}/supernova_data_260508.tar.gz
+target=${extractdir}/supernova_data_260508.tar.gz
 
 which wget || (echo "no wget on your system. Please download manually from \"${UPSTREAMURL}\"." && exit 1)
 wget -O $target $UPSTREAMURL
 
 origdir=$(pwd)
-cd $SKSNSIMDATADIR && tar -xvzf $target
+cd ${extractdir} && tar -xvzf $target
 cd $origdir
-

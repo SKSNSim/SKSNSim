@@ -14,15 +14,18 @@ ifdef SKOFL_ROOT
 include $(SKOFL_ROOT)/config.gmk
 endif
 
-LOCAL_INC	+= -I./include/
+LOCAL_INC = -I./include
+LOCAL_INC += -I$(SKOFL_ROOT)/include
 
 CXX=g++
 FC=gfortran
 LN = ln -sf
 
-CXXFLAGS +=$(shell root-config --cflags --libs) -fPIC -lstdc++ -lgsl -lgslcblas -lm
-CXXFLAGS += -DNO_EXTERN_COMMON_POINTERS -DSKINTERNAL #-DDEBUG
+CXXFLAGS += -I/mnt/sim/deps/root_v5.34.38_install/include $(shell root-config --cflags --libs) -fPIC -lstdc++ -lgsl -lgslcblas -lm
+CXXFLAGS += -DNO_EXTERN_COMMON_POINTERS -DSKINTERNAL
 CXXFLAGS += $(LOCAL_INC)
+CXXFLAGS += -std=gnu++14
+# SKINTERNAL is now always defined
 # if you want to use lates neutrino oscillation parameter, please comment out next line
 #CXXFLAGS += -DORIGINAL_NUOSCPARAMETER
 
@@ -30,6 +33,8 @@ FCFLAGS += -w -fPIC -lstdc++
 
 ifndef SKOFL_ROOT
 LDLIBS=$(shell root-config --libs)
+LDLIBS += -L/mnt/sim/deps/skofl/r32697/lib -lmcinfo -lsnevtinfo  # link SKOFL libraries statically
+LDLIBS += -Wl,-rpath,/mnt/sim/deps/skofl/r32697/lib  # set rpath to find SKOFL libraries at runtime
 endif
 
 ifdef SKOFL_ROOT
@@ -52,6 +57,7 @@ OBJS = $(patsubst src/%.cc, obj/%.o, $(filter %.cc, $(SRCS)))
 ifdef SKOFL_ROOT
 OBJS += $(patsubst src/%.F, obj/%.o, $(filter %.F, $(SRCS)))
 endif
+
 
 MAINSRCS = $(wildcard *.cc)
 MAINSRCS += $(wildcard *.F)

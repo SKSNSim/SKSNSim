@@ -4,6 +4,11 @@
  * Cross section interface
  *************************************/
 
+// Bypass SKOFL Fortran routtines and use pure C++ calculations available to the container.
+#ifdef SKINTERNAL
+#undef SKINTERNAL
+#endif
+
 #include <cmath>
 #include <limits>
 #include <iostream>

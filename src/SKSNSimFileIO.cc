@@ -7,9 +7,9 @@
 #include <fstream>
 #include <sstream>
 #include <iomanip>
-#include <TFile.h>
+#include "root/TFile.h" // patch
 #include <TFileCacheWrite.h>
-#include <TTree.h>
+#include "root/TTree.h" //patch
 #include <TMath.h>
 #include "SKSNSimFileIO.hh"
 #include "skrun.h"
